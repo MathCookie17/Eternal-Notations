@@ -1,0 +1,13 @@
+.domino_box {
+    display: inline-block;
+    height: 2em;
+    width: 1em;
+}
+
+.domino_square {
+    display: inline-block;
+    height: 50%;
+    width: 100%;
+    background: url('dominoes.png');
+    background-size: 400% 6500%;
+}

@@ -1,0 +1,116 @@
+.notation_group, .information_group {
+    background-color: #e7e7ff;
+    border: 0.2em solid #cacaff;
+    margin: 1em;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+    padding-left: 2em;
+    padding-right: 2em;
+    width: fit-content;
+    transition: 0.5s;
+}
+
+.notation_group:hover, .information_group:hover {
+    background-color: #c6d9ff;
+    border: 0.2em solid #79c3ff;
+    scale: 1.05;
+    transition: 0.5s;
+}
+
+.notation_group {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.information_group {
+    background-color: #fad4ff;
+    border: 0.2em solid #d061ff;
+}
+
+.information_group:hover {
+    background-color: #daa6ff;
+    border: 0.2em solid #7f54ff;
+}
+
+#number_input_div {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 1em;
+    z-index: 1;
+}
+
+#number_input {
+    border-radius: 0.25em;
+}
+
+#all_explanations {
+    display: none;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    justify-content: center;
+    align-items: center;
+    align-content: space-around;
+    flex-direction: column;
+    z-index: 2
+}
+
+.explanation_box {
+    display: none;
+    background-color: #b4cdff;
+    border: 0.2em solid #008cff;
+    color: #0048ff;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 2em;
+    padding-right: 2em;
+    max-width: 80vw;
+    max-height: 80vh;
+    margin: 2em;
+    border-radius: 0.5em;
+    overflow-y: scroll;
+}
+
+.information_box {
+    display: none;
+    background-color: #daa6ff;
+    border: 0.2em solid #7f54ff;
+    color: #4000ff;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 2em;
+    padding-right: 2em;
+    max-width: 80vw;
+    max-height: 80vh;
+    margin: 2em;
+    border-radius: 0.5em;
+    overflow-y: scroll;
+}
+
+#close_explanation {
+    display: block;
+    text-align: center;
+    background-color: #ff4242;
+    color: #ff8cb3;
+    border: 0.2em solid #ff8cb3;
+    padding-left: 2em;
+    padding-right: 2em;
+    font-weight: bold;
+    margin: 2em;
+    transition: 0.5s
+}
+
+#close_explanation:hover {
+    background-color: #ff0000;
+    color: #fd73a1;
+    border-color: #fd73a1;
+    scale: 1.1;
+    transition: 0.5s;
+}
+
+#information_line {
+    display: flex;
+    justify-content: center;
+}

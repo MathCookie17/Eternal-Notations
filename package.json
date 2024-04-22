@@ -1,0 +1,13 @@
+{
+  "name": "eternal_notations",
+  "packageManager": "yarn@3.6.3",
+  "dependencies": {
+    "break_eternity.js": "^1.4.2",
+    "lru_cache": "^1.0.2"
+  },
+  "devDependencies": {
+    "bili": "^5.0.5",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "typescript": "^5.3.3"
+  }
+}

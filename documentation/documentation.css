@@ -1,0 +1,45 @@
+body {
+    background-color: #1b0021;
+    color: #fadcff;
+    text-align: center;
+}
+
+.chapter {
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.subchapter {
+    padding: 5px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 5px solid;
+}
+
+.start_hide {
+    display: none;
+}
+
+code, .code {
+    background-color: #1f1f1f;
+    color: #ffd3cd;
+    font-family: monospace;
+    text-align: left;
+    padding: 1px;
+}
+
+.param_list {
+    text-align: left
+}
+
+.param_function {
+    color: #ffd900;
+}

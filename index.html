@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="index.css">
+        <link rel="stylesheet" href="eternal_notations_images/dominoes.css">
+    </head>
+    <body style="text-align: center">
+        <div id="header_logo_div">
+            <img id="header_logo_img" src="eternal_notations_images/eternal_notations header logo.png" style="text-align: center;width:20em;height: auto">
+        </div>
+        <div id="beneath_explanation">
+            <p>
+                Any box with sharp edges here can be clicked to pull up an explanation box. The purple boxes contain general
+                information about Eternal Notations, the blue boxes contain explanations of specific notations. (That being said,
+                if you're mathematically inclined, you may enjoy trying to figure out how some of these notations work before
+                you read their explanations!)
+            </p>
+            <div id="information_line">
+                <div id="group_explainEternalNotations" class="information_group">
+                    <p id="display_explainEternalNotations">What is Eternal Notations?</p>
+                </div>
+                <div id="group_explainTetration" class="information_group">
+                    <p id="display_explainTetration">What is Tetration?</p>
+                </div>
+                <div id="group_explainEnterNumber" class="information_group">
+                    <p id="display_explainEnterNumber">How to Enter Large Numbers</p>
+                </div>
+            </div>
+            <p>Type a number into this text box and see what it looks like in all sorts of different notations!</p>
+            <div id="number_input_div"><form id="number_input_form"><input type="text" id="number_input" style="font-size:1.2em"></form></div>
+
+            <div id="all_displays">
+                <div id="group_default" class="notation_group">
+                    <p id="display_Default" class="notation_display">Default:</p>
+                </div>
+                <div id="group_scientific" class="notation_group">
+                    <p id="display_Scientific" class="notation_display">Scientific:</p>
+                </div>
+                <div id="group_engineering" class="notation_group">
+                    <p id="display_Engineering" class="notation_display">Engineering:</p>
+                </div>
+                <div id="group_logarithm" class="notation_group">
+                    <p id="display_Logarithm" class="notation_display">Logarithm:</p>
+                </div>
+                <div id="group_hyperscientific" class="notation_group">
+                    <p id="display_Hyperscientific" class="notation_display">Hyperscientific:</p>
+                    <p id="display_PowerTower" class="notation_display">Power Tower:</p>
+                </div>
+                <div id="group_superLogarithm" class="notation_group">
+                    <p id="display_SuperLogarithm" class="notation_display">Super-Logarithm:</p>
+                </div>
+                <div id="group_pentation" class="notation_group">
+                    <p id="display_PentaScientific" class="notation_display">Penta-Scientific:</p>
+                    <p id="display_PentaLogarithm" class="notation_display">Penta-Logarithm:</p>
+                </div>
+                <div id="group_naturalLogarithms" class="notation_group">
+                    <p id="display_NaturalLogarithm" class="notation_display">Natural Logarithm:</p>
+                    <p id="display_NaturalSuperLogarithm" class="notation_display">Natural Super-Logarithm:</p>
+                    <p id="display_NaturalPentaLogarithm" class="notation_display">Natural Penta-Logarithm:</p>
+                </div>
+                <div id="group_doubleLogarithm" class="notation_group">
+                    <p id="display_DoubleLogarithm" class="notation_display">Double Logarithm:</p>
+                </div>
+                <div id="group_binary" class="notation_group">
+                    <p id="display_Binary" class="notation_display">Binary:</p>
+                </div>
+                <div id="group_ternary" class="notation_group">
+                    <p id="display_Ternary" class="notation_display">Ternary:</p>
+                </div>
+                <div id="group_quaternary" class="notation_group">
+                    <p id="display_Quaternary" class="notation_display">Quaternary:</p>
+                </div>
+                <div id="group_seximal" class="notation_group">
+                    <p id="display_Seximal" class="notation_display">Seximal:</p>
+                </div>
+                <div id="group_octal" class="notation_group">
+                    <p id="display_Octal" class="notation_display">Octal:</p>
+                </div>
+                <div id="group_dozenal" class="notation_group">
+                    <p id="display_Duodecimal" class="notation_display">Duodecimal:</p>
+                    <p id="display_DozenalXE" class="notation_display">Dozenal (X, E):</p>
+                    <p id="display_Dozenal23" class="notation_display">Dozenal (↊, ↋):</p>
+                </div>
+                <div id="group_hexadecimal" class="notation_group">
+                    <p id="display_Hexadecimal" class="notation_display">Hexadecimal:</p>
+                </div>
+                <div id="group_balancedTernary" class="notation_group">
+                    <p id="display_BalancedTernary" class="notation_display">Balanced Ternary:</p>
+                </div>
+                <div id="group_bijectiveDecimal" class="notation_group">
+                    <p id="display_BijectiveDecimal" class="notation_display">Bijective Decimal:</p>
+                </div>
+                <div id="group_standard" class="notation_group">
+                    <p id="display_Standard" class="notation_display">Standard:</p>
+                    <p id="display_ADStandard" class="notation_display">AD Standard:</p>
+                    <p id="display_AarexStandard" class="notation_display">Aarex Standard:</p>
+                </div>
+                <div id="group_longScale" class="notation_group">
+                    <p id="display_LongScale" class="notation_display">Long Scale:</p>
+                    <p id="display_ADLongScale" class="notation_display">AD Long Scale:</p>
+                    <p id="display_AarexLongScale" class="notation_display">Aarex Long Scale:</p>
+                </div>
+                <div id="group_mixedScientific" class="notation_group">
+                    <p id="display_MixedScientific" class="notation_display">Mixed Scientific:</p>
+                    <p id="display_ADMixedScientific" class="notation_display">AD Mixed Scientific:</p>
+                    <p id="display_AarexMixedScientific" class="notation_display">Aarex Mixed Scientific:</p>
+                    <p id="display_MixedScientificLongScale" class="notation_display">Mixed Scientific (Long Scale):</p>
+                    <p id="display_ADMixedScientificLongScale" class="notation_display">AD Mixed Scientific (Long Scale):</p>
+                    <p id="display_AarexMixedScientificLongScale" class="notation_display">Aarex Mixed Scientific (Long Scale):</p>
+                </div>
+                <div id="group_letters" class="notation_group">
+                    <p id="display_Letters" class="notation_display">Letters:</p>
+                </div>
+                <div id="group_alphabet" class="notation_group">
+                    <p id="display_Alphabet" class="notation_display">Alphabet:</p>
+                </div>
+                <div id="group_greekLetters" class="notation_group">
+                    <p id="display_GreekLetters" class="notation_display">Greek Letters:</p>
+                    <p id="display_GreekAlphabet" class="notation_display">Greek Alphabet:</p>
+                    <p id="display_ADGreekLetters" class="notation_display">AD Greek Letters:</p>
+                </div>
+                <div id="group_emoji" class="notation_group">
+                    <p id="display_Emoji" class="notation_display">Emoji:</p>
+                    <p id="display_EmojiAlphabet" class="notation_display">Emoji Alphabet:</p>
+                </div>
+                <div id="group_xyz" class="notation_group">
+                    <p id="display_XYZ" class="notation_display">XYZ:</p>
+                </div>
+                <div id="group_elementLetters" class="notation_group">
+                    <p id="display_ElementLetters" class="notation_display">Element Letters:</p>
+                </div>
+                <div id="group_roman" class="notation_group">
+                    <p id="display_RomanNumerals" class="notation_display">Roman Numerals:</p>
+                    <p id="display_ADRoman" class="notation_display">AD Roman:</p>
+                </div>
+                <div id="group_septecoman" class="notation_group">
+                    <p id="display_Septecoman" class="notation_display">Septecoman:</p>
+                </div>
+                <div id="group_si" class="notation_group">
+                    <p id="display_SI" class="notation_display">SI:</p>
+                    <p id="display_SIWritten" class="notation_display">SI (Written):</p>
+                </div>
+                <div id="group_binarySi" class="notation_group">
+                    <p id="display_BinarySI" class="notation_display">Binary SI:</p>
+                    <p id="display_BinarySIWritten" class="notation_display">Binary SI (Written):</p>
+                </div>
+                <div id="group_combinedD" class="notation_group">
+                    <p id="display_CombinedD" class="notation_display">Combined-D:</p>
+                </div>
+                <div id="group_hyperSi" class="notation_group">
+                    <p id="display_HyperSI" class="notation_display">Hyper-SI:</p>
+                    <p id="display_HyperSIWritten" class="notation_display">Hyper-SI (Written):</p>
+                </div>
+                <div id="group_sandcastleBuilder" class="notation_group">
+                    <p id="display_SandcastleBuilder" class="notation_display">Sandcastle Builder:</p>
+                    <p id="display_SandcastleBuilderWritten" class="notation_display">Sandcastle Builder (Written):</p>
+                </div>
+                <div id="group_fraction" class="notation_group">
+                    <p id="display_LooseFraction" class="notation_display">Fraction (Loose):</p>
+                    <p id="display_MediumFraction" class="notation_display">Fraction (Medium):</p>
+                    <p id="display_PreciseFraction" class="notation_display">Fraction (Precise):</p>
+                    <p id="display_LooseMixedNumber" class="notation_display">Mixed Number (Loose):</p>
+                    <p id="display_MediumMixedNumber" class="notation_display">Mixed Number (Medium):</p>
+                    <p id="display_PreciseMixedNumber" class="notation_display">Mixed Number (Precise):</p>
+                </div>
+                <div id="group_letterDigits" class="notation_group">
+                    <p id="display_LetterDigits" class="notation_display">Letter Digits:</p>
+                    <p id="display_AlphabetDigits" class="notation_display">Alphabet Digits:</p>
+                </div>
+                <div id="group_myriad" class="notation_group">
+                    <p id="display_Myriad" class="notation_display">Myriad:</p>
+                    <p id="display_ADMyriad" class="notation_display">AD Myriad:</p>
+                    <p id="display_AarexMyriad" class="notation_display">Aarex Myriad:</p>
+                </div>
+                <div id="group_doubleBinary" class="notation_group">
+                    <p id="display_DoubleBinaryNames" class="notation_display">Double Binary:</p>
+                    <p id="display_DoubleBinaryPrefixes" class="notation_display">Double Binary Prefixes:</p>
+                </div>
+                <div id="group_hypersplit" class="notation_group">
+                    <p id="display_Hypersplit" class="notation_display">Hypersplit:</p>
+                    <p id="display_HypersplitBase3" class="notation_display">Hypersplit (Base 3):</p>
+                </div>
+                <div id="group_hyperE" class="notation_group">
+                    <p id="display_HyperE" class="notation_display">Hyper-E:</p>
+                </div>
+                <div id="group_infinity" class="notation_group">
+                    <p id="display_Infinity" class="notation_display">Infinity:</p>
+                </div>
+                <div id="group_eternity" class="notation_group">
+                    <p id="display_Eternity" class="notation_display">Eternity:</p>
+                </div>
+                <div id="group_brackets" class="notation_group">
+                    <p id="display_Brackets" class="notation_display">Brackets:</p>
+                </div>
+                <div id="group_simplifiedWritten" class="notation_group">
+                    <p id="display_SimplifiedWritten" class="notation_display">Simplified Written:</p>
+                </div>
+                <div id="group_dots" class="notation_group">
+                    <p id="display_Dots" class="notation_display">Dots:</p>
+                </div>
+                <div id="group_hearts" class="notation_group">
+                    <p id="display_Hearts" class="notation_display">Hearts:</p>
+                </div>
+                <div id="group_dominoes" class="notation_group">
+                    <p id="display_Dominoes" class="notation_display">Dominoes:</p>
+                    <p id="display_ColoredDominoes6" class="notation_display">Colored Dominoes (Double-6):</p>
+                    <p id="display_ColoredDominoes9" class="notation_display">Colored Dominoes (Double-9):</p>
+                    <p id="display_ColoredDominoes12" class="notation_display">Colored Dominoes (Double-12):</p>
+                    <p id="display_ColoredDominoes15" class="notation_display">Colored Dominoes (Double-15):</p>
+                    <p id="display_ColoredDominoes18" class="notation_display">Colored Dominoes (Double-18):</p>
+                </div>
+                <div id="group_factorial" class="notation_group">
+                    <p id="display_Factorial" class="notation_display">Factorial:</p>
+                </div>
+                <div id="group_factorialAmount" class="notation_group">
+                    <p id="display_FactorialAmount" class="notation_display">Factorial Amount:</p>
+                </div>
+                <div id="group_factorialScientific" class="notation_group">
+                    <p id="display_FactorialScientific" class="notation_display">Factorial Scientific:</p>
+                </div>
+                <div id="group_factorialHyperscientific" class="notation_group">
+                    <p id="display_FactorialHyperscientific" class="notation_display">Factorial Hyperscientific:</p>
+                </div>
+                <div id="group_factoradic" class="notation_group">
+                    <p id="display_Factoradic" class="notation_display">Factoradic:</p>
+                </div>
+                <div id="group_root" class="notation_group">
+                    <p id="display_SquareRoot" class="notation_display">Square Root:</p>
+                    <p id="display_CubeRoot" class="notation_display">Cube Root:</p>
+                    <p id="display_IncreasingRoot" class="notation_display">Increasing Root:</p>
+                </div>
+                <div id="group_superRoot" class="notation_group">
+                    <p id="display_SuperSquareRoot" class="notation_display">Super Square Root:</p>
+                    <p id="display_Tritetrated" class="notation_display">Tritetrated:</p>
+                    <p id="display_IncreasingSuperRoot" class="notation_display">Increasing Super Root:</p>
+                </div>
+                <div id="group_prime" class="notation_group">
+                    <p id="display_Prime" class="notation_display">Prime:</p>
+                </div>
+                <div id="group_psiDash" class="notation_group">
+                    <p id="display_PsiLetters" class="notation_display">Psi Letters:</p>
+                    <p id="display_PsiDash" class="notation_display">Psi Dash:</p>
+                </div>
+                <div id="group_omegaLayers" class="notation_group">
+                    <p id="display_OmegaLayers" class="notation_display">Omega Layers:</p>
+                    <p id="display_OmegaLayersRamped" class="notation_display">Omega Layers (Ramped):</p>
+                    <p id="display_OmegaLayerNumber" class="notation_display">Omega Layer Number:</p>
+                </div>
+                <div id="group_increasingOperator" class="notation_group">
+                    <p id="display_IncreasingOperator" class="notation_display">Increasing Operator:</p>
+                    <p id="display_IncreasingOperatorBase2" class="notation_display">Increasing Operator (Base 2):</p>
+                    <p id="display_IncreasingOperatorBase3" class="notation_display">Increasing Operator (Base 3):</p>
+                </div>
+                <div id="group_omega" class="notation_group">
+                    <p id="display_Omega" class="notation_display">Omega:</p>
+                    <p id="display_OmegaShort" class="notation_display">Omega (Short):</p>
+                </div>
+                <div id="group_fours" class="notation_group">
+                    <p id="display_Fours" class="notation_display">Fours:</p>
+                </div>
+                <div id="group_polygonal" class="notation_group">
+                    <p id="display_Triangular" class="notation_display">Triangular:</p>
+                    <p id="display_Square" class="notation_display">Square:</p>
+                </div>
+                <div id="group_doubleFactorials" class="notation_group">
+                    <p id="display_DoubleFactorials" class="notation_display">Double Factorials:</p>
+                </div>
+                <div id="group_grid" class="notation_group">
+                    <p id="display_Grid" class="notation_display">Grid:</p>
+                </div>
+                <div id="group_tetrationFloat" class="notation_group">
+                    <p id="display_TetrationFloat" class="notation_display">Tetration Float:</p>
+                </div>
+                <div id="group_polynomial" class="notation_group">
+                    <p id="display_Polynomial10" class="notation_display">Polynomial (x = 10):</p>
+                    <p id="display_Polynomial2" class="notation_display">Polynomial (x = 2):</p>
+                    <p id="display_Polynomial3" class="notation_display">Polynomial (x = 3):</p>
+                    <p id="display_RationalFunction10" class="notation_display">Rational Function (x = 10):</p>
+                    <p id="display_RationalFunction2" class="notation_display">Rational Function (x = 2):</p>
+                    <p id="display_RationalFunction3" class="notation_display">Rational Function (x = 3):</p>
+                </div>
+                <div id="group_polynomialFractionalBases" class="notation_group">
+                    <p id="display_BaseThreeHalves" class="notation_display">Base 1.5:</p>
+                    <p id="display_BasePhi" class="notation_display">Base phi:</p>
+                    <p id="display_BaseE" class="notation_display">Base e:</p>
+                    <p id="display_BasePi" class="notation_display">Base pi:</p>
+                </div>
+                <div id="group_blind" class="notation_group">
+                    <p id="display_Blind" class="notation_display">Blind:</p>
+                </div>
+                <div id="group_powersOfOne" class="notation_group">
+                    <p id="display_PowersOfOne" class="notation_display">Powers of One:</p>
+                </div>
+                <div id="group_physicalScale" class="notation_group">
+                    <p id="display_physicalScale" class="notation_display"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="all_explanations">
+            <div id="explanation_explainEternalNotations" class="information_box">
+                <h2>What is Eternal Notations?</h2>
+                <p>
+                    Eternal Notations is a code library that takes large numbers and abbreviates them in various "notations",
+                    designed to be used alongside break_eternity.js in incremental games made in JavaScript.
+                    The source code for the library, along with documentation on how to use it as a library, can be found on
+                    <a href="https://github.com/MathCookie17/Eternal_Notations">GitHub</a>, but if you're just interested in
+                    seeing the notations in action, then that's what this webpage is for.
+                </p>
+                <p>
+                    For a more detailed explanation, we'll need to have a little history lesson. Incremental games are typically
+                    made in languages like JavaScript that use "double-precision floating point numbers"; these numbers
+                    cannot go above 2<sup>1024</sup>, a number which is around 1.79 * 10<sup>308</sup>, which for most purposes
+                    is more than high enough, but for incremental games (where the whole point is to make the numbers go up
+                    really fast), that might not be enough. To allow for numbers beyond this limit, developers created
+                    large number libraries; while large number libraries existed beforehand, the first one that was
+                    specifically created with incremental games in mind was
+                    <a href="https://github.com/Patashu/break_infinity.js">break_infinity.js</a>, which can go up to
+                    10<sup>2<sup>1024</sup></sup>, which is around 10<sup>10<sup>308</sup></sup>. This library was first used by
+                    the popular incremental game <a href="https://ivark.github.io/AntimatterDimensions/">Antimatter Dimensions</a>,
+                    which included several different ways of abbreviating large numbers. Later on,
+                    <a href="https://github.com/antimatter-dimensions/notations">AD Notations</a>, a library that
+                    lets you use all these notations for yourself, was released - you can try out those notations
+                    <a href="https://antimatter-dimensions.github.io/notations/">here</a>.
+                    <br>
+                    However, even break_infinity.js didn't go far enough for some people, so
+                    <a href="https://github.com/Patashu/break_eternity.js">break_eternity.js</a> was released, which goes up
+                    to 10&#8593;&#8593;(2<sup>1024</sup>) - that's 10^10^10^10...^10 with 2<sup>1024</sup> 10s.
+                    (That double up-arrow denotes <i>tetration</i> - more on that in the "What is Tetration?" box). There are
+                    libraries that go to even higher numbers, like <a href="https://github.com/Naruyoko/OmegaNum.js">OmegaNum.js</a>,
+                    but those libraries are missing features that I'd consider fundamental to working with numbers that large,
+                    so break_eternity.js is the largest number library that's really feature-complete. However, what break_eternity
+                    did not have was a corresponding notation library...
+                </p>
+                <p>
+                    ...and that's where I (MathCookie, the creator of Eternal Notations) come in. Years ago, I made
+                    <a href="https://scratch.mit.edu/projects/342132531/">MathCookie's Large Number Abbreviator</a>,
+                    a Scratch project that abbreviates numbers up to 10<sup>10<sup>10<sup>308</sup></sup></sup> in many
+                    different notations, including some from AD Notations, some from other places, and some I made myself.
+                    However, since this was a Scratch project and not a code library, it couldn't be integrated into other projects -
+                    all it could do was be used to demonstrate the notations, it couldn't be plugged into incremental games.
+                    Since making that project, I've planned to someday remake it in a "real" coding language and extend it to
+                    tetrational-level numbers, which inevitably meant it would be made to go along with break_eternity.js.
+                </p>
+                <p>
+                    And now, here we are. Eternal Notations is sort of a sequel to AD Notations: AD Notations is a library that's
+                    used alongside break_infinity.js to abbreviate large numbers in many different notations, Eternal Notations
+                    is a library that's used alongside break_eternity.js to abbreviate even larger numbers in even more
+                    different notations. While not every notation from AD Notations is included here (some didn't have a clear
+                    way to extend them to the tetrational range), almost all of the notations included in my Large Number
+                    Abbreviator have been included here, as well as many new notations that weren't in either of those two.
+                </p>
+            </div>
+            <div id="explanation_explainTetration" class="information_box">
+                <h2>What is Tetration?</h2>
+                <p>
+                    Addition (x + y) is one of the first mathematical operations you learn in school,
+                    and soon afterwards you learn about multiplication (x * y), which is defined as repeated addition.
+                    Then, several years later, exponentiation (officially written as x<sup>y</sup>, but often x^y is used instead),
+                    which is repeated multiplication, is introduced... and that's as far as it usually goes.
+                    Addition, multiplication, and exponentiation are the first three <i>hyperoperators</i>,
+                    a sequence of operations where each operator is the repetition of the previous one... and the sequence doesn't have to stop at three.
+                </p>
+                <p>
+                    <i>Tetration</i> is the fourth hyperoperator, which means it's repeated exponentiation.
+                    Tetration can be written in several ways: <sup>y</sup>x, x^^y, or x&#8593;&#8593;y are all options.
+                    x&#8593;&#8593;y is defined as x^x^x^x...^x with y x's in that "power tower": for example, 10&#8593;&#8593;3 means
+                    10^10^10, and 3&#8593;&#8593;6 means 3^3^3^3^3^3.
+                    <br>
+                    Tetration grows fast. <i>Incomprehensibly</i> fast. Let's use a base of 2 to demonstrate this:
+                </p>
+                <ul>
+                    <li>2&#8593;&#8593;1 is just 2.</li>
+                    <li>2&#8593;&#8593;2 is 2^2, which is 4.</li>
+                    <li>2&#8593;&#8593;3 is 2^2^2. Power towers are evaluated top-down, so this is 2^(2^2) = 2^4 = 16.</li>
+                    <li>2&#8593;&#8593;4 is 2^2^2^2 = 2^2^4 = 2^16 = 65,536.</li>
+                    <li>2&#8593;&#8593;5 is 2^2^2^2^2 = 2^2^2^4 = 2^2^16 = 2^65,536, which is a number with 19,729 digits.</li>
+                    <li>2&#8593;&#8593;6 is 2^2^2^2^2^2, which ends up equalling 2^(2&#8593;&#8593;5). This number has around 2&#8593;&#8593;5 digits,
+                        meaning its <i>amount of digits</i> itself has thousands of digits.
+                    </li>
+                    <li>2&#8593;&#8593;7 is 2^2^2^2^2^2^2, which equals 2^(2&#8593;&#8593;6). This number has around 2&#8593;&#8593;6 digits.
+                    </li>
+                </ul>
+                <p>
+                    ...and so on. Tetration quickly shoots off into numbers that are far, far too large to have any physical meaning,
+                    which is probably why it's not taught in schools like the first three are.
+                </p>
+                <p>
+                    Unlike with the first few operators, there's no agreed-upon definition for what should happen when the height of a
+                    power tower is not a whole number, so what would, say, 10&#8593;&#8593;4.5 mean?
+                    Eternal Notations handles fractional-height tetration using the "linear approximation":
+                    x&#8593;&#8593;y, where y is not a whole number, means x^x^x...^x^frac(y), where there are ceiling(y) 10s in that
+                    power tower. (ceiling(y) means "the closest whole number to y that's above y" and frac(y) means "the fractional part
+                    of y", i.e. y mod 1). For example, 10&#8593;&#8593;4.5 is 10^10^10^10^10^0.5, as ceiling(4.5) is 5 and frac(4.5) is 0.5.
+                </p>
+            </div>
+            <div id="explanation_explainEnterNumber" class="information_box">
+                <h2>How to Enter Large Numbers</h2>
+                <p>
+                    Eternal Notations supports very, very large numbers, so how do you enter those large numbers in the
+                    text box? Here are some supported formats: (In the examples below, x, y, and z are numbers)
+                    <ul>
+                        <li>
+                            Obviously, smaller numbers can just be entered directly: writing "5" in the textbox (without the quotes)
+                            will indeed enter the number 5 into the notations.
+                        </li>
+                        <li>
+                            xey means x * 10^y: for example, 2e5 is 200,000, and 1e20 is 1 * 10<sup>20</sup>.
+                            You can choose to omit the x, which will make it default to 1: for example,
+                            e100 means 10<sup>100</sup>.
+                        </li>
+                        <li>
+                            Multiple e's can be included, such as 1e2e3 (which means 1 * 10<sup>2 * 10<sup>3</sup></sup>),
+                            eee50 (which means 10^10^10^50), or ee4e7 (which means 10^10^(4 * 10^7)).
+                        </li>
+                        <li>
+                            For really big numbers, instead of writing a bunch of e's, you can write them in (e^z) form:
+                            for example, (e^12) 8.5e6 means eeeeeeeeeeee8.5e6 (that's 12 e's before the 8.5e6). 
+                        </li>
+                        <li>
+                            Something similar can be accomplished using the letter F: 8.5F20 means eeee...ee8.5 with 20 e's.
+                            (Keep in mind that the number limit is around F1e308, so if you try to enter a z above that in
+                            xFz, the F will end up being ignored)
+                        </li>
+                        <li>
+                            For numbers below 1, you can make the number after the e negative to indicate a negative exponent,
+                            such as 4e-5 or eeee-3e2. This does not work with F, but it does work with the number after an (e^z).
+                        </li>
+                    </ul>
+                    For the full list of accepted formats, including a few I didn't mention here, see the
+                    <a href="https://github.com/Patashu/break_eternity.js">break_eternity.js GitHub page</a>. However,
+                    when using (e^z) or xFz with a non-whole z, the result might not match up with break_eternity exactly:
+                    break_eternity.js normally uses an "analytic" approximation of tetration for bases 10 and below and
+                    switches to the linear approximation for bases above 10, but Eternal Notations always uses the linear
+                    approximation, and this includes what it does with numbers you enter into the textbox.
+                </p>
+            </div>
+
+
+            <div id="explanation_default" class="explanation_box">
+                <h2>Default</h2>
+                <p>
+                    This notation basically just cleans up the number without really changing it much. What it actually does depends
+                    on the size of the number:
+                    <ul>
+                        <li>Numbers below 1e12 are written out as plain numbers (with commas). Numbers below 1,000 are written with
+                            four significant figures, larger numbers are just rounded to the nearest integer.
+                        </li>
+                        <li>
+                            Numbers above 1e12 are written in scientific notation.
+                        </li>
+                        <li>
+                            For larger numbers, there may be e's placed in front of the number - for example, 10<sup>10<sup>100</sup></sup>
+                            is written as e1e100, and 10^^5 is written as ee1e10,000,000,000. The visible exponent will never go above 1e12,
+                            as that's the point when another e is added to the front.
+                        </li>
+                        <li>
+                            If there would be more than five e's in front of the number like this, it switches to being written in
+                            hyperscientific notation instead.
+                        </li>
+                        <br>
+                        <li>
+                            A similar progression is followed for tiny numbers: unabbreviated decimals like 0.01,
+                            then scientific notation like 1e-12, then scientific notation with multiple e's like ee-1e20,
+                            then hyperscientific like 1F-9 (in this case, the hyperexponent is written with a negative sign to indicate
+                            we're working with a reciprocal, which isn't how hyperscientific notation actually works but it's what this notation does).
+                        </li>
+                    </ul>
+                    Explanations on scientific and hyperscientific are found in their respective boxes.
+                    <br>
+                    As the name implies, this is the default notation that other notations can pull from, so generally other numbers
+                    left over within other notations (such as the mantissa and exponent in scientific notation) are themselves
+                    written in Default notation.
+                </p>
+            </div>
+            <div id="explanation_scientific" class="explanation_box">
+                <h2>Scientific</h2>
+                <p>Scientific notation is the most well-known way of abbreviating large numbers. Scientific notation expressions
+                    come in the form XeY for some numbers X and Y, where X must be between 1 (inclusive) and 10 (exclusive).
+                    XeY means X * 10<sup>Y</sup>, so 1e10 means 10,000,000,000 and 5e50 means 5 * 10<sup>50</sup>.
+                    The number before the e is called the <i>mantissa</i>, and the number after the e is called the <i>exponent</i>.
+                    Numbers below 1 have negative exponents, so 0.03 is 3e-2.
+                    <br>
+                    Larger numbers have e's placed in front of the number, with each e in front adding a 10 to the bottom of a
+                    power tower, so e4.5e18 means 10<sup>4.5 * 10<sup>18</sup></sup>, and eee5e12 means 10<sup>10<sup>10<sup>5 * 10<sup>12</sup></sup></sup></sup>.
+                    If there would be more than five e's in front of the number like this, those e's are truncated into an (e^N) expression, so
+                    (e^10)1e100 means eeeeeeeeee1e100 (that's 10 e's in front). For the highest numbers supported by Eternal Notations,
+                    that amount of e's can get large enough to be written in scientific notation itself.
+                </p>
+            </div>
+            <div id="explanation_engineering" class="explanation_box">
+                <h2>Engineering</h2>
+                <p>
+                    Engineering notation is similar to scientific notation, but the exponent is always a multiple of 3,
+                    which means the mantissa ranges between 1 and 1,000 instead of between 1 and 10. This is done because
+                    powers of 1,000 often feel more distinct from each other than powers of 10 do. For example, 10<sup>14</sup>
+                    is written as 1e14 in scientific notation, but it's written as 100e12 in engineering notation.
+                    <br>
+                    Once the number gets large enough to have e's in front, it's still only the last exponent that must
+                    be a multiple of 3: for example, a googolplex, which is written as e1e100 in scientific notation,
+                    is written as e10e99 in engineering notation. The multiple of three restriction does not apply to the
+                    amount of e's, so the N in an (e^N) expression can still be any integer.
+                </p>
+            </div>
+            <div id="explanation_logarithm" class="explanation_box">
+                <h2>Logarithm</h2>
+                <p>
+                    This notation writes numbers based on their base-10 logarithm - in other words, it's basically scientific
+                    notation without the mantissa. For example, 10<sup>30</sup> is written as e30. 2 is written as e0.301, because
+                    10<sup>0.301</sup> is around 2, i.e. the base-10 logarithm of 2 is around 0.301.
+                    For larger numbers, multiple logarithms may be taken, indicated by there being multiple e's in front:
+                    for example, 10<sup>10<sup>100</sup></sup> is written as ee100. 
+                    If there would be more than five e's in front of the number like this, those e's are truncated into an (e^N) expression, so
+                    (e^10)14 means eeeeeeeeee14. For the highest numbers supported by Eternal Notations,
+                    that amount of e's can get large enough to be written in scientific notation.
+                </p>
+            </div>
+            <div id="explanation_hyperscientific" class="explanation_box">
+                <h2>Hyperscientific</h2>
+                <p>
+                    Hyperscientific notation is a variation on scientific notation that handles tetration instead of exponentiation.
+                    Hyperscientific notation expressions come in the form XFY for some numbers X and Y,
+                    where X must be between 1 (inclusive) and 10 (exclusive). XFY means 10^10^10...^X with Y 10's, so
+                    10^10^3 becomes 3F2, 10^10^10^4.5 becomes 4.5F3, and 5 becomes 5F0. 
+                    For the highest numbers supported by Eternal Notations,
+                    the hyperexponent (the number after the F, indicating the height of the power tower) can get large enough
+                    to also be written in hyperscientific notation, at which point the mantissa is no longer written: for example,
+                    10^^(10^10) is written as F1F2, which means F(1F2), which means a power tower that is (1F2) tens tall, and
+                    1F2 is 10^10.
+                </p>
+                <p>
+                    Power Tower notation is a variation on Hyperscientific where the hyperexponent is 1 less than it would be for
+                    hyperscientific, which means the mantissa ranges between 10 and 10^10 instead of ranging between 1 and 10.
+                </p>
+            </div>
+            <div id="explanation_superLogarithm" class="explanation_box">
+                <h2>Super Logarithm</h2>
+                <p>
+                    Normal logarithms are an inverse of exponentiation: log<sub>b</sub>(x) returns a number y such that b<sup>y</sup> = x.
+                    Super logarithms are the same thing, but for tetration instead of exponentiation:
+                    slog<sub>b</sub>(x) returns a number y such that b&#8593;&#8593;y = x.
+                    Super Logarithm notation writes numbers in terms of their base-10 super-logarithm: for example, 10^10^10^10
+                    is written as F4.
+                </p>
+            </div>
+            <div id="explanation_pentation" class="explanation_box">
+                <h2>Pentation</h2>
+                <p>
+                    Pentation is the <i>fifth</i> hyperoperator, defined as repeated tetration and written as x&#8593;&#8593;&#8593;y,
+                    which is defined as x&#8593;&#8593;x&#8593;&#8593;x&#8593;&#8593;x...&#8593;&#8593;x with y x's in that "tetration tower".
+                    Penta-Scientific is like Hyperscientific and Penta-Logarithm is like Super Logarithm, but using pentation instead of tetration.
+                    Pentation grows yet faster still than tetration, too fast for even break_eternity.js to handle, so you won't see a penta-exponent
+                    above 2.4 or so in these two notations - even for a library designed to handle tetration, pentation is just too strong.
+                </p>
+            </div>
+            <div id="explanation_naturalLogarithms" class="explanation_box">
+                <h2>Natural Logarithm</h2>
+                <p>
+                    For complicated reasons (mostly calculus), the most "natural" base for a logarithm is not 10, but rather
+                    a number known as <b>e</b>, a.k.a. "Euler's number", which is around 2.71828. The base-e logarithm is called
+                    the natural logarithm, often written ln(x) instead of log<sub>e</sub>(x). The three notations here are equivalents
+                    of Logarithm, Super Logarithm, and Penta-Logarithm that use e as their base instead of 10.
+                </p>
+            </div>
+            <div id="explanation_doubleLogarithm" class="explanation_box">
+                <h2>Double Logarithm</h2>
+                <p>
+                    A variant of logarithm notation where the amount of iterations is always a multiple of 2.
+                    It's 2 by default, but then it becomes 4, then 6, and so on for larger numbers.
+                </p>
+            </div>
+            <div id="explanation_binary" class="explanation_box">
+                <h2>Binary</h2>
+                <p>
+                    Binary, a.k.a Base 2, is a way of writing numbers that only uses the digits 0 and 1.
+                    Our normal way of writing numbers is Base 10, meaning the place values are 1, 10^1, 10^2, 10^3, and so on.
+                    In binary, the place values are 1, 2^1, 2^2, 2^3, and so on, so "10110" means 1 * 2^4 + 1 * 2^2 + 1 * 2^1
+                    = 16 + 4 + 2 = 22.
+                </p>
+                <p>
+                    Binary is the second-most used number base in the world, as it's the base used by computers: whether it means
+                    "off and on" or "positive and negative", binary is easy to express in computer circuits, so it's what
+                    computers use to do arithmetic.
+                </p>
+                <p>
+                    This notation follows the same progression as Default notation, but in binary instead of decimal.
+                    In the scientific and hyperscientific portions, 2 is used as the base of the exponentiation instead of 10,
+                    so 1e110 means 1 * 2^6.
+                </p>
+            </div>
+            <div id="explanation_ternary" class="explanation_box">
+                <h2>Ternary</h2>
+                <p>
+                    Ternary, a.k.a Base 3, is a way of writing numbers that only uses the digits 0, 1, and 2.
+                    Our normal way of writing numbers is Base 10, meaning the place values are 1, 10^1, 10^2, 10^3, and so on.
+                    In ternary, the place values are 1, 3^1, 3^2, 3^3, and so on, so "2201" means 2 * 3^3 + 2 * 3^2 + 1
+                    = 54 + 18 + 1 = 73.
+                </p>
+                <p>
+                    While ternary is the second-simplest number base, and it's seen a few attempts to use it,
+                    ultimately it's not used much in the modern world.
+                </p>
+                <p>
+                    This notation follows the same progression as Default notation, but in ternary instead of decimal.
+                    In the scientific and hyperscientific portions, 3 is used as the base of the exponentiation instead of 10,
+                    so 1e201 means 1 * 3^19.
+                </p>
+            </div>
+            <div id="explanation_quaternary" class="explanation_box">
+                <h2>Quaternary</h2>
+                <p>
+                    Quaternary, a.k.a Base 4, is a way of writing numbers that only uses the digits 0, 1, 2, and 3.
+                    Our normal way of writing numbers is Base 10, meaning the place values are 1, 10^1, 10^2, 10^3, and so on.
+                    In quaternary, the place values are 1, 4^1, 4^2, 4^3, and so on, so "3012" means 3 * 4^3 + 1 * 4 + 2 
+                    = 192 + 4 + 2 = 196.
+                </p>
+                <p>
+                    Each quaternary digit represents two binary digits, so in theory quaternary could be used as a way to
+                    compress binary to make it slightly more readable, but in practice octal and hexadecimal are better
+                    bases to do that with.
+                </p>
+                <p>
+                    This notation follows the same progression as Default notation, but in quaternary instead of decimal.
+                    In the scientific and hyperscientific portions, 4 is used as the base of the exponentiation instead of 10,
+                    so 1e32 means 1 * 4^14.
+                </p>
+            </div>
+            <div id="explanation_seximal" class="explanation_box">
+                <h2>Seximal</h2>
+                <p>
+                    Seximal, a.k.a Base 6, is a way of writing numbers that only uses the digits from 0 to 5.
+                    Our normal way of writing numbers is Base 10, meaning the place values are 1, 10^1, 10^2, 10^3, and so on.
+                    In seximal, the place values are 1, 6^1, 6^2, 6^3, and so on, so "5241" means 5 * 6^3 + 2 * 6^2 + 4 * 6 + 1
+                    = 1,080 + 72 + 24 + 1 = 1,177.
+                </p>
+                <p>
+                    Seximal was originally called "senary". The name "seximal" came from the video
+                    <a href="https://www.youtube.com/watch?v=qID2B4MK7Y0">a better way to count</a> by jan Misali,
+                    which highlights properties of seximal that make it a powerful and useful base for its size.
+                    Like most number bases other than decimal, binary, and powers of binary, though, seximal doesn't
+                    see much real-world use.
+                </p>
+                <p>
+                    This notation follows the same progression as Default notation, but in seximal instead of decimal.
+                    In the scientific and hyperscientific portions, 6 is used as the base of the exponentiation instead of 10,
+                    so 1e43 means 1 * 6^27.
+                </p>
+            </div>
+            <div id="explanation_octal" class="explanation_box">
+                <h2>Octal</h2>
+                <p>
+                    Octal, a.k.a Base 8, is a way of writing numbers that only uses the digits from 0 to 7.
+                    Our normal way of writing numbers is Base 10, meaning the place values are 1, 10^1, 10^2, 10^3, and so on.
+                    In octal, the place values are 1, 8^1, 8^2, 8^3, and so on, so "736" means 7 * 8^2 + 3 * 8^1 + 6 = 
+                    = 448 + 24 + 6 = 478.
+                </p>
+                <p>
+                    Each octal digit represents three binary digits, so octal has sometimes been used as a way to compress
+                    binary and make it more readable, though hexadecimal remains a more popular way to do so.
+                </p>
+                <p>
+                    This notation follows the same progression as Default notation, but in octal instead of decimal.
+                    In the scientific and hyperscientific portions, 8 is used as the base of the exponentiation instead of 10,
+                    so 1e70 means 8 * 6^56.
+                </p>
+            </div>
+            <div id="explanation_dozenal" class="explanation_box">
+                <h2>Duodecimal/Dozenal</h2>
+                <p>
+                    Duodecimal, also called "Dozenal", is Base 12, a way of writing numbers that uses twelve digits instead of ten.
+                    Our normal way of writing numbers is Base 10, meaning the place values are 1, 10^1, 10^2, 10^3, and so on.
+                    In base 12, the place values are 1, 12^1, 12^2, 12^3, and so on, so "418" means 4 * 12^2 + 1 * 12^1 + 8
+                    = 576 + 12 + 8 = 596. Base 12 needs two extra digits beyond the ten digits we're familiar with -
+                    what those two digits are depends on the version of base 12 being used.
+                </p>
+                <p>
+                    Unlike other non-decimal number bases, base 12 has a serious following, with supporters that believe
+                    it's superior to base 10 and that society should switch to writing numbers in base 12, such as the Dozenal
+                    Societies of <a href="https://dozenal.org/">America</a> and <a href="http://www.dozenalsociety.org.uk/">Great Britain</a>.
+                    It's because of this following that we have two names and three notations for this base: "duodecimal" is the
+                    name for base 12 that matches up with the names for other bases, but the supporters of base 12 don't want it to have a
+                    name that derives from base 10, so they go with "dozenal". The same applies to the digits used for ten and eleven:
+                    the digits A and B are used for duodecimal since it's customary to use letters for digits beyond 9 in higher bases,
+                    but for dozenal there are different proposals: &#x218A; and &#x218B; are digits specifically made for use with
+                    dozenal, but since computers don't always support those characters, some use X and E instead.
+                </p>
+                <p>
+                    These notations follow the same progression as Default notation, but in duodecimal/dozenal instead of decimal.
+                    In the scientific and hyperscientific portions, 12 is used as the base of the exponentiation instead of 10,
+                    so 1e99 means 1 * 12^117. Since uppercase letters may be used as digits, hyperscientific uses #
+                    instead of an uppercase F.
+                </p>
+            </div>
+            <div id="explanation_hexadecimal" class="explanation_box">
+                <h2>Hexadecimal</h2>
+                <p>
+                    Hexadecimal, a.k.a Base 16, is a way of writing numbers that uses sixteen digits instead of ten.
+                    Our normal way of writing numbers is Base 10, meaning the place values are 1, 10^1, 10^2, 10^3, and so on.
+                    The extra digits used for ten, eleven, twelve, thirteen, fourteen, and fifteen are A, B, C, D, E, and F respectively.
+                    In hexadecimal, the place values are 1, 16^1, 16^2, 16^3, and so on, so "A4C" means 10 * 16^2 + 4 * 16^1 + 12 = 
+                    = 2,560 + 64 + 12 = 2,636.
+                </p>
+                <p>
+                    Each hexadecimal digit represents four binary digits, so hexadecimal is often used by low-level programming
+                    languages to truncate binary into a more readable form for humans.
+                </p>
+                <p>
+                    This notation follows the same progression as Default notation, but in hexadecimal instead of decimal.
+                    In the scientific and hyperscientific portions, 16 is used as the base of the exponentiation instead of 10,
+                    so 1eA5 means 1 * 16^165. Since uppercase letters may be used as digits, hyperscientific uses #
+                    instead of an uppercase F.
+                </p>
+            </div>
+            <div id="explanation_balancedTernary" class="explanation_box">
+                <h2>Balanced Ternary</h2>
+                <p>
+                    Balanced ternary is a way of writing numbers that's similar to regular ternary.
+                    The place values are still 1, 3, 3^2, 3^3, and so on, but whereas the digits in regular ternary are for
+                    0, 1, and 2, the digits in balanced ternary are for 0, 1, and -1.
+                    In this notation, the digits are 0 (for 0), + (for 1), and - (for -1).
+                    For example, 2 is +- (3 - 1), 10 is +0+ (9 + 1), and 22 is +-++ (27 - 9 + 3 + 1).
+                    Unlike normal number bases, balanced ternary doesn't need a negative sign to place in front of
+                    negative numbers: to convert a number to its negative in balanced ternary, just turn all the +s into -s
+                    and vice-versa. For example, -2 is -+ (-3 + 1), -10 is -0- (-9 - 1), and -22 is -+-- (-27 + 9 - 3 - 1).
+                </p>
+                <p>
+                    This notation follows the same progression as Default notation, but in balanced ternary instead of decimal.
+                    In the scientific and hyperscientific portions, 3 is used as the base of the exponentiation instead of 10,
+                    so +.+-e++-- means (1 + 2/9) * 3^32. Because of the digits used, the range of the mantissa in balanced ternary
+                    is not from 1 to 3, but rather from around 0.5 (+.----...) to 1.5 (+.++++...).
+                </p>
+            </div>
+            <div id="explanation_bijectiveDecimal" class="explanation_box">
+                <h2>Bijective Decimal</h2>
+                <p>
+                    "Bijective" decimal is a number base similar to regular decimal.
+                    The place values are still 1, 10, 10^2, 10^3 and so on, but unlike decimal, bijective decimal does not
+                    have a digit for zero. Since there's no zero digit, ten can't be written as "10", so ten gets its own digit,
+                    that being A. Eleven can still be written as "11", so it is.
+                    20 is written as "1A", 100 is "9A", 101 is "A1", 1,000 is "99A", and so on.
+                    The lack of a zero digit means non-whole numbers can't be written in this system, so this notation
+                    rounds to the nearest whole number.
+                    This notation follows the same progression as Default notation, but in bijective decimal instead of regular decimal.
+                    Since uppercase letters may be used as digits, hyperscientific uses # instead of an uppercase F.
+                </p>
+            </div>
+            <div id="explanation_standard" class="explanation_box">
+                <h2>Standard</h2>
+                <p>
+                    In real life, one of the most common ways to abbreviate large numbers (other than scientific notation),
+                    especially when it comes to money, is to use abbreviations of the names "thousand", "million", "billion",
+                    and so on, so 500 million would be written as "500 M". This is what "Standard" notation does (the name
+                    "Standard" was chosen by Antimatter Dimensions, because at the time it often was the standard way incremental
+                    games abbreviated numbers). Standard notation works well for smaller numbers like millions and trillions,
+                    but the further you go, the more ridiculous and less readable it gets.
+                    Eternal Notations has three different varieties of Standard, which differ in the
+                    abbreviations they use to represent each -illion name but share the same general progression: the notation
+                    just called "Standard" uses prefixes chosen by MathCookie (the creator of Eternal Notations), AD Standard
+                    uses the prefixes that Antimatter Dimensions uses, and Aarex Standard uses prefixes chosen by Aarex
+                    Tiaokhiao, a prominent figure in the incremental games community. I'll start by explaining MathCookie's
+                    Standard, then I'll go back and explain how the other two differ from it.
+                </p>
+                <p>
+                    The first few -illions have their own names and thus their own prefixes: k for thousand (10<sup>3</sup>),
+                    M for million (10<sup>6</sup>), B for billion (10<sup>9</sup>), T for trillion (10<sup>12</sup>),
+                    Qa for quadrillion (10<sup>15</sup>), Qi for quintillion (10<sup>18</sup>), Sx for sextillion (10<sup>21</sup>),
+                    Sp for septillion (10<sup>24</sup>), Oc for octillion (10<sup>27</sup>), No for nonillion (10<sup>30</sup>),
+                    and Dc for decillion (10<sup>33</sup>). After those first few, the -illions follow a place-value system
+                    where the -illions for 1 through 9, multiples of 10 from 10 through 90, and multiples of 100 from 100 through 900
+                    each get their own names, and the rest combine these names. The prefixes for the unit position are U, D, T,
+                    Qa, Qi, Sx, Sp, O, and N, the prefixes for the tens position are Dc, Vg, Tg, Qg, Qq, Sg, St, Og, and Ng, and
+                    the prefixes for the hundreds position are Cn, Dn, Tc, Qe, Qu, Sc, Si, Oe, and Ne. For example, the 345th
+                    -illion, with a value of 10<sup>1,038</sup>, is abbreviated as QiQgTc.
+                    <br>
+                    After the hundreds, though, the only -illions that get new names are powers of 1,000-numbered -illions,
+                    which have the smaller prefixes placed in front of them to multiply them, with hyphens separating each
+                    power of 1,000. The thousandth -illion, a millillion (10<sup>3,003</sup>) is abbreviated as Ml, so the
+                    49,824th -illion (10<sup>149,475</sup>) is written as NQgMl-QaVgOe. 
+                    At this point, the names start following the
+                    <a href="http://www.polytope.net/hedrondude/illion.htm">-illion scheme devised by Jonathan Bowers</a>,
+                    which has become the standard for the names of huge -illion numbers.
+                    The next few -illions with their own prefixes are the thousandth, millionth, billionth, trillionth, and so on -illions,
+                    whose names follow the small SI prefixes (milli, micro, nano, pico, and so on); the prefixes for these in
+                    Standard notation are Ml, Mc, Na, Pc, Fm, At, Zp, and Yc. ronto and quecto weren't part of the SI prefixes yet
+                    when Bowers made his system, so the following "power of a thousand" -illions, a.k.a "Tier 2 illions",
+                    use made-up extended SI prefixes: Xn, Vc, Mec, Duc, Tec, Ttc, Pnc, Hxc, Hpc, Otc, and Enc.
+                    For example, the 123,456,789,012th -illion would be written as TVgCnNa-SxQqQeMc-NOgSiMl-DDc.
+                    The "tier 2" illion names themselves enter a place value system after the first 19 of them,
+                    primarily using greek number prefixes as their name inspirations:
+                    the unit position prefixes are Me, Du, To, Tt, Pn, Hx, Hp, Ot, and En, but entries 10 through 19 also use those
+                    prefixes from Vc to Enc instead of being [ones digit]Vc, then 20 and above go back to the usual "ones + tens".
+                    The tens position prefixes are Vc, Ic, Ta, Te, Pe, He, Ht, Oa, and Ea, and the hundreds position prefixes are
+                    Hc, Dh, Th, Tth, Ph, Hxh, Hph, Oh, and Eh.
+                    <br>
+                    Like before, the next tier 2 illions to get their own names are the thousandth, millionth, billionth, and so
+                    on - these are the "tier 3" illions, which start with the large SI prefixes instead of the small ones:
+                    Ki (for reference, Ki is around 10<sup>3 * 10<sup>3003</sup></sup>), Mg, Gg, Tr, Pt, Ex, Zt, Yt. Then the
+                    SI prefixes give way to Greek-like names again, but this time those Greek names are somewhat warped: Xe, Da,
+                    Hd, Dok, Tad, Ted, Pd, Ed, Zd, Yd, and Nd. Underscores are used to separate tier 3 illions within a single tier 2 illion,
+                    so the 45,321,905th tier 2 illion would be written as PnTeMg_MeIcThKi_PnEh.
+                    After the first 19 tier 3 illions, the tier 3 illions enter their own place value system:
+                    the first few ones place prefixes are Hd, Di, and Ti, then the ones from 4 to 19 match up with the Tr, Pt, Ex...
+                    sequence given before. The tens position prefixes are Da, Ik, Tak, Tek, Pk, Ek, Zk, Yk, and Nk, and the
+                    hundreds position prefixes are Ho, Bo, Tro, Tot, Po, Eo, Zo, Yo, and Nt.
+                    <br>
+                    Finally, the fourth tier. The first fourth tier -illion, which is the thousandth third tier -illion, is Ka.
+                    Tildes (~) separate fourth tier -illions within a single third tier -illion. Unlike with the lower tiers,
+                    when a tier 3 -illion is used as a prefix on a tier 4 -illion, the first few prefixes are different:
+                    as prefixes, the tier 3 -illions from 2 to 9 become Dl, Ta, Tl, Pl, El, Zl, Yl, and Nl, then the rest of
+                    the prefixes (10 to 999) are the same as the corresponding plain tier 3 -illion (Da, Hd, Dok... up to XeNkNt).
+                    The fourth tier -illions start with warped SI prefixes but then start using the names of increasingly large
+                    astronomical objects: Ka, Mj, Gj, As, Lu, Fr, Jv, Sl, Bt, Gx, Go, Sp, Vs, and Mu.
+                    <br>
+                    This is where the system ends:
+                    Mu stands for a "multillion", the largest -illion name in Bowers's system, with a value of around
+                    10^10^10^(3 * 10^42). This means that the names run out at 10^10^10^(3 * 10^45), so for numbers larger than
+                    that, they're placed inside the brackets of an Il() expression, which means the "n"'th illion (where n is
+                    whatever's inside the parentheses): Il(Mu), for example, would be the 10^10^10^(3 * 10^42)'th -illion, which
+                    is around 10^10^10^10^(3 * 10^42). If multiple layers of Il() need to be applied, they're written as Il^2(),
+                    Il^3(), and so on, and once the amount of Il() layers, each one adding a 10 to the bottom of the power tower
+                    goes above 1,000, the number becomes written purely in terms of the amount of Il layers, with that
+                    amount of letters itself written in Standard notation, so Il^1 M is around 10&#8593;&#8593;1,000,000.
+                </p>
+                <p>
+                    AD Standard is the version of Standard used by Antimatter Dimensions, which to my knowledge is the first version
+                    of Standard that ever went past 2<sup>1024</sup>. The first few prefixes are K, M, B, T, Qa, Qt, Sx, Sp, Oc, No,
+                    and Dc. The ones position prefixes are U, D, T, Qa, Qt, Sx, Sp, O, and N, the tens position prefixes are Dc,
+                    Vg, Tg, Qd, Qi, Se, St, Og, and Nn, and the hundreds position prefixes are Ce, Dn, Tc, Qe, Qu, Sc, Si, Oe, and Ne.
+                    The tier 2 illions are in all-caps here: MI, MC, NA, PC, FM, AT, and ZP... and that's where it ends, as
+                    Antimatter Dimensions only goes up to around e9e15, which is in the FM range (AT and ZP are present in the code
+                    of the game, though). Therefore, the Il() thing gets going after that.
+                </p>
+                <p>
+                    Whereas Antimatter Dimensions Standard stops early, Aarex's Standard goes all the way up to the limit of Bowers's
+                    -illions, just as MathCookie's Standard does. I'm not going to go into detail on all the prefixes; check out
+                    <a href="https://docs.google.com/document/d/1K8Oj1As5p8S4hq_9zY_ZD29jdkLw7ZRV7Ka-5J8toE4/">Aarex's list of them</a>,
+                    which is the source of Aarex's Standard, if you want the full list. The most notable difference comes in the form
+                    of the separators: hyphens are still used to separate tier 2 -illions, but tier 3 -illions are separated via a' instead
+                    of _, and tier 4 -illions aren't separated at all; for tier 4 specifically, tier 3 prefixes or suffixes on them
+                    chop off the beginning or ending letter of the tier 4 -illion. Also, rather than using Il() larger than the last
+                    prefix, is uses MXS-, where MXS-(n) just means 10^n, so MXS-M would mean 10^(1 M)... though for numbers large
+                    enough that MXS- is needed, MXS- and Il() are essentially the same.
+                </p>
+            </div>
+            <div id="explanation_longScale" class="explanation_box">
+                <h2>Long Scale</h2>
+                <p>
+                    In English-speaking countries, -illion names use the "short scale", in which each -illion is 1,000x the previous:
+                    a billion is a thousand millions (10<sup>9</sup>), a trillion is a thousand billions (10<sup>12</sup>), a quadrillion
+                    is a thousand trillions (10<sup>15</sup>), and so on. However, many European languages use the "long scale", in
+                    which each -illion is 1,000,000x the previous: a billion is a million millions (10<sup>12</sup>),
+                    a trillion is a million billions (10<sup>18</sup>), a quadrillion is a million trillions (10<sup>24</sup>),
+                    and so on. In the short scale, the n<sup>th</sup> -illion has a value of 10<sup>3n + 3</sup>, while in the long
+                    scale the n<sup>th</sup> -illion has a value of 10<sup>6n</sup>. The Long Scale notations are like Standard
+                    (one for each of the three variations of Standard), but using the long scale instead of the short scale.
+                    Because the -illions go up by a factor of a million each time instead of a thousand, Long Scale does not abbreviate
+                    thousands with k/K, choosing instead to just leave the thousands as is. (Some long-scale languages have the term
+                    "milliard" for a thousand millions, "billiard" for a thousand billions, and so on, but these notations do not
+                    bother with that.)
+                </p>
+            </div>
+            <div id="explanation_mixedScientific" class="explanation_box">
+                <h2>Mixed Scientific</h2>
+                <p>
+                    Standard notation is useful for the first few -illions, but quickly becomes unwieldy starting somewhere
+                    between decillions and centillions (where exactly it becomes unwieldy is subjective, but it's somewhere in there).
+                    Scientific notation is more "boring" than Standard and isn't as intuitive as Standard for smaller numbers like
+                    millions and billions, but it makes much more sense than Standard for larger numbers. Mixed Scientific is a
+                    compromise between the two: it uses Standard for smaller numbers, then switches to Scientific for larger ones.
+                    When the exponent in the scientific notation gets large enough, it will itself be written in Standard up to the
+                    same limit, and only then does an e get placed in front. Similarly, once the N in (e^N) gets large enough,
+                    it starts being written in Standard and then switches to scientific.
+                    <br>
+                    Eternal Notations has mixed scientific varieties for all six versions of Standard/Long Scale, and what the
+                    standard-to-scientific limit is depends on the variety:
+                    <ul>
+                        <li>
+                            MathCookie's Standard uses Standard up through Vg, as vigintillion is the last -illion
+                            recognized as an official word in dictionaries (centillion is too, but-illions 21 through 99 are not).
+                        </li>
+                        <li>
+                            AD Standard uses Standard up through No, as that's what Antimatter Dimensions's Mixed Scientific notation does.
+                        </li>
+                        <li>
+                            Aarex's Standard uses Standard up through De (though this was an arbitrary decision made for Eternal
+                            Notations, as Aarex has not to my knowledge ever addressed mixed scientific for his Standard).
+                        </li>
+                    </ul>
+                </p>
+            </div>
+            <div id="explanation_letters" class="explanation_box">
+                <h2>Letters</h2>
+                <p>
+                    Letters notation, which was popularized by Antimatter Dimensions but was used in some variety in
+                    several incremental games beforehand, is similar to Standard notation in that it splits a number into a
+                    power of 1,000 and a coefficient on that power, but whereas Standard uses abbreviated versions of the names
+                    "thousand", "million", "billion", and so on, Letters uses lowercase letters in order: a for 10<sup>3</sup>,
+                    b for 10<sup>6</sup>, c for 10<sup>9</sup>, d for 10<sup>12</sup>, and so on. For example, 20,500 is 20.5a,
+                    and 593,000,000 is 593b.
+                    <br>
+                    The system keeps going after z: the next power of 1,000 after z uses aa, then next is ab, then ac, then ad,
+                    and so on. ba comes after az, then bb, then bc, and so on. After zz is aaa, after zzz is aaaa, and so on.
+                    This means that the powers of 1,000 are written in a "bijective base 26" with letters as the digits.
+                    <br>
+                    Having a bunch of lowercase letters is as far as the notation goes elsewhere, but Eternal Notations
+                    goes much further. Once there are too many letters, the notation switches to a number with a single uppercase
+                    A, where the uppercase A indicates that the number represents how many lowercase letters would be in
+                    the expression if it was fully expanded without the A: for example, 50A means 1aaaaaaa... with 50 a's.
+                    For fractional numbers with an uppercase A, you can think of the fraction as the logarithmic distance from
+                    one amount of letters to the next: for example, 14.5A means "halfway between 14A and 15A",
+                    which is around 1fcoyj... with 14 letters in there. Once the number with the A gets over 1,000, the lowercase
+                    letters return: for example, 20Ab means 1aaaaa... with 20b = 20,000,000 a's.
+                    An uppercase B indicates that the number represents the amount of lowercase letters in an expression with an
+                    uppercase A: for example, 500B means 1Aaaaaaa... with 500 a's. Likewise, an uppercase C means the number
+                    is the amount of lowercase letters in a B expression, a D means the number is the amount of lowercase letters
+                    in a C expression, and so on; each uppercase letter is two power-tower layers higher than the previous one.
+                    Like the lowercase letters, the uppercase letter after Z is AA, then AB is next, then AC, and so on, with BA after
+                    AZ, AAA after ZZ, and so on.
+                    Finally, once there's too many uppercase letters to show, you get an expression with an @, where the number
+                    indicates the amount of uppercase letters that would be in the expression: for example, 32@ means 1AAAA...
+                    with 32 A's.
+                </p>
+            </div>
+            <div id="explanation_alphabet" class="explanation_box">
+                <h2>Alphabet</h2>
+                <p>
+                    Alphabet notation, the notation used in the games created by <a href="https://topcoggaming.com/">TopCog</a>,
+                    is similar to Letters notation, but it's not quite the same. Letters are written before the number instead of
+                    afterwards, so 100,000,000 is b100. Instead of going to multiple letters after z, the uppercase letters come next,
+                    so after z is A, then B, and so on. Whereas Letters notation uses bijective base 26, Alphabet uses regular base 53;
+                    this means it has a zero digit, which is ~, so after Z is a~, then aa. aA is after az, b~ is after aZ, ba is after b~,
+                    A~ is after zZ, a~~ is after ZZ, a~a is a~~, aa~ is after a~Z, aaa is after aa~, a~~~ is after ZZZ, and so on.
+                    <br>
+                    Since the uppercase letters are used as regular digits instead of a second "tier" of letters, the tiers are
+                    handled differently: each tier uses the same letters, but the tiers are separated with a |. For example, a|500
+                    means aaaa...1 with 500 a's, a|a40 means aaaa...1 with a40 = 40,000 a's, b|120 means a|aaaaa...1 with 120 a's
+                    after the |, A|75 means z|aaaaaa...1 with 75 a's, and so on. This also applies for the third tier, so a||40 means
+                    aaaaaa...|1 with 40 a's.
+                    <br>
+                    The part of the notation with the lowercase and uppercase letters is used in TopCog's games, but those games never
+                    get to numbers nearly as high as Eternal Notations does, so the higher tiers of letters with the |'s separating them
+                    were made up by MathCookie, though he tried to do something that he felt fit with the notation.
+                </p>
+            </div>
+            <div id="explanation_greekLetters" class="explanation_box">
+                <h2>Greek Letters</h2>
+                <p>
+                    Greek Letters and Greek Alphabet are variations of Letters and Alphabet that use the Greek alphabet instead of
+                    the Latin alphabet. For Greek Letters, the lowercase and uppercase Greek letters replace the lowercase and
+                    uppercase Latin letters, and @ is replaced by &#x3DC;, which is one of the old abandoned Greek letters.
+                    Greek Alphabet uses both the lowercase and uppercase Greek letters, with &#x3D9; (another abandoned letter)
+                    used as the zero digit. AD Greek Letters is the "Greek Letters" notation in the Antimatter Dimensions
+                    notations, which is actually an Alphabet variation rather than a Letters variation, as it uses both lowercase
+                    and uppercase letters in the same digit set like Alphabet does. However, AD Greek Letters uses bijective base 48
+                    instead of regular base 49, i.e. it does not have the zero digit, so &#x3B1;&#x3B1; comes right
+                    after &#x3A9; instead of &#x3B1;&#x3D9; coming between the two like it does in Greek Alphabet.
+                </p>
+            </div>
+            <div id="explanation_emoji" class="explanation_box">
+                <h2>Emoji</h2>
+                <p>
+                    Originally called "Cancer" notation by Antimatter Dimensions, Emoji notation is a variant of Letters notation
+                    where each letter is replaced with an emoji.
+                    <br>
+                    The emojis were chosen to correspond to their letters:
+                    &#x1F620; is a ("angry"), &#x1F382; is b ("birthday"), &#x1F384; is c ("Christmas"), &#x1F480; is d ("death"),
+                    &#x1F346; is e ("eggplant"), &#x1F46A; is f ("family"), &#x1F308; is g ("gay"), &#x1F4AF; is h ("hundred"),
+                    &#x1F366; is i ("ice cream"), &#x1F383; is j ("jack-o-lantern"), &#x1F48B; is k ("kiss"), &#x1F602; is l ("laughing"),
+                    &#x1F319; is m ("moon"), &#x26D4; is n ("no"), &#x1F419; is o ("octopus"), &#x1F4A9; is p ("poop"), &#x2753; is q ("question mark"),
+                    &#x2622; is r ("radioactive"), &#x1F648; is s ("see no evil"), &#x1F44D; is t ("thumbs up"), &#x2602; is u ("umbrella"),
+                    &#x270C; is v (I guess this could be "victory", but I think it was just chosen because the hand sign looks like a V),
+                    &#x26A0; is w ("warning"), &#x274C; is x (this one's pretty self-explanatory), &#x1F60B; is y ("yummy"), and &#x26A1; is z ("zap").
+                    <br>
+                    Whereas the emoji for the lowercase letters were chosen by the creators of Antimatter Dimensions,
+                    MathCookie chose the emoji for the uppercase letters (and @):
+                    &#x1F6A8; is A ("alarm"), &#x1F171;&#xFE0F; is B (also self-explanatory), &#x1F352; is C ("cherries"),
+                    &#x1F608; is D ("demon" or "devil"),
+                    &#x1F4A5; is E ("explosion"), &#x1F460; is F ("fashion", or perhaps "fancy"), &#x1F52B; is G ("gun"),
+                    &#x1F3E5; is H ("hospital"), &#x1F440; is I ("eyes" starts with E, but it sure sounds like the letter I), &#x1F939; is J ("juggler"),
+                    &#x1F635; is K ("killed"), &#x2764;&#xFE0F; is L ("love"), &#x1F522; is M ("math"), &#x1F311; is N ("night"),
+                    &#x1F369; is O (because the donut looks like the letter O), &#x1F48D; is P ("proposal"),
+                    &#x1F441;&#xFE0F;&#x200D;&#x1F5E8;&#xFE0F; is Q (because it looks like a Q), &#xAE; is R (again, self-explanatory),
+                    &#x1F4B0; is S (the dollar sign looks like an S), &#x1F3C6; is T ("trophy"), &#x1F984; is U ("unicorn"),
+                    &#x1F30B; is V ("volcano"), &#x1F937; is W (because the man's arms kinda make a W shape),
+                    &#x2702;&#xFE0F; is X (because the scissors are in the shape of an X), &#x1F7E1; is Y ("yellow"), and &#x1F4A4; is Z (self-explanatory once again).
+                    Finally, the replacement for @ is &#x13068;, the symbol for a million in the Ancient Egyptian number system;
+                    the man's arms are stretched in astonishment at the size of the number, which certainly applies to the huge numbers
+                    needed to get this symbol in this notation.
+                    <br>
+                    Emoji Alphabet is an Alphabet variation that uses those same emoji for the lowercase and uppercase letters; the
+                    zero digit is &#x1F6AB;.
+                </p>
+            </div>
+            <div id="explanation_xyz" class="explanation_box">
+                <h2>XYZ</h2>
+                <p>
+                    A fairly simple notation that follows a similar but simpler version of the tiers of Letters notation.
+                    Smaller numbers are written with a number between 1 and 10 and some amount of Xs; each X multiplies the
+                    number by 10, so 3XXX means 3 * 10 * 10 * 10 = 3,000. A Y indicates that the number that goes with it
+                    is the amount of X's that would be in the full expression without the Y, so 8Y means 1XXXXXXXX (with 8 X's),
+                    and 2.5XXY means 1XXXXX... with 2.5XX = 250 X's. In other words, nY, for some "number and X's expression" n,
+                    means 10^n, so 2.5XXY means 10^(2.5XX) = 10^250. A Z indicates that the number that goes with it is the
+                    amount of Y's that would be in the full expression without the Z, so 9Z means 1YYYYYYYYY (with 9 Y's),
+                    3XZ means 1YYYY... with 3X = 30 Y's, and 4XYZ means 1YYYY... with 4XY = 10<sup>40</sup> Y's. In other words,
+                    nZ means 10&#8593;&#8593;n.
+                </p>
+            </div>
+            <div id="explanation_elementLetters" class="explanation_box">
+                <h2>Element Letters</h2>
+                <p>
+                    A variety of Letters notation where each power of 118 gets a "letter" instead of each power of 1,000, and each
+                    of these "letters" is a symbol for an element on the periodic table: 118^1 is H, 118^2 is He, 118^3 is Li,
+                    118^4 is Be, and so on. Like Letters notation, after Og (the 118th element) is HH, then HHe, then HLi, and so on,
+                    except if there's multiple of the same element in a row they're concatenated with a subscript, so HH becomes
+                    H<sub>2</sub> and HHH becomes H<sub>3</sub> but HHe and HHeH are unaltered. Uppercase letters have a bar over
+                    them, such as H&#x305;, as that's the symbol for antimatter hydrogen. @ is replaced with &#x2622;, and for reciprocals
+                    there's a - on the end.
+                </p>
+            </div>
+            <div id="explanation_roman" class="explanation_box">
+                <h2>Roman Numerals</h2>
+                <p>
+                    You've probably heard of Roman numerals and know how they work already, but in case you don't, here's a refresher:
+                    1 is written as I. The next few numbers are written by just using multiple I's as if they're tally marks: 2 is II,
+                    and 3 is III. I isn't the only unique symbol: V is 5, X is 10, L is 50, C is 100, D is 500, and M is 1,000.
+                    To write larger numbers, write multiple of these symbols and add them up: for example, XXVIII means
+                    10 + 10 + 5 + 1 + 1 + 1 = 28. If a smaller symbol is written before a larger one, that's subtraction instead
+                    of addition, but this is only valid when it's a single power of ten (I, X, C, M, etc.) in front
+                    and it's coming before the symbol that's 5x or 10x it.
+                    This means IV is 4, IX is 9, XL is 40, XC is 90, CD is 400, and CM is 900. These subtraction
+                    pairs can be treated as single symbols, so 394 is written as CCCXCIV (100 + 100 + 100 + 90 + 4). There is limited
+                    support for non-whole numbers, but only for twelfths: &#xB7; is 1/12, : is 2/12 (1/6), &#x2234; is 3/12 (1/4),
+                    &#x2237; is 4/12 (1/3), &#x2059; is 5/12, S is 6/12 (1/2), and then 7/12 through 11/12 use S and dots, so 7/12
+                    is S&#xB7;, 8/12 (2/3) is S:, and so on. To go beyond 4,000, you can write a symbol with a line above it to
+                    multiply that symbol by 1,000, so V&#x305; is 5,000 (which means MV&#x305; is 4,000),
+                    X&#x305; is 10,000, L&#x305; is 50,000, C&#x305; is 100,000, D&#x305; is 500,000, and M&#x305; is a million.
+                </p>
+                <p>
+                    How numbers beyond M&#x305; are handled depends on the notation being used. The notation called "Roman Numerals"
+                    here writes a number in parentheses after the M&#x305; to indicate multiplying M&#x305; by that number, so
+                    M&#x305;(XI) means XI * M&#x305; = 11,000,000, and M&#x305;(CXV)D means CXV * M&#x305; + D = 115,000,500.
+                    Eventually, this number can get large enough to itself be an M&#x305; with parentheses on it,
+                    and so on. After a few layers of this, a number in brackets is added, which means
+                    the M&#x305; is raised to the power of the number in the brackets before the multiplication, so
+                    M&#x305;[VI](CDX) means M&#x305;<sup>VI</sup> * CDX = 410 * 1,000,000<sup>6</sup> = 4.1e38. Finally, once
+                    there would be several layers of brackets, a number in braces is introduced, which means the expression is
+                    placed on top of a power tower of M&#x305;'s with the number in braces being the height of the tower, so
+                    M&#x305;{IV}[X](C) means M&#x305;^M&#x305;^M&#x305;^M&#x305;^(M&#x305;^X * C).
+                </p>
+                <p>
+                    AD Roman is the Roman numerals notation seen in Antimatter Dimensions, and this one goes for a scientific
+                    notation approach for larger numbers: numbers above 4 million are written in an x&#8593;y expression, where
+                    x and y are both in Roman numerals. x&#8593;y means x * 4,000,000<sup>y</sup>, so XIX&#8593;V means
+                    19 * 4,000,000<sup>5</sup>; this is basically scientific notation with a base of 4,000,000 instead of 10 and
+                    using &#8593; instead of e. For larger numbers, the exponent itself will need to be written in a &#8593;
+                    expression, and so on; after enough of these arrows, the notation switches to hyperscientific, still
+                    using a base of 4,000,000, with &#8593;&#8593; in place of F. Single-arrow expressions are evaluated before
+                    double-arrows, so IX&#8593;I&#8593;&#8593;V means (IX&#8593;I)&#8593;&#8593;V = 36,000,000&#8593;&#8593;5 =
+                    4,000,000^4,000,000^4,000,000^4,000,000^4,000,000^36,000,000.
+                </p>
+            </div>
+            <div id="explanation_septecoman" class="explanation_box">
+                <h2>Septecoman</h2>
+                <p>
+                    Septecoman is a Roman numerals-like notation that's based on 7s and 17s instead of 5s and 10s.
+                    The symbols are as follows: I is 1, S is 7, D is 17, N is 119 (7 * 17), T is 289 (17^2),
+                    O is 2,023 (7 * 17^2), F is 4,913 (17^3), H is 34,391 (7 * 17^3), and E is 83,521 (17^4).
+                    The subtraction rule still applies, but with a couple differences: it only applies when it's one or two
+                    of a power of 17 (I, D, T, O, E, etc.) in front of the symbol that's 7x it, so IIS for 5 and IS for 6 are both
+                    valid here but IID and ID are not. When a smaller symbol is written before an E, it's multiplication instead of
+                    addition or subtraction, so SE is 7 * 17^4, DE is 17^5, NE is 7 * 17^5, and so on. These multiplication pairs,
+                    like the subtraction pairs, can be treated as single symbols, so DESESE means 17^5 + 14 * 17^4.
+                    Fractional numbers use backwards letters: &#x1A7; is 7/17, &#xA4F7; is 1/17, &#x418; is 7/289, and &#xA4D5; is 1/289.
+                </p>
+                <p>
+                    The multiplication rule only goes up to OE. FE could be used for 17^7, as the subtraction rule doesn't apply here,
+                    but it kinda looks like it applies here (it would under the usual Roman numerals subtraction rules, but not
+                    under Septecoman subtraction rules), so 17^7 is where the next part of the notation starts, which
+                    behaves more like AD Roman than Roman Numerals. A number in brackets indicates multiplication by 17^x,
+                    where that x is 17 times the number in the brackets, so [I]SI means SI * 17^17,
+                    and [II]NDS means NDS * 17^34. Since this starts at 17^7, we also need [&#x1A7;] to multiply by 17^7,
+                    [&#x1A7;&#x1A7;] to multiply by 17^14, [I&#x1A7;] to multiply by 17^24, and so on. For larger numbers, you'll
+                    get multiple layers of brackets, and eventually a number in braces will show up, with the number in braces
+                    indicating the amount of layers of brackets outside the ones actually shown - but, like the brackets themselves,
+                    the amount of layers of brackets is 17 times the number in the braces, so {I}DN means [[[...[DN]...]I]I]I with 17
+                    bracket layers, {II} adds 34 bracket layers, and so on. This means we need {&#xA4F7;} to add one bracket layer
+                    (adding one bracket layer essentially increases the height of the power tower by 1), {&#xA4F7;&#xA4F7;} to add
+                    two bracket layers, {&#xA4F7;&#xA4F7;&#x1A7;} to add five bracket layers, {&#x1A7;} to add seven bracket layers,
+                    and so on.
+                </p>
+                <p>
+                    This notation was created by MathCookie because 17 is his favorite number, so he wanted to make a notation
+                    based on 17, and Roman numerals seemed like a good template to alter enough to make it feel like something new.
+                </p>
+            </div>
+            <div id="explanation_si" class="explanation_box">
+                <h2>SI</h2>
+                <p>
+                    The International System of Units (the "SI"), the system of measurements used across pretty much the entire world
+                    (the United States of America is the primary exception), has a list of prefixes that can be placed before its
+                    units to change their size. The most well-known of these is kilo- (k) for 1,000: a kilometer is 1,000 meters,
+                    a kilogram is 1,000 grams, and so on. The rest of the prefixes are as follows: mega- (M) for 10<sup>6</sup>,
+                    giga- (G) for 10<sup>9</sup>, tera- (T) for 10<sup>12</sup>, peta- (P) for 10<sup>15</sup>, exa- (E) for 10<sup>18</sup>,
+                    zetta- (Z) for 10<sup>21</sup>, yotta- (Y) for 10<sup>24</sup>, ronna- (R) for 10<sup>27</sup>, and
+                    quetta- (Q) for 10<sup>30</sup>. (Don't recognize those last two? They were added to the system in 2022. If you
+                    were expecting something like "xenna" or "bronto" for 10<sup>27</sup>... well, those were never real SI prefixes).
+                    There are also prefixes for numbers below 1, and these are arguably more well-known than the larger prefixes
+                    (mostly because of distance; millimeters, micrometers, etc. see plenty of use, but people tend to use units
+                    like AU or light-years rather than megameters, gigameters, etc.): milli- (m) for 10<sup>-3</sup>, micro (µ)
+                    for 10<sup>-6</sup>, nano (n) for 10<sup>-9</sup>, pico (p) for 10<sup>-12</sup>, femto (f) for 10<sup>-15</sup>,
+                    atto (a) for 10<sup>-18</sup>, zepto (z) for 10<sup>-21</sup>, yocto (y) for 10<sup>-24</sup>,
+                    ronto (r) for 10<sup>-27</sup>, and quecto (q) for 10<sup>-30</sup>. (There are also prefixes for 10<sup>2</sup>
+                    (hecto- (h)), 10<sup>1</sup> (deca- (da)), 10<sup>-1</sup> (deci- (d)), and 10<sup>-2</sup> (centi-, (c)),
+                    but these four won't be used by these notations).
+                    These notations use these prefixes: SI notation uses the letters, SI (Written) writes out the whole prefix name.
+                    For example, in SI, 1,987,000 is 1.987 M, 10<sup>17</sup> is 100 P, and 0.056 is 56 m. 
+                </p>
+                <p>
+                    For numbers above 1,000 Q, multiple prefixes are used: kQ for 10<sup>33</sup>, MQ for 10<sup>36</sup>, GQ for
+                    10<sup>39</sup>... QQ for 10<sup>60</sup>, kQQ for 10<sup>63</sup>, and so on. (Combining prefixes in this
+                    way is not allowed under official SI rules, but we're doing it anyway because it's pretty much required to go
+                    any further than 10<sup>30</sup> here). Likewise, mq for 10<sup>-33</sup>, µq for 10<sup>-36</sup>, nq for
+                    10<sup>-39</sup>, and so on. Once there are enough Q's in a row, they're truncated with a number in brackets
+                    after them; that number indicates how many Q's there are, so MQ[10] means MQQQQQQQQQQ (with 10 Q's).
+                    Once the amount of Q's gets above 1,000, it's written with SI prefixes itself. For large enough numbers, there may
+                    be multiple layers of brackets, and then a number in braces gets introduced, where the number in braces indicates
+                    the amount of layers of brackets outside of what's shown: for example, Q{4}[5] means Q[Q[Q[Q[5]]]].
+                </p>
+            </div>
+            <div id="explanation_binarySi" class="explanation_box">
+                <h2>Binary SI</h2>
+                <p>
+                    The SI prefixes work great for most units of measurement, but things get confusing once bytes get involved -
+                    which is a problem, since bytes are perhaps the unit that the SI prefixes are used the most on these days.
+                    Because computers work in powers of 2, it would make sense for the prefixes on bytes to be powers of 2 instead
+                    of powers of 10... and 2<sup>10</sup> = 1,024 is quite close to 10, so many people co-opt the SI prefixes and use
+                    them for powers of 1,024 on bytes instead of powers of 1,000. This leads to a small discrepancy that gets larger
+                    for higher prefixes: for example, 1 TB under the 2<sup>40</sup> definition is around 1.1 TB under the
+                    10<sup>12</sup> definition, which can lead to people being scammed when their hard drive (sold under the 10<sup>12</sup>
+                    definition) displays less storage than they paid for (because their system displays memory under the 2<sup>40</sup> definition).
+                    This confusion goes against the purpose of the SI (to create a single common standard for measurements), so to solve this,
+                    the IEC (which creates international standards for most technologies involving electricity) created an alternate set of
+                    prefixes that use the powers of 1,024 by definition: kibi- (Ki) for 2<sup>10</sup>, mebi- (Mi) for 2<sup>20</sup>,
+                    gibi- (Gi) for 2<sup>30</sup>, tebi- (Ti) for 2<sup>40</sup>, pebi- (Pi) for 2<sup>50</sup>, exbi- (Ei) for 2<sup>60</sup>,
+                    zebi- (Zi) for 2<sup>70</sup>, and yobi- (Yi) for 2<sup>80</sup> (equivalents for ronna and quetta have not yet been finalized,
+                    and there's no need for counterparts for the smaller prefixes because fractions of a byte don't go lower than eighths).
+                    Unfortunately, these prefixes have not been universally accepted, so while a kibibyte always means 1,024 bytes, a kilobyte
+                    might still mean 1,000 or 1,024 depending on the system being used.
+                </p>
+                <p>
+                    These two notations are the same as the regular SI notations, but using these binary prefixes instead of the regular SI prefixes.
+                </p>
+            </div>
+            <div id="explanation_combinedD" class="explanation_box">
+                <h2>Combined-D</h2>
+                <p>
+                    This notation, suggested by Scratch user RobloxLover2015, is in theory a variant of Mixed Scientific, but in
+                    practice it's actually much closer to being a variant of SI. For numbers up to decillions, it uses similar prefixes
+                    as those in Standard: M, B, T, Qa, Qi, Sx, Sp, O, N, and D. For example, 500,000,000 is 500M, and 10<sup>14</sup>
+                    is 100T. (Thousands don't get a prefix, they're just written out as numbers). Above decillions, the amount of
+                    decillions is written in this notation itself, so 1e36 is 1,000D, 1e39 is 1M*D, 1e42 is 1B*D... 1e60 is 1D*D,
+                    1e63 is 1,000D*D, 1e66 is 1M*D*D, and so on. Once there would be more than three D's, the amount of D's is written
+                    in brackets, so 10Qa*D[9] means 10Qa*D*D*D*D*D*D*D*D*D (with 9 D's). For larger numbers, the number in brackets
+                    gets to be large enough to be written in Combined-D notation itself. Once there are several layers of brackets,
+                    a number in braces gets introduced, where the number in braces indicates the amount of layers of brackets
+                    outside of what's shown: for example, D{5}[100M] means D[D[D[D[D[100M]]]]].
+                </p>
+            </div>
+            <div id="explanation_hyperSi" class="explanation_box">
+                <h2>Hyper-SI</h2>
+                <p>
+                    SI notation (and, for that matter, Standard and Letters) can be thought of varieties of Scientific/Engineering
+                    notation where each exponent value gets a name instead of a number... and if SI notation is a Scientific variety,
+                    then Hyper-SI notation is a Hyperscientific variety, where each tetra-power of 10 gets a name, and for a given
+                    prefix X and number n, n X means 10^10^10^10...^n with however many 10's in the power tower the prefix X
+                    corresponds to, i.e. nFz for X's appropriate number z. Here are the prefixes:
+                    <ul>
+                        <li>F1 is plexi- (Pl), as the suffix -plex means 10^x, such as how a googolplex is 10^googol.</li>
+                        <li>F2 is digexi- (Dg), as in "the amount of <b>dig</b>its in the <b>ex</b>ponent.</li>
+                        <li>F3 is brinexi- (Bi), because the limit of break_infinity.js (e9e15) is around 1.204 brinexi.</li>
+                        <li>
+                            F4 is swekexi- (Sk), because <a href="https://en.wikipedia.org/wiki/Skewes%27s_number">Skewes's numbers</a>
+                            are around 1.531 swekexi and 2.984 swekexi respectively.
+                        </li>
+                        <li>
+                            F5 is madenexi- (Md), because according to
+                            <a href="https://github.com/Reinhardt-C/Incremental-Limits/blob/master/limits.md">
+                                Reinhardt-C's list of incremental game limits
+                            </a>, the incremental game Exponential Madness goes up to around 1 madenexi.
+                        </li>
+                        <li>
+                            F6 is alifexi- (Af), because according to Reinhardt-C's list of incremental game limits,
+                            the incremental game True Infinity Alpha goes up to around 1 alifexi.
+                        </li>
+                        <li>
+                            F7 is hypocexi- (Hc), because it's the first tetra-power of ten for which
+                            <a href="http://www.mrob.com/pub/comp/hypercalc/hypercalc-javascript.html">HyperCalc</a>
+                            resorts to using PT notation to write it.
+                        </li>
+                        <li>
+                            F8 is cloctexi- (Co) because it's a "class 8" number under
+                            <a href="http://www.mrob.com/pub/math/largenum-2.html#class5">Robert Munafo's number classes</a>.
+                        </li>
+                        <li>
+                            F9 is tenebexi- (Tb) because, on Part 3 of cookiefonster's
+                            <a href="https://sites.google.com/site/pointlesslargenumberstuff/home/l/pgln3">Pointless List of Large Numbers</a>,
+                            "Bentley's Number" is around 10&#8593;&#8593;9.
+                        </li>
+                        <li>F10 is deckerexi- (Dk) because <a href="https://googology.fandom.com/wiki/Decker">Decker</a> is a googological name for 10&#8593;&#8593;10.</li>
+                    </ul>
+                    There are also a couple negative-F prefixes (i.e. layers of logarithms instead of layers of exponents):
+                    <ul>
+                        <li>F-1 is logo- (lg) since it's taking the base-10 logarithm of the number.</li>
+                        <li>F-2 is nepogo- (np) because it's used for negative numbers but the number that's written with the np is positive.</li>
+                    </ul>
+                    No prefixes below F-2 are needed, as 1 np is log(log(1)) = -Infinity. Above F10, multiple prefixes are used: PlDk for F11,
+                    DgDk for F12, BiDk for F13... DkDk for F20, PlDkDk for F21... Dk(5) for DkDkDkDkDk = F50... and so on.
+                </p>
+            </div>
+            <div id="explanation_sandcastleBuilder" class="explanation_box">
+                <h2>Sandcastle Builder</h2>
+                <p>
+                    <a href="https://castle.chirpingmustard.com/castle.html">Sandcastle Builder</a> is a ridiculous incremental game based off
+                    xkcd comic #1190, "Time". This game is so wacky that the number notation it uses is probably the least ridiculous part of it,
+                    and even the notation gets a little silly. It's a variation of SI: it starts with the SI prefixes from kilo to yotta
+                    (ronna and quetta didn't exist yet when this game was made), but after those, it goes into made-up prefixes:
+                    Umpty (U) for 10<sup>27</sup>, Squilli (S) for 10<sup>30</sup>, Helo (H) for 10<sup>33</sup>, Ferro (F) for
+                    10<sup>36</sup>, Lotta (L) for 10<sup>39</sup>, and Wololo for 10<sup>42</sup>. After W is KW, then MW, then GW,
+                    and so on, with the twist that there's one more prefix later on: Quita (Q) is an abbreviation for WWWWW
+                    (that's five W's), i.e. 10<sup>210</sup>. Beyond the change in prefixes, though, these notations behave the same
+                    as regular SI.
+                </p>
+            </div>
+            <div id="explanation_fraction" class="explanation_box">
+                <h2>Fraction</h2>
+                <p>
+                    These notations approximate non-whole numbers as rational numbers (fractions) using
+                    <a href="https://en.wikipedia.org/wiki/Continued_fraction">continued fractions</a> - the exact details of how
+                    continued fractions work aren't really relevant here, what matters is that they're independent of the number base
+                    being used, and that they're in some sense the "best" fraction approximations for given levels of simplicity.
+                    Since programming languages tend not to include exact rational numbers, Eternal Notations provides three different
+                    levels of precision for fractions: Loose will stop once the error is less than 0.001n (where n is the number being
+                    approximated: for example, for a number around 1.5, Fraction (Loose) will return an approximation that's within
+                    0.0015 of the target number), Medium's error will be less than 10<sup>-6</sup> * n, and Precise's error will be
+                    less than 10<sup>-10</sup> * n. The three Fraction notations will return "improper" fractions for numbers above 1,
+                    while the three Mixed Number notations separate the whole part from the fractional part. These notations, unlike
+                    most notations in Eternal Notation, aren't interesting for large numbers, since eventually the whole numbers
+                    themselves will be within precision limits; it's with numbers less than the millions where these notations are
+                    interesting.
+                </p>
+            </div>
+            <div id="explanation_letterDigits" class="explanation_box">
+                <h2>Letter Digits</h2>
+                <p>
+                    Letter Digits notation is similar to Letters notation, but without a mantissa: the lowercase letters
+                    represent the number itself instead of representing a power of 1,000. a is 1, b is 2, z is 26, aa is 27, and
+                    so on. An uppercase A still means that the number after the A represents the amount of lowercase letters that
+                    would be in the expression without the uppercase A, but now that number is itself represented via lowercase
+                    letters: for example, Am means aaaaaaaaaaaaa (that's 13 a's). Further uppercase letters also mean the same
+                    thing they did before, but since there's no mantissa, going to the next uppercase letter only adds 1 to the
+                    height of the power tower instead of 2. Likewise, in an expression with an @, the lowercase letters after the @
+                    express the amount of uppercase letters that would be in the full expression.
+                    <br>
+                    Alphabet Digits is, as you'd probably expect, Alphabet notation without the mantissa. Aside from using regular
+                    base 53 instead of bijective base 26, a notable difference between Letter Digits and Alphabet Digits is in
+                    how they handle fractional lowercase letters: Letter Digits uses a fractional approximation (with the same
+                    level of precision as Fraction (Medium)), Alphabet Digits uses decimal places. 
+                </p>
+            </div>
+            <div id="explanation_myriad" class="explanation_box">
+                <h2>Myriad</h2>
+                <p>
+                    Most people don't often use -illion names beyond a trillion: if they need to refer to something in the
+                    quadrillions, they'll say "thousand trillions" or "million billions". This begs the question: why do we
+                    need the word "quadrillion" if "thousand trillion" would suffice? In other words: do we really a new name for every
+                    power of 1,000, or could we be more efficient with spreading out the names?
+                </p>
+                <p>
+                    Such an increase in efficiency is the goal of <a href="https://en.wikipedia.org/wiki/-yllion">Donald Knuth's -yllion
+                    system</a>. In this system, tens and hundreds get names, but "thousand" isn't used:
+                    1000 is "ten hundred", and the next name is at 10<sup>4</sup>, which is called a myriad
+                    ("myriad" for 10,000 is a fairly standard term, at least in some languages). The first -yllion,
+                    a myllion, is a myriad myriad, i.e. 10<sup>8</sup>. 10<sup>12</sup> is just "a myriad myllion", as the
+                    second -yllion, a byllion, isn't until a myllion myllion, 10<sup>16</sup>. Similarly, 10<sup>24</sup> is
+                    "a myllion byllion", and the next -yllion, a tryllion, is at a byllion byllion, 10<sup>32</sup>. Each -yllion,
+                    therefore, is the square of the previous one, and in general the n'th -yllion has a value of
+                    10<sup>2<sup>n + 2</sup></sup>.
+                </p>
+                <p>
+                    These notations use the same prefixes as Standard (a variety for each of the three Standard prefixes is given here),
+                    but now they refer to -yllions instead of -illions, so M is 10<sup>8</sup>, B is 10<sup>16</sup>,
+                    T is 10<sup>32</sup>, Qa/Qd is 10<sup>64</sup>, Qi/Qt is 10<sup>128</sup>, and so on. When multiple -yllions
+                    are included, they're separated via hyphens with the largest -yllions first, so 10<sup>24</sup> is 1 B-M.
+                    M is the smallest prefix used here; myriad does not get its own prefix, so numbers below 10<sup>8</sup>
+                    are written as normal, with the caveat that commas are placed between every 4 digits instead of every 3 digits
+                    in this system. The prefixes are the same as Standard up until the 100th -yllion; the 100th -yllion still uses Cn/Ce,
+                    but powers of 100 act like the powers of 1,000 do in Standard (separated via underscores here), so the 356th -yllion
+                    in (MathCookie's) Myriad is TCn_SxQq. The 1,0000th -yllion is a "myryllion", which uses the prefix My (in all
+                    three systems; Antimatter Dimensions never specified what the prefix for such an -illion would be, while Aarex does
+                    and it's My for him too, so I just used My for all three), then the 100,0000th -yllion is CeMy (again, we're trying
+                    to reuse symbols where we can here).
+                </p>
+                <p>
+                    For really big numbers, Knuth proposed "latin-x-yllion" to mean "the x'th yllion", so "latinmyllionyllion"
+                    means the 10<sup>8</sup>th -yllion, and it's given the prefix LtM here. Once we reach a latinbyllionyllion,
+                    the 10<sup>16</sup>th -yllion, though, we just put the whole number in an Lt[] expression: for example,
+                    Lt[1.5 B-M] means the "1.5 myllion byllion"th -yllion, i.e. the (1.5 * 10<sup>24</sup>)th -yllion, which is
+                    around 10<sup>2<sup>1.5 * 10<sup>24</sup></sup></sup>. Like with Standard, for even larger numbers you'll get
+                    Lt^2[], then Lt^3[], and so on, and eventually the Lt amount will itself be written in Myriad notation. Whereas
+                    each Il() added 1 to the height of a power tower in Standard, here each Lt[] adds 2 to the height of a power tower
+                    (the power tower would alternate between 10s and 2s, not that it really matters for anything other than the
+                    top few entries of the tower).
+                </p>
+            </div>
+            <div id="explanation_doubleBinary" class="explanation_box">
+                <h2>Double Binary Names</h2>
+                <p>
+                    <a href="https://www.youtube.com/watch?v=rDDaEVcwIJM">the best way to count</a> is a long YouTube video
+                    made by supporters of binary as the best number base, which goes into great detail on all the properties of
+                    binary that make it easier and more versatile than other bases. Near the end of the video, they give a system
+                    of naming these numbers (and a way of writing these names with symbols, though of course
+                    typically you'd just write the numbers in binary itself without the complexity of these names). Double Binary
+                    Names notation writes numbers using the symbols version of this naming system. The first three symbols of this system
+                    are 1, 2, and 4, and the system follows a few rules:
+                    <ul>
+                        <li>When a smaller symbol is written after a larger symbol, it's addition.</li>
+                        <li>When a smaller symbol is written before a larger symbol, it's multiplication.</li>
+                        <li>Expressions with smaller symbols are evaluated before expressions with bigger symbols.</li>
+                    </ul>
+                    For example, "4 2" means 4 + 2 = 6, "2 4" means 2 * 4 = 8, and in "2 1 4 1" you evaluate the 2s and 1s before
+                    you touch the 4, so this becomes (2 + 1) * 4 + 1 = 13.
+                    <br>
+                    We don't allow two of the same symbol to be right next to each other, and we only introduce a new symbol whenever
+                    we need to. This ends up meaning that we need a new symbol once we reach the square of the previous symbol, which means
+                    the symbols correspond to the double-powers of 2, i.e. the numbers of the form 2<sup>2<sup>n</sup></sup> for positive integer n.
+                    The names for the double-powers of 2 chosen in the video tend to use computer science terms, since powers of 2 show up often there.
+                    The names and symbols are as follows:
+                    <ul>
+                        <li>1, 2<sup>1</sup> = 2, and 2<sup>2</sup> = 4 already have their own single digits, so they keep those as their symbols.</li>
+                        <li>2<sup>4</sup> = 16 is "hex" (H), because a single hexadecimal (base 16) digit is four binary digits.</li>
+                        <li>2<sup>8</sup> = 256 is "byte" (B), because a byte is 8 bits.</li>
+                        <li>
+                            2<sup>16</sup> = 65,536 is "short" (S), 2<sup>32</sup> = 4,294,967,296 is "int" (I),
+                            and 2<sup>64</sup> &#x2248; 1.844e19 is "long" (L); these are different sizes of integer variables in low-level
+                            programming languages like C, with a short being 16-bit, an int being 32-bit, and a long being 64-bit.
+                            65,536 is the first nonnegative integer too large for a short to hold, and likewise for the other two.
+                        </li>
+                        <li>
+                            2<sup>128</sup> &#x2248; 3.403e38 is called "overlong" in the video, but I think a better name is "float" (F),
+                            as this number is the limit of a "float", i.e. a single-precision floating-point number
+                            (floating point is the way that computers represent non-whole numbers).
+                        </li>
+                        <li>
+                            2<sup>256</sup> &#x2248; 1.158e77 is "byteplex" (P), because it's 2^(byte). "Plex" is a suffix that normally means
+                            10^x, like how a googolplex is 10^googol, but since this is a binary-focused system, -plex is used to mean 2^x instead
+                            of 10^x here.
+                        </li>
+                        That's as far as the video goes in naming numbers, but Eternal Notations goes further with eight more symbols (these eight were chosen by MathCookie):
+                        <li>
+                            2<sup>512</sup> &#x2248; 1.341e154 is "tetracube" (T), as this number is 4^4^4, i.e. 4&#8593;&#8593;3.
+                        </li>
+                        <li>
+                            2<sup>1024</sup> &#x2248; 1.798e308 is "double" (D), as this number is the limit of a "double", i.e. a
+                            double-precision floating-point number; doubles are used for floating point numbers in most high-level programming
+                            languages, including JavaScript, which is why 2<sup>1024</sup> is a well-known limit in the incremental games community.
+                        </li>
+                        <li>
+                            2<sup>2048</sup> &#x2248; 3.232e616 is given the letter R, as the cryptographic system RSA (one of the oldest
+                            encryption/decryption algorithms still in use) is typically used with 2048-bit "keys" these days. (Perhaps the
+                            name for this number would be "r-key"?)
+                        </li>
+                        <li>
+                            2<sup>4096</sup> &#x2248; 1.044e1,233 is "sector" (C), as memory-storing hard drives usually use 512-byte (= 4096-bit)
+                            disc sectors as their minimum unit of data to allocate to programs. (Yeah, C isn't the best symbol here,
+                            but D and S were both taken and C was the next best option)
+                        </li>
+                        <li>
+                            2<sup>8192</sup> &#x2248; 1.091e2,466 is "kibi" (K), as 8,192 bits = 1,024 bytes = 1 kibibyte.
+                        </li>
+                        <li>
+                            2<sup>16,384</sup> &#x2248; 1.19e4,932 is "quadruple" (Q), as this number is the limit of a
+                            quadruple-precision floating point number; programming languages rarely use these.
+                        </li>
+                        <li>
+                            2<sup>32,768</sup> &#x2248; 1.415e9,864 is given the letter A, as "Advanced Format" disk sectors are
+                            4,096 bytes (32,768 bits) instead of 512 bytes. (Perhaps the name for this number would be "adform" or "advaf"?)
+                        </li>
+                        <li>
+                            2<sup>65,536</sup> &#x2248; 2.004e19,728 is "shortplex" (X), or perhaps "hexduplex"; this number is
+                            2&#8593;&#8593;5, which I figured was a good stopping point for new symbols.
+                        </li>
+                    </ul>
+                    Once 2<sup>131,072</sup> is reached, the number is written in parentheses with a p after it; the p stands for "-plex",
+                    which here means 2^x, so (2 S 1)p means 2^(2 S 1) = 2^131,073. For larger numbers, multiple p's will be present,
+                    and then the p will get an exponent to indicate how many p's there are; that exponent will itself be written in this
+                    notation, so I | p^(H 2 1) means 2^2^2^2...^2^4,294,967,296 with (H 2 1) = 19 2's in the power tower.
+                </p>
+                <p>
+                    Double Binary Prefixes is simpler than Double Binary Names: the symbols H and above are used like SI prefixes, and the
+                    leftover mantissa is just written as a usual (decimal) number. For example, 2.5 B means (2.5 * 256) = 1,280. The prefixes
+                    end up following a binary-like system themselves: H for 16, B for 16^2, HB for 16^3, S for 16^4, then HS, BS, HBS, I, HI, BI,
+                    HBI, SI, HSI, BSI, HBSI, L... and so on. If there would be multiple X's, they're written as X^n (where n is itself written in
+                    Double Binary Prefixes); the ^n serves as the replacement for SI's brackets, and later on there's "# (n)", which replaces braces.
+                    Double Binary Prefixes, at least up until X, is basically a version of Myriad with numbers of the form 2<sup>2<sup>n</sup></sup>
+                    given names/prefixes instead of numbers of the form 10<sup>2<sup>n</sup></sup>.
+                </p>
+            </div>
+            <div id="explanation_hypersplit" class="explanation_box">
+                <h2>Hypersplit</h2>
+                <p>
+                    Hypersplit notation splits a number into four numbers, all of which are between 0 and 10: a mantissa,
+                    an exponent, a tetra-exponent (i.e. a power tower height), and a penta-exponent (a.k.a. a "tetration tower" height).
+                    Numbers between 1 and 10 are just written as the mantissa. This is similar to how numbers are represented
+                    internally in <a href="https://naruyoko.github.io/OmegaNum.js/index.html">OmegaNum.js</a>, but there
+                    there's no regular exponent (it goes mantissa, tetration, pentation, hexation, etc. there).
+                    With just a mantissa m and an exponent e, the number is written as m * 10^e, so 150 is 1.5 * 10^2.
+                    When there's a tetra-exponent t, it's written as (10^)^t, indicating that t is the amount of (10^)'s in the
+                    power tower: for example, (10^)^7 8 * 10^5 means 10^10^10^10^10^10^10^(8 * 10^5). When there's a penta-exponent p,
+                    it's written as (10^^)^p, indicating that p is the amount of (10^^)'s in the "tetration tower":
+                    for example, (10^^)^3 (10^)^2 1 would mean 10^^10^^10^^(10^10^1), though in practice the penta-exponent
+                    will never go above 1 because break_eternity doesn't support numbers large enough for it to go above one.
+                    In addition to the 10-based variant, there's also a 3-based variant where the base of the exponent, tetra-exponent,
+                    and penta-exponent is 3 instead of 10 (the numbers are still written in decimal, though, not ternary); 3 was
+                    chosen here because it's the smallest integer where Hypersplit makes sense (it doesn't make sense for 2 because
+                    2^2, 2^^2, and 2^^^2 are all equal to 4).
+                </p>
+            </div>
+            <div id="explanation_hyperE" class="explanation_box">
+                <h2>Hyper-E</h2>
+                <p>
+                    <a href="https://sites.google.com/site/largenumbers/home/4-3/4-3-1-foray">Hyper-E Notation</a>
+                    is a googological notation that, even in its weakest form, encompasses the hyperoperator sequence as
+                    a whole (and its various extensions go much, much farther than that). In this weakest form, an
+                    expression in Hyper-E notation has the form Ea#b#c#d... for some numbers a, b, c, d... and so on.
+                    With just one number, Ea means 10^a. With more than one number, the function is recursive: Ea#b
+                    means E(Ea#(b - 1)), Ea#b#c means Ea#(Ea#b#(c - 1)), Ea#b#c#d means Ea#b#(Ea#b#c#(d - 1)), and so on:
+                    for each step, you get rid of the last argument and replace the second-to-last argument with the
+                    entire original expression but with the last argument decreased by 1. If the last argument is 1,
+                    remove the last argument but don't do anything else. Each entry in a Hyper-E Expression approximately
+                    corresponds to the next hyperoperator: the first entry is an exponent, the second corresponds to tetration,
+                    the third to pentation, and so on. Ea#b turns out to be the same as aFb in Hyperscientific, and beyond
+                    two-entry expressions, only Ea#1#2, which means Ea#(Ea) = aF(10^a),
+                    is seen before Eternal Notations reaches its limit.
+                </p>
+            </div>
+            <div id="explanation_infinity" class="explanation_box">
+                <h2>Infinity</h2>
+                <p>
+                    Introduced by Antimatter Dimensions, Infinity notation is essentially a variation of Logarithm with a
+                    base of 2<sup>1024</sup>, which is around 1.79e308, instead of 10. For example, the number written as
+                    0.1&infin; is (2<sup>1024</sup>)<sup>0.1</sup> = 2<sup>102.4</sup> &#x2248; 6.69e30. For huge numbers,
+                    the number before the &infin; will itself be written in infinity notation, resulting in multiple
+                    &infin;s in a row, such as 0.25&infin;&infin; meaning (2<sup>1024</sup>)<sup>(2<sup>1024</sup>)<sup>0.25</sup></sup></sup>.
+                    Once there are enough &infin;s in a row, they're truncated into an &infin;<sup>n</sup> expression.
+                    <br>
+                    If you're wondering why 2<sup>1024</sup> was chosen as the base, it's because 2<sup>1024</sup> is the limit
+                    of numbers in many programming languages (including JavaScript, which most incremental games are written in);
+                    numbers beyond 2<sup>1024</sup> are considered to be infinite, thus the use of 2<sup>1024</sup> as "infinity"
+                    in this notation.
+                </p>
+            </div>
+            <div id="explanation_eternity" class="explanation_box">
+                <h2>Eternity</h2>
+                <p>
+                    Infinity notation has the property that, if you stick to numbers reachable without a large number library,
+                    it maxes out at 1&infin;. Eternity notation takes this idea of representing a number in terms of its proportion
+                    of the way towards the limit and applies it to break_eternity. break_eternity.js's maximum is
+                    10&#8593;&#8593;(2<sup>1024</sup>), so to write a number in Eternity notation, take its base-10 super-logarithm,
+                    then take the base-(2<sup>1024</sup>) logarithm of that. This result is written with the character &#x58E;
+                    in front of it, which is apparently an Armenian sign for eternity. This character actually comes in two forms:
+                    the clockwise &#x58E; is used for normal numbers (those above 1) and the counterclockwise &#x58D; is used for
+                    reciprocals, so &#x58D;0.01 is the reciprocal of &#x58E;0.01. (0 and 1 don't work under either of these,
+                    so they're just written as plain numbers.) This notation is incredibly slow - it takes until
+                    around 10&#8593;&#8593;1,210 to reach &#x58E;0.01, for example.
+                </p>
+            </div>
+            <div id="explanation_brackets" class="explanation_box">
+                <h2>Brackets</h2>
+                <p>
+                    Introduced in an April Fools' Day update to Antimatter Dimensions, Brackets is a notation designed to be
+                    confusing and hard to understand. The notation uses a base-6 logarithm, with the number also written in base 6,
+                    but the digits 0 and 5 are replaced with parentheses, brackets, and braces in an arbitrary order:
+                    ) is 0, [ is 1, { is 2, ] is 3, ( is 4, and } is 5. For example, 6 is e[.)), and 36 is e{.)). That's all
+                    there is to it... in Antimatter Dimensions, at least. This notation's extension to tetrational numbers is
+                    also designed to be confusing: if the base-6 logarithm needs to be taken multiple times, an expression is placed
+                    before the e to indicate the amount of <i>extra</i> times it's taken (which is one less than the actual number
+                    of times, since it doesn't include the original logarithm). This expression is also written as a base 6
+                    logarithm with the same six digits, but here both the digits themselves and the order of the digits are reversed,
+                    so six extra logarithms would be indicated by placing ((.] before the e.
+                </p>
+            </div>
+            <div id="explanation_simplifiedWritten" class="explanation_box">
+                <h2>Simplified Written</h2>
+                <p>
+                    This notation comes from <a href="https://aarextiaokhiao.github.io/NG-plus-3/">NG+++</a>,
+                    an Antimatter Dimensions mod by Aarex Tiaokhiao. In this notation, each of the digits 0-9 are
+                    written with the first two letters of their name: 0 is Ze, 1 is On, 2 is Tw, 3 is Th, 4 is Fo, 5 is Fi,
+                    6 is Si, 7 is Se, 8 is Ei, and 9 is Ni. Numbers between 1 and 1,000 are rounded to the nearest integer
+                    and written with these digits: for example, 350 is written as ThFiZe. For numbers above 1,000, 
+                    there will be a number in parentheses (also written in this notation) that multiplies by 10<sup>n</sup>:
+                    for example, (Si) FoOnEi means 10<sup>6</sup> * 418. This is like scientific notation, but the mantissa
+                    ranges between 100 and 1,000 instead of between 1 and 10. Once the number in parentheses would go above
+                    1,000, a number in brackets is introduced instead. The number in brackets means that the expression
+                    is placed on top of a power tower of 10s with n 10s in it: for example, [Fo] EiSeSi means
+                    10^10^10^10^876. Finally, for the largest numbers Eternal Notations supports, there will be a number
+                    in braces, which puts the expression on top of a "tetration" tower of 10s: for example, {Th} TwOn would mean
+                    10^^10^^10^^21 (though the number in braces never gets above 1 in practice).
+                </p>
+            </div>
+            <div id="explanation_dots" class="explanation_box">
+                <h2>Dots</h2>
+                <p>
+                    Unicode, the standard that decides what wacky text characters are supported by computers, supports
+                    256 <a href="https://en.wikipedia.org/wiki/Braille_Patterns">Braille dot patterns</a>. These patterns
+                    consist of a 2x4 grid of dots, some of which are visible and some of which are not. The patterns follow
+                    a binary numbering system: the numbers go from 0 to 255, with the first three dots in the left column as
+                    the 1s, 2s, and 4s places, the first three dots in the right column as the 8s, 16s, and 32s places,
+                    the bottom-left dot as the 64s place, and the bottom-right dot as the 128s place (visible is 1, invisible is 0).
+                    <br>
+                    Dots notation uses these dot patterns to notate numbers. First of all, it offsets the numbers by 1, so &#x2801;
+                    (which is pattern 1 in Unicode) is the digit for 0, &#x2802; (pattern 2 in Unicode) is the digit for 1,
+                    &#x2803; (pattern 3 in Unicode) is the digit for 2, and so on - this is done because pattern 0 in Unicode is
+                    empty, and having a blank position would get confusing, so pattern 0 is not used.
+                    &#x28FF;, the final pattern, is also not used as a regular digit, so Dots notation works with
+                    patterns 1 to 254 as digits from 0 to 253, making it a base-254 system. The last digit of the number is not
+                    the 1s place, but rather the first place after the decimal point (the decimal point itself is not shown, but it's
+                    implied to be there), i.e. the 1/254ths place, so numbers below 254 use two digits (the first digit is the 1s place,
+                    the second is the 1/254ths place), numbers between 254 and 254^2 use three digits (254s place, 1s place, 1/254ths place),
+                    and so on. For numbers below 1, the first digit will be a 0 to signify that what comes afterwards is all after the decimal
+                    point.
+                    <br>
+                    Only up to four digits are shown, so once the number is above 254^3, scientific notation begins. This is where
+                    &#x28FF; comes in: &#x28FF; separates the exponent and the mantissa, with the exponent coming before the &#x28FF;
+                    and the mantissa coming after the &#x28FF;. The mantissa is represented the same way it was before (three whole number
+                    digits and then one post-decimal point digit), and the exponent is just written as a whole number without the
+                    post-decimal point digit. For larger numbers, a &#x28FF;&#x2802; will be placed at the end to signify that the expression
+                    is an exponent on a 254, like how e's are placed at the beginning of Scientific notation to indicate that the
+                    expression is an exponent on a 10 there. Once there are enough of these, the notation switches to hyperscientific,
+                    with &#x28FF;&#x28FF; separating the hyperexponent and the mantissa (hyperexponent before the &#x28FF;&#x28FF;,
+                    mantissa after).
+                </p>
+            </div>
+            <div id="explanation_hearts" class="explanation_box">
+                <h2>Hearts</h2>
+                <p>
+                    For numbers between 100 and 1e12, Hearts notation uses colored heart emoji to implement
+                    <a href="https://en.wikipedia.org/wiki/Electronic_color_code#Resistors">resistor color codes</a>,
+                    a system in which each digit gets a color: 0 is black (&#x1F5A4;), 1 is brown (&#x1F90E;), 2 is red (&#x2764;&#xFE0F;),
+                    3 is orange (&#x1F9E1;), 4 is yellow (&#x1F49B;), 5 is green (&#x1F49A;), 6 is blue (&#x1F499;),
+                    7 is purple (&#x1F49C;), 8 is grey (&#x1FA76;), and 9 is white (&#x1F90D;). This notation uses the version of
+                    resistor color codes with three significant figures, so the first three hearts are digits of the mantissa and
+                    the fourth is a scientific notation exponent: for example, &#x1F9E1;&#x1F49B;&#x1F5A4;&#x2764;&#xFE0F;
+                    means 340 * 10<sup>2</sup> = 34,000. There's no implied decimal point in the mantissa:
+                    the mantissa ranges between 100 and 1,000, not between 1 and 10. This means we need negative exponents
+                    for numbers smaller than 100, in which case a cyan heart (&#x1FA75;) is placed before the exponent
+                    to indicate the exponent is negative. &#x1FA77; is used as the exponent for 10 (this magenta heart
+                    will never show up as a digit, only as an exponent), then &#x1F90E;&#x1FA77; is the exponent for 11,
+                    &#x2764;&#xFE0F;&#x1FA77; is the exponent for 12, &#x1F9E1;&#x1FA77; is the exponent for 13, and so on,
+                    like how SI notation's prefixes after Q are kQ, MQ, GQ, and so on. Instead of writing multiple &#x1FA77;s in a row
+                    for exponents of 20 and above, the amount of &#x1FA77;s there would be is written after the &#x1FA77;, also in
+                    this notation: for example, since &#x1F90E;&#x1F5A4;&#x1F5A4;&#x1F5A4; is 100, &#x1FA77;&#x1F90E;&#x1F5A4;&#x1F5A4;&#x1F5A4;
+                    is the exponent for (10 * 100) = 1,000, and then &#x1F90E;&#x1FA77;&#x1F90E;&#x1F5A4;&#x1F5A4;&#x1F5A4; is the
+                    exponent for 1,001, &#x2764;&#xFE0F;&#x1FA77;&#x1F90E;&#x1F5A4;&#x1F5A4;&#x1F5A4; is the exponent for 1,002, and so on.
+                    Once the exponent is above 10,000, only the multiplier after the &#x1FA77; is shown, since at that point the
+                    mantissa is pretty much meaningless. For really big numbers, there will be multiple &#x1FA77;s before the number (each
+                    one representing one 10,000,000,000^ in a power tower), and then it will switch to hyperscientific:
+                    if &#x1F497; is in the expression, then the number after the &#x1F497; is how many &#x1FA77;s there would be before the
+                    rest of the expression if it was expanded out without the &#x1F497;.
+                </p>
+            </div>
+            <div id="explanation_dominoes" class="explanation_box">
+                <h2>Dominoes</h2>
+                <p>
+                    Dominoes notation, as the name implies, writes numbers using dominoes. This notation was designed around the colored
+                    dominoes, with the text-based one as an afterthought, so I'll explain Colored Dominoes (Double 6) first, then
+                    go back and talk about the differences with the others.
+                </p>
+                <p>
+                    The first few nonnegative integers get their own domino: the 0-0 domino is 0, the 1-0 domino is 1, the 1-1 domino is 2,
+                    the 2-0 domino is 3, the 2-1 domino is 4, the 2-2 domino is 5, the 3-0 domino is 6, and so on. Whenever we increase the
+                    number by 1, we increase the amount of dots on the bottom square of the domino by 1, unless the two squares are already
+                    equal, in which case we increase the amount of dots on the top square by 1 and reset the bottom square to 0. This
+                    continues until we hit the largest domino in the system; for Double 6, this is the 6-6 domino, which has a value of 27.
+                    After that, we add another domino in front, using these 28 dominoes from 0-0 to 6-6 as digits in a base-28 number system.
+                    For non-whole numbers, there will be a couple white dominoes with black dots (as opposed to cream with colored dots);
+                    these are decimal places. Once there are too many dominoes, a black 1-0 domino appears: in an expression with a
+                    black 1-0 domino, the rest of the expression denotes how many dominoes there would be if the expression was expanded
+                    out without the black 1-0 domino. If the black domino is 1-1, then the rest of the expression denotes how many
+                    dominoes there would be in a black 1-0 domino expression, and in general, for a given black domino value, the colored
+                    part of the expression denotes how many dominoes there would be in an expression of the previous black domino value.
+                    Eventually, there will be multiple black dominoes (which use the same base-28 system as the regular ones),
+                    then for the largest numbers Eternal Notations supports, there will be a red 1-0 domino, which means the colored
+                    part of the expression denotes how many <i>black</i> dominoes would be in the full expression without the red 1-0
+                    domino. As for weirder numbers, an empty black-and-white domino denotes a negative sign, and an empty cream and red
+                    domino denotes a reciprocal.
+                </p>
+                <p>
+                    What about the other varieties? The other Colored Dominoes varieties differ in how high their dominoes go and thus
+                    what base the system works in: Double 9 goes up to the 9-9 domino (resulting in base 55), Double 12 goes up to the
+                    12-12 domino (resulting in base 91), Double 15 goes up to the 15-15 domino (resulting in base 136), and
+                    Double 18 goes up to the 18-18 domino (resulting in base 190). As for the notation just called "Dominoes"?
+                    While the colored dominoes notations are cool, they're also the only notation in Eternal Notations that doesn't
+                    work in plain text, requiring HTML or some other markup language to work. As such, a plain text version of
+                    Dominoes is included as well: Unicode has characters for dominoes, but they only go up to 6-6, so only the Double
+                    6 variant gets this plaintext alternative. Since different colors of dominoes wouldn't work, the character
+                    &#x1F062;, which represents a face-down domino, is used to split the black dominoes from the regular ones,
+                    and later to split the red dominoes from the black ones.
+                </p>
+            </div>
+            <div id="explanation_factorial" class="explanation_box">
+                <h2>Factorial</h2>
+                <p>
+                    The factorial function, denoted with an exclamation mark, is a fairly well-known function: on integers,
+                    x! = x * (x - 1) * (x - 2) * (x - 3) * ... * 3 * 2 * 1. This grows faster than any exponential function,
+                    but slower than x<sup>x</sup>. The factorial can be extended to non-whole numbers while retaining the recursive
+                    property x! = x * (x - 1)! via a function known as the 
+                    <a href="https://en.wikipedia.org/wiki/Gamma_function">Gamma function</a>, though this extension is undefined
+                    for negative integers (it's defined for non-integer negative numbers, but it has vertical asymptotes at
+                    negative integers specifically). This notation writes numbers in terms of what number they're a factorial of,
+                    so 6 is written as 3!, 24 is written as 4!, 120 is written as 5!, and so on. For huge numbers, there may be
+                    multiple factorials taken: for example, 6!! would mean (6!)! = 720!, which is around 2.6e1,746 (though
+                    the notation hasn't actually switched to two factorials yet at this point). This isn't what multiple exclamation
+                    points is normally used for - normally
+                    <a href="https://en.wikipedia.org/wiki/Double_factorial">"double factorial"</a> means x * (x - 2) * (x - 4)...,
+                    but this is weaker than the usual factorial, so it's not of much use to Eternal Notations. Therefore, in
+                    Eternal Notations, "double factorial" means (x!)!. Anyways, once there are enough exclamation marks, they're
+                    truncated by writing one exclamation mark with the amount of exclamation marks after it: for example,
+                    25!8 means 25!!!!!!!! (with 8 !'s).
+                </p>
+            </div>
+            <div id="explanation_factorialAmount" class="explanation_box">
+                <h2>Factorial Amount</h2>
+                <p>
+                    Factorial notation can be thought of as a factorial-based equivalent of Logarithm, and if you do so,
+                    then Factorial Amount is the Super Logarithm equivalent: how many times do you need to apply the
+                    factorial function to 3 to reach the target number? 3!0 is 3, 3!1 is 3! = 6, 3!2 is 3!! = 720,
+                    3!3 is 3!!! &#x2248; 2.6e1,746, and so on. For fractional amounts of factorial applications, an
+                    approximation similar to the linear approximation of tetration is used: x!y, for 0 < y < 1, takes a weighted
+                    geometric mean of x! and x: for example, x!0.75 = (x!)<sup>0.75</sup> * x<sup>0.25</sup>. For y > 1,
+                    x!y = (x!(y-1))!. The amount of factorial applications will be negative for numbers between 2 and 3, meaning
+                    the "inverse factorial" function is applied some amount of times. The reason 3 was chosen as the base is because
+                    it's the smallest integer that works: 2! = 2, so no matter how many times you apply the factorial function to 2,
+                    it remains at 2. 2 would be 3!(-Infinity), so numbers between 1 and 2 are just written as plain numbers because you
+                    can't reach them from 3 using factorials and inverse factorials.
+                </p>
+            </div>
+            <div id="explanation_factorialScientific" class="explanation_box">
+                <h2>Factorial Scientific</h2>
+                <p>
+                    This notation is similar to Scientific notation, except instead of the "exponent" being for powers of 10,
+                    it's for factorials. For example, the largest factorial below 60 is 4! = 24, so 60 is written as 2.5 * 4!.
+                    Because of how factorials work, the range for the mantissa here is between 1 and the "exponent": for example,
+                    if the factorial currently in use is 5!, then the mantissa can range from 1 to 5. This means that, for larger
+                    numbers, the mantissa can go higher before it resets and increments the exponent. Once the number gets too large,
+                    a single factorial is applied to the whole expression, such as (3 * 12!)!, then multiple factorials, and then
+                    the amount of factorials applied to the expression is written after an exclamation point: for example,
+                    7.5 * 14! (!6) means (7.5 * 14!)!!!!!! (with 6!'s on the outside).
+                </p>
+            </div>
+            <div id="explanation_factorialHyperscientific" class="explanation_box">
+                <h2>Factorial Hyperscientific</h2>
+                <p>
+                    This notation is similar to Factorial Amount, but with one key difference: whereas in Factorial Amount the
+                    base was always 3 and the "hyperexponent" was allowed to be non-whole, here the hyperexponent is always a
+                    whole number and the base is allowed to vary. The base has an upper limit of 3, which turns out to give it a
+                    lower limit of "the inverse factorial of 3", which is around 2.405. This results in a notation which is basically
+                    the Hyperscientific equivalent of Factorial Scientific.
+                </p>
+            </div>
+            <div id="explanation_factoradic" class="explanation_box">
+                <h2>Factoradic</h2>
+                <p>
+                    Factoradic is an example of a "mixed radix" number base, where not every place value operates under the same
+                    base. In factoradic, the rightmost digit acts as like binary digit (it can only be 0 or 1), the next digit
+                    acts like a ternary digit (it can be 0, 1, or 2), the next acts like a quaternary digit (it can be 0, 1, 2, or 3),
+                    and so on, with each place value allowing one more possible digit than the one after it. This turns out to make
+                    the place values be the factorials: there's a 1s place, a 2s place, a 6s place, a 24s place, a 120s place, a 720s
+                    place, and so on. For example, "3101" means 3 * 4! + 1 * 3! + 0 * 2! + 1 * 1! = 79. For digits in the 10!'s
+                    place and above, the typical convention of using A, B, C, etc. as the digits for 10, 11, 12, etc. is used.
+                    This notation behaves the same as the other number base notations, just using factoradic instead.
+                    Like the other number base notations, this one eventually switches to scientific notation - scientific notation's
+                    exponent is based on amount of digits in the number, which in this case means it's actually "factorial scientific",
+                    and likewise for hyperscientific later on. e is still used as the separator for scientific, but as with
+                    the other factorial notations, ! is used as the separator for hyperscientific.
+                </p>
+            </div>
+            <div id="explanation_root" class="explanation_box">
+                <h2>Roots</h2>
+                <p>
+                    Roots are one of the inverses of exponentiation: the nth root of x is the number y such that y^n = x.
+                    If you expand your domain and range to include negative numbers, then weird things can start happening with roots
+                    (this is how complex numbers were first created), but if we stick to positive numbers then we can get
+                    a single answer for any given root. The 2nd and 3rd roots are given special names, those being "square root"
+                    and "cube root" respectively. These notations use roots to write numbers: for example, Square Root
+                    writes 196 as 14^2, and Cube Root writes 512 as 8^3. For larger numbers, those roots may have to be applied
+                    multiple times: for example, Square Root writes 10<sup>24</sup> as ((1,000^2)^2)^2. Above that, the amount
+                    of square roots applied will be written as a second exponent, such as 1,000^2^8 meaning the square root
+                    was applied 8 times. For even larger numbers, the whole expression will be placed on a 2^2^ or 3^3^ expression
+                    to indicate "how many times do we have to apply the root to the number to get down to 2 or 3?", and then the
+                    amount of 2^2^'s or 3^3^'s will be truncated into an expression like ((2^2^)^7) to indicate that the "2^2^"
+                    prefix was applied 7 times. Increasing Root, on the other hand, starts with a root height of 2 but increases that
+                    height for larger numbers to keep the base under 10,000 (10,000 was chosen arbitrarily because it's (10^2)^2).
+                    For tetrational-sized numbers, this is essentially equivalent to a single logarithm, which for really big
+                    tetrational numbers doesn't have much impact.
+                </p>
+            </div>
+            <div id="explanation_superRoot" class="explanation_box">
+                <h2>Super Roots</h2>
+                <p>
+                    Exponentiation has two inverses, those being roots and logarithms, and the same is true for tetration:
+                    tetration's two inverses are super-roots and super-logarithms, and unlike with roots and exponentiation,
+                    super-roots can't easily be rewritten as fractional-height tetrations (though this is partially because
+                    we have no agreed definition of fractional-height tetration, only approximations). These notations write
+                    numbers in terms of these super-roots: for example, in Super Square Root, 27 is written as 3&#8593;&#8593;2,
+                    256 is 4&#8593;&#8593;2, 3,125 is 5&#8593;&#8593;2, 46,656 is 6&#8593;&#8593;2, and so on.
+                    Tritetrated, which uses a super-root degree of three, should probably be called "Super Cube Root", but this
+                    notation was called "Tritetrated" in the Antimatter Dimensions notations so I reused that name for the sake
+                    of familiarity. For larger numbers, the super-root may need to be applied multiple times, such as
+                    (15&#8593;&#8593;2)&#8593;&#8593;2, and eventually the amount of times the super-root is applied is written
+                    as an exponent on the &#8593;&#8593;, such as 25(&#8593;&#8593;^7)2. Increasing Super Root, on the other
+                    hand, starts with a super-root degree of 2 but increases that height for larger numbers to keep the base under
+                    65,536 (65,536 was chosen arbitrarily because it's 2&#8593;&#8593;4). For tetrational-sized numbers,
+                    square super-roots end up being approximately the same as single logarithms, cube super-roots end up being approximately
+                    the same as double logarithms, fourth super-roots end up being approximately the same as triple logarithms, and so on.
+                </p>
+            </div>
+            <div id="explanation_prime" class="explanation_box">
+                <h2>Prime</h2>
+                <p>
+                    Prime numbers are integers that have no factors except 1 and themselves (1 itself is not considered prime):
+                    the first few are 2, 3, 5, 7, 11, 13, 17... and so on. Any integer can be expressed uniquely as a product of
+                    prime numbers (the result is called the "prime factorization" of that number),
+                    a fact so important to mathematicians that they call it the
+                    <a href="https://en.wikipedia.org/wiki/Fundamental_theorem_of_arithmetic">fundamental theorem of arithmetic</a>,
+                    and this notation expresses numbers as their prime factorizations. When a prime occurs multiple times in a
+                    number's prime factorization, it's written with an exponent to indicate the number of times it appears.
+                    For example, 3 is just written as 3 because it's prime, 6 is written as 2 * 3, and 50 is written as 2 * 5<sup>2</sup>.
+                    If you allow primes to have negative exponents, then the fundamental theorem of arithmetic extends to all positive
+                    rational numbers (and we can include the negative ones too if we allow multiplying by -1 a single time), so for
+                    non-whole numbers, this notation approximates them as fractions (with the same level of precision as Fraction (Medium))
+                    and then takes the prime factorization of that: for example, 5/6 is written as 2<sup>-1</sup> * 3<sup>-1</sup> * 5.
+                    <br>
+                    There's no easy formula to calculate the nth prime, so factoring a number into primes is a very hard problem if the
+                    number is big enough. As such, this notation only checks prime factors below 10,000 (the last of which is 9,973), so if
+                    there are any prime factors in the number above 10,000, they'll slip through as leftovers at the end. However, this still
+                    allows the prime factorizations of whole numbers to be accurate up to 100,000,000 (10,000<sup>2</sup>), as below this point
+                    only one prime factor above 10,000 can slip through, which means if there is anything leftover it must be prime. This
+                    guarantee doesn't hold above 100,000,000, though: for example, 100,140,049 is 10,007<sup>2</sup> (10,007 is the first prime
+                    that's above 10,000), but the notation doesn't check for 10,007, so the whole 100,140,049 would make it through as a single
+                    leftover factor. Since we can't be precise beyond 100,000,000 anyway, we make that clear by writing numbers above
+                    100,000,000 in terms of square roots, then cube roots, and so on, choosing whichever root has the smallest degree that keeps
+                    the displayed number below 100,000,000. For larger numbers, there will be a power tower of multiple prime factorizations
+                    where all but the topmost two are set to 10,000, and then once that gets high enough the notation switches to writing
+                    numbers in terms of super-roots.
+                </p>
+            </div>
+            <div id="explanation_psiDash" class="explanation_box">
+                <h2>Psi Letters and Psi Dash</h2>
+                <p>
+                    These two notations were created by former Googology Wiki user PsiCubed2.
+                    PsiCubed2's <a href="https://googology.fandom.com/wiki/User_blog:PsiCubed2/My_Letter_Notation">Letter notation</a>,
+                    referred to here as Psi Letters, was created to extend scientific/logarithmic notation to higher hyperoperators.
+                    E is used for scientific, F for tetration, and G for pentation (you've probably noticed that F is used as the
+                    tetrational equivalent of scientific's e all across Eternal Notations, but PsiCubed2's Letter Notation is actually
+                    where the use of F for this originates from). Psi Letters starts with scientific with E, but switches to the next
+                    letter whenever the number reaches 10. It turns out that, because Eternal Notations uses the linear approximation
+                    for tetration and pentation, this notation is the same as Logarithm below 10<sup>10</sup>, the same as Super Logarithm
+                    between 10<sup>10</sup> and 10&#8593;&#8593;10, and the same as Penta-Logarithm above 10&#8593;&#8593;10.
+                </p>
+                <p>
+                    The notation referred to as Psi Dash here was 
+                    <a href="https://googology.fandom.com/wiki/User_blog:PsiCubed2/An_intuitive_lexicographic_ordering_of_numbers_up_to_P10_(%CF%89%5E%CF%89-level)">also created by PsiCubed2</a>:
+                    the goal here was to reformat the numbers given in Psi Letters notation in a way such that they tell you what the number actually is,
+                    and such that chopping any amount of symbols off the end of an approximation will produce a still valid (albeit less precise)
+                    approximation for that number - for example, anything that starts with "F4-" must be between F4 and F5, and anything that
+                    starts with "G2-345" must be between G2-345 and G2-346, even something like G2-3457.
+                    It's a bit hard to describe Psi Dash without explaining the evaluation process of Psi Letters in detail, but here are some
+                    examples:
+                    <ul>
+                        <li>If the letter is E, then the first number is the exponent and the second is the digits of the mantissa.</li>
+                        <li>If it begins with F2-, then the second number is the digits of the exponent and the third is the digits of the mantissa.</li>
+                        <li>If it begins with F3-, then the second number is the digits of the second exponent, the third is the digits of the first exponent, and the fourth is the digits of the mantissa.</li>
+                        <li>If it begins with F4-, then the second number is the digits of the third exponent, the third is the digits of the second exponent, the fourth is the digits of the first exponent, and the fifth is the digits of the mantissa.</li>
+                    </ul>
+                    ...and so on. In the case of the letter being G, the first number will be the penta-exponent and the second will be the digits of the highest tetra-exponent,
+                    but what comes after that depends on the number. That being said, it's pretty easy in this notation to see when one number is larger
+                    than another.
+                </p>
+            </div>
+            <div id="explanation_omegaLayers" class="explanation_box">
+                <h2>Omega Layers</h2>
+                <p>
+                    <a href="https://veprogames.github.io/omega-layers/">Omega Layers</a> is an incremental game made by VeproGames
+                    (formerly known as cook1ee) in which there are infinite layers of prestige. Each layer's currency is a Greek
+                    letter: the base currency is &#x3B1;, the first prestige layer is &#x3B2;, the second prestige layer is &#x3B3;,
+                    the the third prestige layer is &#x3B4;, and so on. Omega Layers notation writes a number by answering the
+                    question "if you had this many &#x3B1; in Omega Layers, how much of the higher layer currencies would you have?".
+                    <br>
+                    For the first couple layers, each layer requires 1e24 of the previous currency to get 1 of the next, and
+                    the next layer grows at the rate of the 24th root of the previous, which means it takes x<sup>24</sup> times
+                    as much &#x3B1; to get x times as much &#x3B2;, and likewise for &#x3B2; to &#x3B3;. However, starting at
+                    &#x3B4;, each layer multiplies the degree of the root by 1.1 and raises the requirement to the power of 1.1
+                    (the requirement is always 10^(the root)), so &#x3B4; requires (1e24)<sup>1.1</sup> &#x2248; 2.51e26 &#x3B3;,
+                    &#x3B5; requires (1e24)<sup>1.1<sup>2</sup></sup> &#x2248; 1.1e29 &#x3B4;, and so on. However, this ramping
+                    stops after five layers, so from &#x3B8; onwards, every layer requires around 4.49e38 of the previous one and
+                    grows at the rate of the 38.65224th root of the previous one.
+                    <br>
+                    The layer names go through the lowercase Greek letters first, then the uppercase letters, then all
+                    48 of those are repeated again but this time as superscripts on an &#937;, so after &#937; is &#937;<sup>&#945;</sup>,
+                    then &#937;<sup>&#946;</sup>, then &#937;<sup>&#947;</sup>, and so on. After &#937;<sup>&#937;</sup>, the 48
+                    superscripts repeat again and again but with a different subscript on the &#937; each time: the subscripts are
+                    &#968;, &#989;, &#987;, &#881;, &#1019;, &#985;, &#883;, and &#1016;. This brings the total to 480 layers,
+                    and these 480 symbols are then used as digits in bijective base 480, with &#x2191; between each digit and
+                    with the digits in reverse order, so after &#937;<sub>&#1016;</sub><sup>&#937;</sup> is &#x3B1;&#x2191;&#x3B1;,
+                    then &#x3B2;&#x2191;&#x3B1;, then &#x3B3;&#x2191;&#x3B1;, and so on;
+                    after &#937;<sub>&#1016;</sub><sup>&#937;</sup>&#x2191;&#x3B1; is &#x3B1;&#x2191;&#x3B2;, then &#x3B2;&#x2191;&#x3B2;.
+                    &#x3B1;&#x2191;&#x3B1;&#x2191;&#x3B1; comes after &#937;<sub>&#1016;</sub><sup>&#937;</sup>&#x2191;&#937;<sub>&#1016;</sub><sup>&#937;</sup>,
+                    then comes &#x3B2;&#x2191;&#x3B1;&#x2191;&#x3B1;... you get the idea (hopefully).
+                    Only up to four digits are shown - if there would be more than four digits, then only the last two digits are
+                    shown, followed by &#x2191;&#x2191; and then a letter indicating how many digits aren't shown, so
+                    &#x3B7;&#x2191;&#x3B1;&#x2191;&#x2191;&#x3B5; would have five digits before the &#x3B7;&#x2191;&#x3B1; if it were expanded out in full.
+                    (The actual game Omega Layers writes the double-arrow number as a plain number rather than a layer symbol, but Eternal Notations
+                    writes it as a layer symbol to keep it interesting for larger numbers). Eventually the number after the &#x2191;&#x2191;
+                    becomes large enough to be written with a &#x2191;&#x2191; itself, and once there are enough of these, it switches to
+                    using a triple-arrow, where the number after the &#x2191;&#x2191;&#x2191; indicates how many double-arrows aren't shown.
+                </p>
+                <p>
+                    As for the other two notations in this box: Omega Layers (Ramped) is like regular Omega Layers, except the "multiply
+                    the root by 1.1 and raise the requirement to the power of 1.1" starts right at &#x3B3; and keeps going forever instead
+                    of stopping at &#x3B8;, and Omega Layer Number returns the layer expression of that number (&#x3B1; is layer 1,
+                    &#x3B2; is layer 2, and so on).
+                </p>
+            </div>
+            <div id="explanation_increasingOperator" class="explanation_box">
+                <h2>Increasing Operator</h2>
+                <p>
+                    This notation slowly moves up the hyperoperator sequence for larger and larger numbers. Numbers below 10 are written
+                    as-is. Above 10, 10 is repeatedly added in the expression to keep the leftover number under 10, so 19 is written as
+                    10 + 9 and 36 is written as 10 + 10 + 10 + 6. Once there are too many "10 +"'s, they're truncated using multiplication,
+                    such as 10 * 7 + 6. The number multiplying that 10 can also be written in this notation, so 121 is 10 * (10 + 2) + 1.
+                    Once there are enough layers of this, it switches to repeatedly multiplying a whole expression by 10, such as
+                    10 * 10 * 10 * 5.6 for 5,600. Once there are too many "10 *"'s, they're truncated using exponentiation, such as
+                    10^9 * 6.5. That exponent can also be written in this notation, such as 10^(10 * 6 + 4) * 7.89. Once there are
+                    enough layers of this, it switches to repeatedly putting a whole expression as an exponent on a 10, such as
+                    10^10^10^(10 + 5). Once there are too many "10^"'s, they're truncated using tetration, such as
+                    (10^)^8 4.5 for 4.5F8. That hyperexponent can also be written in this notation, such as (10^)^(10 * 10 * 10 * 6) 1.
+                    Once there are enough layers of this... well, we don't get that far, because Eternal Notations hits its limit
+                    before we'd get to the next stage.
+                </p>
+                <p>
+                    In addition to the regular Increasing Operator notation described above (which is based on 10), variants are included
+                    here based on 2 and 3.
+                </p>
+            </div>
+            <div id="explanation_omega" class="explanation_box">
+                <h2>Omega</h2>
+                <p>
+                    Omega is a notation created by VeproGames (formerly known as cook1ee). I'm not really sure how to summarize it,
+                    so here's how it works:
+                    <br>
+                    Numbers below 8,000 are written with a Greek letter and a subscript, where the Greek letter represents a multiple
+                    of 1,000 and the subscript represents the leftover number: &beta; is 0, &zeta; is 1,000, &lambda; is 2,000,
+                    &psi; is 3,000, &Sigma; is 4,000, &Theta; is 5,000, &Psi; is 6,000, and &omega; is 7,000. For example,
+                    &beta;<sub>50</sub> is 50, &lambda;<sub>763</sub> is 2,763, and &Theta;<sub>600</sub> is 5,600.
+                    Next, &omega;^ is placed at the beginning of a number to indicate addition by 8,000, so
+                    &omega;^&psi;<sub>0</sub> is 8,000 + 3,000 = 11,000 and &omega;^&omega;^&zeta;<sub>3</sub> is 8,000 + 8,000 + 1,003 = 25,003.
+                    If there would be too many &omega;^'s, they're truncated into an &omega;(n) expression, where the number inside the parentheses
+                    is the amount of &omega;^'s there would be (in other words, the number inside the parentheses is multiplied by 8,000); for example,
+                    &omega;(9)^&Sigma;<sub>208</sub> is 8,000 * 9 + 208 = 72,208. If the number inside the parentheses is 10 or greater, it's
+                    also written in Omega notation, such as &omega;(&beta;<sub>100</sub>)^&beta;<sub>0</sub> or &omega;(&omega;(8)^&psi;<sub>450</sub>)^&Psi;<sub>775</sub>.
+                    Once there are too many layers of parentheses, a number with brackets is introduced: in an &omega;[x](y) expression,
+                    x layers of parentheses are applied to y. For example, &omega;[8](&Sigma;<sub>0</sub>) would mean
+                    &omega;(&omega;(&omega;(&omega;(&omega;(&omega;(&omega;(&omega;(&Sigma;<sub>0</sub>)))))))) (that's 8 &omega;('s).
+                    Like how &omega;(x)^y equals 8,000x + y, &omega;[x](y) equals 8,000^x * y. If the number in the brackets is 100 or greater, then
+                    it's also written in Omega notation, and once there are too many layers of brackets, a number in braces is introduced:
+                    in an &omega;{x}[y] expression, x layers of brackets are applied to y. If the number in the braces is 100 or greater, then
+                    it's also written in Omega notation.
+                    <br>
+                    Expressions in Omega notation can get quite long, so Omega (Short) exists to return shorter ones: these expressions still follow
+                    the same rules, they just switch to the next brackets/braces type sooner than regular Omega does.
+                </p>
+            </div>
+            <div id="explanation_fours" class="explanation_box">
+                <h2>Fours</h2>
+                <p>
+                    This notation is inspired by the <a href=https://en.wikipedia.org/wiki/Four_fours>"four fours"</a> challenge,
+                    in which the goal is to write various numbers using mathematical operations on exactly four 4 digits
+                    and no other digits. Which operations are allowed for this varies from iteration to iteration, but typically
+                    allowed ones include the four basic operations (+, -, ×, ÷), exponentiation,
+                    square roots (for easy access to 2), and factorials (in case 24 ends up being useful somehow). This notation
+                    writes all numbers in terms of 4s, but it doesn't stick to having exactly four of them.
+                    <br>
+                    The integers from 0 to 15 get their own expressions: 0 is 4-4, 1 is 4÷4, 2 is √4, and so on. For numbers
+                    between 16 and 31, we add 4×4 (16) to an expression between 0 and 15. For larger numbers, that 4×4 is multiplied
+                    by a number that's also written in this notation. This continues until 1,024 (4<sup>5</sup>), at which point
+                    we switch to writing numbers in terms of their square root (using ^(√4)) as the exponent, then their fourth
+                    root (^4), then their eighth root (^(4+4)), and so on, doubling the root height each time. Once the root
+                    height gets too high, we write the whole expression as an exponent on a 4, such as 4^((4×4)^(4+4)). For
+                    larger numbers, there will be multiple layers of 4^, and once there would be too many of those, the notation
+                    switches to writing numbers in terms of super-roots, and then finally in terms of a tetra-exponent on a 4.
+                </p>
+            </div>
+            <div id="explanation_polygonal" class="explanation_box">
+                <h2>Polygonal</h2>
+                <p>
+                    <a href="https://en.wikipedia.org/wiki/Polygonal_number">Polygonal numbers</a> are numbers such that that many
+                    dots can be arranged in the form of a given regular polygon. The most well-known of these are the triangular and
+                    square numbers: the nth triangular number is the sum of the first n positive integers, i.e. 1 + 2 + 3 + ... + n,
+                    which has the formula n * (n+1) / 2. The nth square number is obviously n * n, but it's also the sum of the
+                    first n odd integers, i.e. 1 + 3 + 5 + ... + (2n - 1). Since both of these have outright formulas,
+                    they can easily be extended to non-whole n. These two notations use these two number sequences/formulas
+                    in pretty much the same progression, so I'll just explain Triangular notation here, as Square follows the
+                    same progression, just with square numbers instead of triangular ones.
+                </p>
+                <p>
+                    Triangular notation expresses the nth triangular number as &#x25B3;n, so 21 is &#x25B3;6 and 55 is &#x25B3;10.
+                    For larger numbers, there will be multiple layers of triangular number taken, such as &#x25B3;(&#x25B3;(&#x25B3;99)).
+                    The notation then switches to a "bi-polygonal" expression, where the n in &#x25B3;&#x25B3;n indicates how
+                    many times you'd have to apply &#x25B3; to 2 to reach the target number: for example, &#x25B3;&#x25B3;10
+                    means &#x25B3;(&#x25B3;(&#x25B3;...(&#x25B3;2))) with 10 &#x25B3;'s. (2 was chosen as the base here because it's
+                    the smallest integer that works, since the 1st polygonal number for any amount of sides is still 1,
+                    but also because 2 is sort of the fundamental starting number for polygonal numbers: the 2nd triangular number is 3,
+                    the 2nd square number is 4, the 2nd pentagonal number is 5, and so on).
+                    For larger numbers, the number &#x25B3;&#x25B3; is applied to is also written in this notation,
+                    eventually leading to multiple layers of &#x25B3;&#x25B3;, and once there are too many of those it
+                    switches to a "tri-polygonal" expression, where the n in &#x25B3;&#x25B3;&#x25B3;n indicates how many times
+                    you'd have to apply &#x25B3;&#x25B3; to 2 to reach the target number: for example, &#x25B3;&#x25B3;&#x25B3;5
+                    means &#x25B3;&#x25B3;(&#x25B3;&#x25B3;(&#x25B3;&#x25B3;(&#x25B3;&#x25B3;(&#x25B3;&#x25B3;2)))) (with 5 &#x25B3;&#x25B3;'s).
+                    &#x25B3;&#x25B3;n grows at a double-exponential rate, and &#x25B3;&#x25B3;&#x25B3;n grows at a tetrational rate of "
+                    two power tower layers per increase of n by 1".
+                </p>
+            </div>
+            <div id="explanation_doubleFactorials" class="explanation_box">
+                <h2>Double Factorials</h2>
+                <p>
+                    In this notation, numbers are written as products of powers of double factorials (numbers of the form
+                    (x!)!, which is just written as x!! here). Numbers below 720 are written as-is, as 3!! = 720 is the
+                    first double factorial featured here. Once we hit 720, numbers are expressed as a product of 3!! and a coefficient:
+                    for example, 1,080 is 1.5 * 3!!. For larger numbers, that 3!! is raised to a power, such as 50 * 3!!^2 or
+                    700 * 3!!^3. This continues until 4!! is reached, at which point a 4!! term enters the product, such as
+                    2 * 3!!^6 * 4!!^2. Further double factorial terms, each of which can have an exponent on them, enter the
+                    product once they're reached, though to avoid taking up too much space, only the largest eight terms are shown.
+                    This continues up until 3,628,800!! = 10!!!, at which point the entire expression is placed under a factorial.
+                    For larger numbers, multiple factorials will be placed on the entire expression, and then the amount of
+                    factorials will be written as a number after a single exclamation point, and once the amount of factorials exceeds
+                    720, that amount is also written in Double Factorials notation.
+                </p>
+            </div>
+            <div id="explanation_grid" class="explanation_box">
+                <h2>Grid</h2>
+                <p>
+                    Grid notation, as the name implies, writes a number as a grid of squares.
+                    The first row of the grid is the number itself, written in binary with empty squares (&#x25A1;) as 0s and
+                    filled squares (&#x25A0;) as 1s, but with the digits reversed, so the leftmost square is the 1s place, the
+                    next square is the 2s place, the next square is the 4s place, and so on, ending with the rightmost square
+                    being the 128s place. If the first row would have more than eight squares, then only the rightmost eight squares
+                    are shown, and the second row starts going up. The second row uses the same binary representation as the first
+                    row, and whatever number is in the second row, that's how many extra squares before the eight shown would be in the
+                    first row if the first row was written out in full; in other words, if the second row holds a number n,
+                    then the value of the first row is multiplied by 2<sup>n</sup>. Once the second row fills, it does the same thing,
+                    with the number in the third row indicating how many extra squares would be in the second row, and in general
+                    each row after the first indicates how many extra squares would be in the previous row. If the grid would have more
+                    than eight rows, only the final eight rows are shown, and a second 8x8 plane appears: the number represented by
+                    the second plane indicates how many extra <i>rows</i> would be in the first plane if the first plane was written out
+                    in full. In theory, this could keep going with more planes, and then with a second 8x8x8 cube that would represent
+                    the amount of extra planes in the first cube, and so on... but in practice, Eternal Notations's limit is reached
+                    shortly after the third row of the second plane starts increasing.
+                </p>
+            </div>
+            <div id="explanation_tetrationFloat" class="explanation_box">
+                <h2>Tetration Float</h2>
+                <p>
+                    In a computer, all data is stored as bits (often thought of as "0s and 1s"; each bit can be a 0 or a 1).
+                    Implementing integers using bits isn't too hard - just interpret a certain amount of bits as digits of a
+                    number in binary - but non-whole numbers are harder to get working. Most programming languages use
+                    <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic">floating-point</a> to implement non-whole
+                    numbers, a system whose level of precision changes depending on the size of the number. In a 32-bit number,
+                    the bits are split into three groups: a single bit that controls the sign, eight bits that control the exponent
+                    in base-2 scientific notation, and 23 bits that control the fractional part of the mantissa (the whole part
+                    of the mantissa in base-2 scientific notation is always 1 except in special cases, so it's not included).
+                    This notation writes numbers in a theoretical tetrational equivalent of this system, which is less precise
+                    than usual floating point in exchange for fitting break_eternity's entire range of numbers into the 32 bits
+                    (for reference, break_eternity's numbers actually take up 192 bits each (though only 129 of those bits (at most)
+                    are actually needed), so this notation is much less precise than that).
+                </p>
+                <p>
+                    The first three bits of this notation are special, the next nine are the tetration bits, the next ten are
+                    the exponent bits, and the last ten are the mantissa bits. Like in floating point, the mantissa does not
+                    include the implied leading 1, so a mantissa of 1 becomes 0000000000 and a mantissa of binary 1.101011 becomes
+                    1010110000. Unlike in floating point, the exponent does not have a bias: if the exponent bits are
+                    0000000010, the exponent is 2, as you'd expect (I'll get to numbers below 1 in a moment). If the tetration
+                    bits represent the number T, the exponent bits represent the number E, and the mantissa bits (with the implied
+                    leading 1) represent the number M, then the expression (without the three special bits) represents the number
+                    2^2^2^...^(M * 2^E) with T 2's in that power tower before the parentheses.
+                    <br>
+                    Now for the special bits. The third bit is the "pentation bit": if the pentation bit is 1, then the 29-bit
+                    expression is made into a tetra-exponent on a 2. For example, if the pentation bit is 1, the tetration bits
+                    represent 3, the exponent bits represent 10, and the mantissa bits represent 1, then the number is
+                    2^^(2^2^2^(1 * 2^10)). (Though in practice, if the pentation bit is 1 then the tetration bits always represent 0
+                    - break_eternity hits its limit exactly at the point when the tetration bits would move to 1 with the
+                    pentation bit being 1.) The first bit is the sign bit: the number is positive if the sign bit is 0, negative
+                    if the sign bit is 1. The second bit is the reciprocal bit: if the reciprocal bit is 1, then once you've evaluated
+                    the rest of the expression, take the reciprocal of it. For example, whatever the representation of 100 is,
+                    1/100 is the same thing but with the reciprocal bit set to 1 instead of 0.
+                    <br>
+                    Because of the reciprocal bit, there's no need for "denormalized" numbers, but there are still a few special cases.
+                    If the pentation bits and all nine tetration bits are all 1, the number is treated as infinite: Infinity if the
+                    sign bit is 0, -Infinity if the sign bit is 1, and this notation represents 0 as "the reciprocal of infinity".
+                    For an infinite number, the exponent and mantissa bits must all be 0s - if they're anything else, it's NaN.
+                </p>
+                <p>
+                    It probably would be a bad idea to actually try and implement arithmetic on these numbers to turn them into
+                    an actual number representation system (they're not really precise enough to be usable), but as a notation,
+                    I think they work well enough.
+                </p>
+            </div>
+            <div id="explanation_polynomial" class="explanation_box">
+                <h2>Polynomial</h2>
+                <p>
+                    These notations writes numbers as polynomial-like expressions, where x has a certain fixed value.
+                    Any occurance of a number above the value of x will be changed to be written in terms of x, so
+                    the only leftover numbers should be below the value of x. For example, when x = 10,
+                    12 is written as x + 2, 56 is writen as 5x + 6, and 130 is written as x<sup>2</sup> + 3x. I said
+                    "polynomial-ish" because in a real polynomial the exponents on the x's are always nonnegative
+                    integers, but here the exponents will also be written in terms of x once they go above the value of x,
+                    so things like x<sup>x</sup>, x<sup>3x + 5</sup>, and x<sup>4x<sup>x + 1</sup>+ 6</sup> can show up.
+                    To keep the expression from getting too long, only the highest 8 terms are shown, and once the number gets too
+                    high it stops showing multiple terms at all. For even higher numbers, it'll just put an "x^" at the beginning of
+                    the expression, and once there are too many of these x^'s it will truncate them into an (x^)^n expression:
+                    for example, (x^)^8 3x + 5 means x^x^x^x^x^x^x^x^(3x + 5) (with 8 x^'s)... and when that tetra-exponent is above
+                    the value of x, it's also written as a polynomial.
+                    <br>
+                    In addition to the x = 10 version, an x = 2 version and an x = 3 version have been provided.
+                    <br>
+                    As for Rational Function, it expresses numbers as fractions (using the same level of precision as
+                    Fraction (Medium)) where the numerator and denominator are polynomials.
+                </p>
+            </div>
+            <div id="explanation_polynomialFractionalBases" class="explanation_box">
+                <h2>Fractional Bases</h2>
+                <p>
+                    All the other number bases included here have been whole number bases: binary is base 2, ternary is base 3,
+                    quaternary is base 4, seximal is base 6, and so on, and of course the normal decimal system is base 10.
+                    However, while it doesn't quite make as much sense as it does for whole numbers, it's possible for a number
+                    base to have a non-whole base number: for example, in base 1.5, the place values are 1, 1.5, 1.5^2, 1.5^3, and so on.
+                    These number bases have a big disadvantage, though: it's no longer clear what numbers are integers and what
+                    numbers aren't, as even integers will now often require decimal places to write.
+                    Aside from base 1.5 (which is included as a basic example of what a non-integer number base looks like),
+                    the other three fractional number bases here are based on important irrational mathematical constants:
+                    phi (the golden ratio, equal to (1 + √5)/2, which is around 1.618; this base is interesting because, while
+                    integers may require decimal places here, they'll only need a finite amount of decimal places), e (Euler's
+                    number, which is around 2.718; e is an important number in calculus), and pi (the ratio of a circle's circumference
+                    to its diameter, which is around 3.1415; probably the most famous irrational number).
+                    <br>
+                    (If you're wondering why these bases display so many decimal places, it's because of how Eternal Notations
+                    implements them: the way it implements other bases doesn't work with fractional bases, so these bases
+                    are made by bootstrapping Polynomial notation instead)
+                </p>
+            </div>
+            <div id="explanation_blind" class="explanation_box" style="color:#0000">
+                <h2>Blind</h2>
+                <p>
+                    Do you hate numbers? Then you'll love this notation! In this notation, you can't see the numbers!
+                </p>
+            </div>
+            <div id="explanation_powersOfOne" class="explanation_box">
+                <h2>Powers of One</h2>
+                <p>
+                    Whatever number you put into this notation, this notation will display 1 to the power of that number (1<sup>n</sup>).
+                </p>
+            </div>
+            <div id="explanation_physicalScale" class="explanation_box">
+                <p>
+                    This last one isn't really a "notation", exactly. Inspired by the "if every antimatter were a planck volume"
+                    bit on the Statistics screen in Antimatter Dimensions, this box takes a number and tries to give it a physical
+                    meaning, to get across how big the number actually is. Here's what it does for various sizes of numbers:
+                </p>
+                <ul>
+                    <li>
+                        For reasonably-sized numbers, it takes that many litres of water (a litre is a unit of
+                        volume equal to 1,000 cm<sup>3</sup>; for Americans, 1 litre is around 1.057 quarts. A typical
+                        large water bottle holds about a litre of water) and tells you how much volume could be filled with
+                        that much water. This starts with everyday objects like fridge freezers and school buses, then moves to
+                        landmarks like harbors, lakes, and oceans, then to celestial bodies like Earth and Jupiter, and finally
+                        to even bigger cosmic things like galaxies. The Wikipedia article
+                        <a href="https://en.wikipedia.org/wiki/Orders_of_magnitude_(volume)">Orders of magnitude (volume)</a>
+                        was used for the volumes of some of these objects (it should be noted that Antimatter Dimensions also
+                        used that article as its source for that Statistics screen bit). Once the amount of water is too large
+                        for even the observable universe to work as a unit, it switches to using the same objects again but in
+                        a hypothetical 4D universe, then 5D, then 6D, and so on.
+                    </li>
+                    <li>
+                        Once the numbers get too big for that, it starts looking at exponential growth: if you started with
+                        a single bacteria that split in two every second and the bacterial colony had infinite space and
+                        resources to grow, how long would it take for its population to reach the target number?
+                    </li>
+                    <li>
+                        The amount of ways to rearrange n objects grows at the rate of n!, which is faster than exponential growth,
+                        so once the bacteria scenario becomes too cumbersome, it switches to counting the amount of ways to rearrange
+                        all of the atoms in a given object or set of objects. Then, once that too exceeds the universe, it goes
+                        back to the bacteria scenario but now counting the amount of ways to rearrange all of the bacteria, then it
+                        goes back to atoms but now counts the amount of ways to rearrange a list of all the rearrangements of the atoms,
+                        and so on, swapping back and forth between atoms and the bacteria scenario, rearranging rearrangements of rearrangements and so on...
+                    </li>
+                    <li>
+                        ...but ultimately, there is no way to make physical sense of tetrational numbers, no matter how hard you try -
+                        they're just too big to have any physical meaning at all. As such, for large enough tetrational numbers,
+                        it gives up on trying to express the number itself and switches to expressing how tall the power tower
+                        would be if you wrote out the number as a power tower of 10s. Even <i>this</i>, which is essentially looking
+                        at the super-logarithm of the number, exceeds the universe eventually, so we have to start looking at larger
+                        hypothetical universes to make it to break_eternity's limit.
+                    </li>
+                </ul>
+            </div>
+
+            <div id="close_explanation">
+                <h2>Close</h2>
+            </div>
+        </div>
+
+        <script src="break_eternity stuff/break_eternity.min.js"></script>
+        <script src="dist/eternal_notations.js"></script>
+        <script src="webpage.js"></script>
+    </body>
+</html>
