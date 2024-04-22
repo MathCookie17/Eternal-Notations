@@ -31,7 +31,7 @@ Every notation ends with the word "Notation" to make it clear that it's a notati
 
 If I've counted correctly, Eternal Notations includes 124 presets and 49 notations, plus some additional utility functions. This includes several (but not all) of the notations from Antimatter Dimensions Notations as presets, and many more than aren't in Antimatter Dimensions Notations, including notations based on tetration, factorials, super-roots, the SI prefixes, and much more. If you just want a reasonable way to notate large numbers similar to how games like Prestige Tree Rewritten do so, use ```DefaultNotation``` (its preset is ```EternalNotations.Presets.Default```), which goes from unabbreviated to scientific to hyperscientific. (```DefaultNotation``` is the default ```InnerNotation``` value for most notations). Otherwise, have fun exploring the many presets and notations Eternal Notations has to offer!
 
-For information on individual presets, notations, and functions, see the [documentation page](mathcookie17.github.io/Eternal-Notations/documentation).
+For information on individual presets, notations, and functions, see the [documentation page](https://mathcookie17.github.io/Eternal-Notations/documentation/).
 
 ## Contributing
 
