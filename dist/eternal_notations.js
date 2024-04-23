@@ -792,7 +792,7 @@
     b = Decimal__default["default"].pow(base, b.sub(e));
     var unroundedB = b;
     b = round(b, rounding);
-    if (e.abs().gt(Number.MAX_SAFE_INTEGER)) b = Decimal__default["default"].pow(baseD, mantissaPowerD);else {
+    if (e.abs().gte(9e15)) b = Decimal__default["default"].pow(baseD, mantissaPowerD);else {
       var oldB = Decimal__default["default"].dZero;
       var checkComplete = false;
       var loopWatch = false;
@@ -881,7 +881,7 @@
     }
     var unroundedB = b;
     b = round(b, rounding);
-    if (e.abs().gt(Number.MAX_SAFE_INTEGER)) b = baseD.iteratedexp(hypermantissaPowerD.toNumber(), Decimal__default["default"].dOne, true);else {
+    if (e.abs().gte(9e15)) b = baseD.iteratedexp(hypermantissaPowerD.toNumber(), Decimal__default["default"].dOne, true);else {
       var oldB = Decimal__default["default"].dZero;
       var checkComplete = false;
       var loopWatch = false;
@@ -1391,7 +1391,7 @@
     if (e.lt(0) && e.neq(fs)) e = previousEngineeringValue(fs, engineeringsD);
     var unroundedB = inverse_factorial(valueD, e.toNumber());
     var b = round(unroundedB, rounding);
-    if (e.abs().gt(Number.MAX_SAFE_INTEGER)) b = limitD;else if (e.gte(0)) {
+    if (e.abs().gte(9e15)) b = limitD;else if (e.gte(0)) {
       var oldB = Decimal__default["default"].dZero;
       var checkComplete = false;
       var loopWatch = false;
@@ -3187,6 +3187,10 @@
           }
           var added_es = multslog(value, this._base, this._expMult).sub(multslog(this._maxnum, this._base, this._expMult)).floor().toNumber();
           value = added_es > 9e15 ? this._maxnum : iteratedmultlog(value, this._base, added_es, this._expMult);
+          while (value.gte(Decimal__default["default"].pow(this._base, this._maxnum))) {
+            added_es += 1;
+            value = iteratedmultlog(value, this._base, 1, this._expMult);
+          }
           if (negExp) value = value.neg();
           result = this.format(value);
           if (added_es <= this.max_es_in_a_row) {
@@ -6814,6 +6818,10 @@
           }
           var added_es = factorial_slog(value, this._maxnum).floor().toNumber();
           value = added_es > 9e15 ? this._maxnum : inverse_factorial(value, added_es);
+          while (value.gte(this._maxnum.factorial())) {
+            added_es += 1;
+            value = inverse_factorial(value, 1);
+          }
           if (negExp) value = value.neg();
           result = this.format(value);
           if (added_es <= this.max_es_in_a_row) {
@@ -8311,7 +8319,7 @@
         var layers = 0;
         layers = currentEngineeringValue(Decimal__default["default"].slog(value, 10, true).sub(Decimal__default["default"].slog(Decimal__default["default"].iteratedexp(10, 2, new Decimal__default["default"](Number.MAX_SAFE_INTEGER), true))).div(2), this._layerEngineerings).max(0).toNumber();
         if (layers > 0) value = value.iteratedlog(10, layers * 2, true);
-        if (layers > Number.MAX_SAFE_INTEGER) value = this.maxnum.pow(Decimal__default["default"].pow(this.height, this.maxIterations));else while (value.gte(this.maxnum.pow(Decimal__default["default"].pow(this.height, this.maxIterations)))) {
+        if (layers >= 4.5e15) value = this.maxnum.pow(Decimal__default["default"].pow(this.height, this.maxIterations));else while (value.gte(this.maxnum.pow(Decimal__default["default"].pow(this.height, this.maxIterations)))) {
           var nextLayers = nextEngineeringValue(new Decimal__default["default"](layers), this._layerEngineerings).toNumber();
           var layerdiff = nextLayers - layers;
           for (var i = 0; i < layerdiff; i++) value = value.log(this.layerBase).log(this.height);

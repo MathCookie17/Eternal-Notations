@@ -267,7 +267,7 @@ export class MultiRootNotation extends Notation {
       let layers = 0;
       layers = currentEngineeringValue(Decimal.slog(value, 10, true).sub(Decimal.slog(Decimal.iteratedexp(10, 2, new Decimal(Number.MAX_SAFE_INTEGER), true))).div(2), this._layerEngineerings).max(0).toNumber();
       if (layers > 0) value = value.iteratedlog(10, layers * 2, true);
-      if (layers > Number.MAX_SAFE_INTEGER) value = this.maxnum.pow(Decimal.pow(this.height, this.maxIterations));
+      if (layers >= 4.5e15) value = this.maxnum.pow(Decimal.pow(this.height, this.maxIterations));
       else while (value.gte(this.maxnum.pow(Decimal.pow(this.height, this.maxIterations)))) {
         let nextLayers = nextEngineeringValue(new Decimal(layers), this._layerEngineerings).toNumber();
         let layerdiff = nextLayers - layers;

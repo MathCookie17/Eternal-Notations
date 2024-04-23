@@ -633,7 +633,7 @@ export function scientifify(value: DecimalSource, base: DecimalSource = Decimal.
     b = Decimal.pow(base, b.sub(e));
     let unroundedB = b;
     b = round(b, rounding);
-    if (e.abs().gt(Number.MAX_SAFE_INTEGER)) b = Decimal.pow(baseD, mantissaPowerD);
+    if (e.abs().gte(9e15)) b = Decimal.pow(baseD, mantissaPowerD);
     else {
         let oldB = Decimal.dZero;
         let checkComplete = false;
@@ -726,7 +726,7 @@ export function hyperscientifify(value: DecimalSource, base: DecimalSource = Dec
     }
     let unroundedB = b;
     b = round(b, rounding);
-    if (e.abs().gt(Number.MAX_SAFE_INTEGER)) b = baseD.iteratedexp(hypermantissaPowerD.toNumber(), Decimal.dOne, true);
+    if (e.abs().gte(9e15)) b = baseD.iteratedexp(hypermantissaPowerD.toNumber(), Decimal.dOne, true);
     else {
         let oldB = Decimal.dZero;
         let checkComplete = false;
@@ -1254,7 +1254,7 @@ export function factorial_hyperscientifify(value: DecimalSource, limit: DecimalS
     if (e.lt(0) && e.neq(fs)) e = previousEngineeringValue(fs, engineeringsD);
     let unroundedB = inverse_factorial(valueD, e.toNumber());
     let b = round(unroundedB, rounding);
-    if (e.abs().gt(Number.MAX_SAFE_INTEGER)) b = limitD;
+    if (e.abs().gte(9e15)) b = limitD;
     else if (e.gte(0)) {
         let oldB = Decimal.dZero;
         let checkComplete = false;

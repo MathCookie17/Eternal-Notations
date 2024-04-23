@@ -1,4 +1,5 @@
-explanationOpen = "";
+let explanationOpen = "";
+let consoleLogging = true;
 
 document.getElementById("number_input").value = "1";
 let entered = EternalNotations.toDecimal(document.getElementById("number_input").value);
@@ -39,13 +40,13 @@ document.getElementById("close_explanation").addEventListener("click", function(
 })
 
 function formatAll(num) {
-    // console.clear();
+    if (consoleLogging) console.clear();
     for (k in EternalNotations.HTMLPresets) formatOne(k, num);
     let startTime = performance.now();
     formatString = EternalNotations.physicalScale(num)
     document.getElementById("display_physicalScale").innerHTML = formatString;
     let endTime = performance.now();
-    // console.log("Physical Scale: " + formatString + " (" + (endTime - startTime).toString() + " ms)")
+    if (consoleLogging) console.log("Physical Scale: " + formatString + " (" + (endTime - startTime).toString() + " ms)")
 }
 
 function formatOne(key, num) {
@@ -55,26 +56,33 @@ function formatOne(key, num) {
         notation = EternalNotations.HTMLPresets[key];
     }
     catch { return; }
-    if (typeof notation == "function") {
-        if (key == "SimplifiedWritten") {
-            notation = notation(10);
-        }
-        else if (key == "ColoredDominoes") {
-            for (let i = 6; i < 21; i += 3) {
-                document.getElementById("display_ColoredDominoes" + i).innerHTML = notation(i).name + ": " + notation(i).format(num);
+    try {
+        if (typeof notation == "function") {
+            if (key == "SimplifiedWritten") {
+                notation = notation(10);
             }
-            return;
+            else if (key == "ColoredDominoes") {
+                for (let i = 6; i < 21; i += 3) {
+                    document.getElementById("display_ColoredDominoes" + i).innerHTML = notation(i).name + ": " + notation(i).format(num);
+                }
+                return;
+            }
+            else if (key == "Polynomial" || key == "RationalFunction") {
+                document.getElementById("display_" + key + 10).innerHTML = notation(10).name + ": " + notation(10).format(num);
+                document.getElementById("display_" + key + 2).innerHTML = notation(2).name + ": " + notation(2).format(num);
+                document.getElementById("display_" + key + 3).innerHTML = notation(3).name + ": " + notation(3).format(num);
+                return;
+            }
+            else return;
         }
-        else if (key == "Polynomial" || key == "RationalFunction") {
-            document.getElementById("display_" + key + 10).innerHTML = notation(10).name + ": " + notation(10).format(num);
-            document.getElementById("display_" + key + 2).innerHTML = notation(2).name + ": " + notation(2).format(num);
-            document.getElementById("display_" + key + 3).innerHTML = notation(3).name + ": " + notation(3).format(num);
-            return;
-        }
-        else return;
+        formatString = notation.name + ": " + notation.format(num);
+        document.getElementById("display_" + key).style.setProperty("color", "black");
+        document.getElementById("display_" + key).innerHTML = formatString;
+        let endTime = performance.now();
+        if (consoleLogging) console.log(formatString + " (" + (endTime - startTime).toString() + " ms)")
     }
-    formatString = notation.name + ": " + notation.format(num);
-    document.getElementById("display_" + key).innerHTML = formatString;
-    let endTime = performance.now();
-    // console.log(formatString + " (" + (endTime - startTime).toString() + " ms)")
+    catch {
+        document.getElementById("display_" + key).style.setProperty("color", "red");
+        document.getElementById("display_" + key).innerHTML = notation.name + ": There has been an error with this notation. Please report this to the developer on the Eternal Notations GitHub page.";
+    }
 }

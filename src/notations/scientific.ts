@@ -107,6 +107,10 @@ export class ScientificNotation extends Notation {
         }
         let added_es = multslog(value, this._base, this._expMult).sub(multslog(this._maxnum, this._base, this._expMult)).floor().toNumber();
         value = (added_es > 9e15) ? this._maxnum : iteratedmultlog(value, this._base, added_es, this._expMult);
+        while (value.gte(Decimal.pow(this._base, this._maxnum))) {
+          added_es += 1;
+          value = iteratedmultlog(value, this._base, 1, this._expMult);
+        }
         if (negExp) value = value.neg();
         result = this.format(value)
         if (added_es <= this.max_es_in_a_row) {
