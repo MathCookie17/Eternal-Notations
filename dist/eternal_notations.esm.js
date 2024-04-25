@@ -1,5 +1,23 @@
 import Decimal from 'break_eternity.js';
 
+function _callSuper(t, o, e) {
+  return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e));
+}
+function _construct(t, e, r) {
+  if (_isNativeReflectConstruct()) return Reflect.construct.apply(null, arguments);
+  var o = [null];
+  o.push.apply(o, e);
+  var p = new (t.bind.apply(t, o))();
+  return r && _setPrototypeOf(p, r.prototype), p;
+}
+function _isNativeReflectConstruct() {
+  try {
+    var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+  } catch (t) {}
+  return (_isNativeReflectConstruct = function () {
+    return !!t;
+  })();
+}
 function _iterableToArrayLimit(r, l) {
   var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
   if (null != t) {
@@ -39,7 +57,7 @@ function _toPrimitive(t, r) {
 }
 function _toPropertyKey(t) {
   var i = _toPrimitive(t, "string");
-  return "symbol" == typeof i ? i : String(i);
+  return "symbol" == typeof i ? i : i + "";
 }
 function _typeof(o) {
   "@babel/helpers - typeof";
@@ -101,32 +119,6 @@ function _setPrototypeOf(o, p) {
   };
   return _setPrototypeOf(o, p);
 }
-function _isNativeReflectConstruct() {
-  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-  if (Reflect.construct.sham) return false;
-  if (typeof Proxy === "function") return true;
-  try {
-    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-function _construct(Parent, args, Class) {
-  if (_isNativeReflectConstruct()) {
-    _construct = Reflect.construct.bind();
-  } else {
-    _construct = function _construct(Parent, args, Class) {
-      var a = [null];
-      a.push.apply(a, args);
-      var Constructor = Function.bind.apply(Parent, a);
-      var instance = new Constructor();
-      if (Class) _setPrototypeOf(instance, Class.prototype);
-      return instance;
-    };
-  }
-  return _construct.apply(null, arguments);
-}
 function _assertThisInitialized(self) {
   if (self === void 0) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -140,20 +132,6 @@ function _possibleConstructorReturn(self, call) {
     throw new TypeError("Derived constructors may only return object or undefined");
   }
   return _assertThisInitialized(self);
-}
-function _createSuper(Derived) {
-  var hasNativeReflectConstruct = _isNativeReflectConstruct();
-  return function _createSuperInternal() {
-    var Super = _getPrototypeOf(Derived),
-      result;
-    if (hasNativeReflectConstruct) {
-      var NewTarget = _getPrototypeOf(this).constructor;
-      result = Reflect.construct(Super, arguments, NewTarget);
-    } else {
-      result = Super.apply(this, arguments);
-    }
-    return _possibleConstructorReturn(this, result);
-  };
 }
 function _slicedToArray(arr, i) {
   return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
@@ -1823,7 +1801,7 @@ var Notation = /*#__PURE__*/function () {
     this.name = "";
   }
   //Notation stuff
-  _createClass(Notation, [{
+  return _createClass(Notation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -1879,7 +1857,6 @@ var Notation = /*#__PURE__*/function () {
       return this;
     }
   }]);
-  return Notation;
 }();
 
 /**
@@ -1897,8 +1874,6 @@ var Notation = /*#__PURE__*/function () {
  * This notation does not have an innerNotation parameter.
  */
 var DefaultNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(DefaultNotation, _Notation);
-  var _super = _createSuper(DefaultNotation);
   function DefaultNotation() {
     var _this;
     var placesAbove1 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : -4;
@@ -1910,7 +1885,7 @@ var DefaultNotation = /*#__PURE__*/function (_Notation) {
     var decimalChar = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : ".";
     var commaChar = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : ",";
     _classCallCheck(this, DefaultNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, DefaultNotation);
     _this.placesAbove1 = -4;
     _this.placesBelow1 = -4;
     _this.commasMin = Decimal.dZero;
@@ -1930,7 +1905,8 @@ var DefaultNotation = /*#__PURE__*/function (_Notation) {
     _this.commaChar = commaChar;
     return _this;
   }
-  _createClass(DefaultNotation, [{
+  _inherits(DefaultNotation, _Notation);
+  return _createClass(DefaultNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return "0";
@@ -1982,7 +1958,6 @@ var DefaultNotation = /*#__PURE__*/function (_Notation) {
       return result;
     }
   }]);
-  return DefaultNotation;
 }(Notation);
 
 /**
@@ -2265,8 +2240,6 @@ function BaseConvert(value, base) {
  * This notation does not have an innerNotation parameter.
  */
 var AlternateBaseNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(AlternateBaseNotation, _Notation);
-  var _super = _createSuper(AlternateBaseNotation);
   function AlternateBaseNotation(base) {
     var _this;
     var negaDigits = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -2291,7 +2264,7 @@ var AlternateBaseNotation = /*#__PURE__*/function (_Notation) {
     var specialDigits = arguments.length > 20 && arguments[20] !== undefined ? arguments[20] : [];
     var concatenation = arguments.length > 21 && arguments[21] !== undefined ? arguments[21] : null;
     _classCallCheck(this, AlternateBaseNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, AlternateBaseNotation);
     _this.negaDigits = 0;
     _this.placesAbove1 = -4;
     _this.placesBelow1 = -4;
@@ -2336,7 +2309,8 @@ var AlternateBaseNotation = /*#__PURE__*/function (_Notation) {
     _this.negExpChars = negExpChars;
     return _this;
   }
-  _createClass(AlternateBaseNotation, [{
+  _inherits(AlternateBaseNotation, _Notation);
+  return _createClass(AlternateBaseNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -2498,7 +2472,6 @@ var AlternateBaseNotation = /*#__PURE__*/function (_Notation) {
       this._expChars = expChars;
     }
   }]);
-  return AlternateBaseNotation;
 }(Notation);
 
 /**
@@ -2506,17 +2479,16 @@ var AlternateBaseNotation = /*#__PURE__*/function (_Notation) {
  * @param str ( string ! ) The string that this notation returns.
  */
 var PredeterminedNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(PredeterminedNotation, _Notation);
-  var _super = _createSuper(PredeterminedNotation);
   function PredeterminedNotation(str) {
     var _this;
     _classCallCheck(this, PredeterminedNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, PredeterminedNotation);
     _this.name = "Predetermined Notation";
     _this.str = str;
     return _this;
   }
-  _createClass(PredeterminedNotation, [{
+  _inherits(PredeterminedNotation, _Notation);
+  return _createClass(PredeterminedNotation, [{
     key: "format",
     value: function format(value) {
       return this.str;
@@ -2532,7 +2504,6 @@ var PredeterminedNotation = /*#__PURE__*/function (_Notation) {
       return this.str;
     }
   }]);
-  return PredeterminedNotation;
 }(Notation);
 
 /**
@@ -2543,12 +2514,10 @@ var PredeterminedNotation = /*#__PURE__*/function (_Notation) {
  * After that first argument, this notation can take as many arguments as you want to give it. The arguments are of type [Notation, Decimal -> boolean], i.e. pairs where the first entry of each pair is a Notation and the second is a predicate that takes a Decimal. To abbreviate a Decimal value, this notation starts at the beginning of the arguments, and for each argument it checks whether the value satisfies that argument's predicate; if so, that argument's notation is used to abbreviate the value, otherwise the checking moves on to the next argument. An error is thrown if the value doesn't satisfy any of the predicates.
  */
 var ConditionalNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(ConditionalNotation, _Notation);
-  var _super = _createSuper(ConditionalNotation);
   function ConditionalNotation(specialIncluded) {
     var _this;
     _classCallCheck(this, ConditionalNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, ConditionalNotation);
     _this.name = "Conditional Notation";
     _this.specialIncluded = specialIncluded;
     for (var _len = arguments.length, options = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -2557,7 +2526,8 @@ var ConditionalNotation = /*#__PURE__*/function (_Notation) {
     _this.options = options;
     return _this;
   }
-  _createClass(ConditionalNotation, [{
+  _inherits(ConditionalNotation, _Notation);
+  return _createClass(ConditionalNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -2591,7 +2561,6 @@ var ConditionalNotation = /*#__PURE__*/function (_Notation) {
       throw new Error("No notation was chosen.");
     }
   }]);
-  return ConditionalNotation;
 }(Notation);
 
 /**
@@ -2602,8 +2571,6 @@ var ConditionalNotation = /*#__PURE__*/function (_Notation) {
  * @param nonFiniteApplied ( boolean ) This is false by default; if this is true, then the functions here are applied even to infinities and NaN. If this is false, then the infinityString, negativeInfinityString, and NaNString of the inner notation, not this notation, are used.
  */
 var AppliedFunctionNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(AppliedFunctionNotation, _Notation);
-  var _super = _createSuper(AppliedFunctionNotation);
   function AppliedFunctionNotation() {
     var _this;
     var DecimalFunc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (value) {
@@ -2615,7 +2582,7 @@ var AppliedFunctionNotation = /*#__PURE__*/function (_Notation) {
     };
     var nonFiniteApplied = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
     _classCallCheck(this, AppliedFunctionNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, AppliedFunctionNotation);
     _this.innerNotation = new DefaultNotation();
     _this.nonFiniteApplied = false;
     _this.name = "Applied Function Notation";
@@ -2625,7 +2592,8 @@ var AppliedFunctionNotation = /*#__PURE__*/function (_Notation) {
     _this.nonFiniteApplied = nonFiniteApplied;
     return _this;
   }
-  _createClass(AppliedFunctionNotation, [{
+  _inherits(AppliedFunctionNotation, _Notation);
+  return _createClass(AppliedFunctionNotation, [{
     key: "format",
     value: function format(value) {
       value = toDecimal(value);
@@ -2643,7 +2611,6 @@ var AppliedFunctionNotation = /*#__PURE__*/function (_Notation) {
       return this.StringFunc(this.innerNotation.formatDecimal(this.DecimalFunc(value)));
     }
   }]);
-  return AppliedFunctionNotation;
 }(Notation);
 
 /**
@@ -2725,8 +2692,6 @@ function DetailedSignValueArray(value, numerals) {
  * @param innerNotation ( Notation ) The notation that the number inside a truncated expression is notated with. DefaultNotation is the default.
  */
 var SignValueNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(SignValueNotation, _Notation);
-  var _super = _createSuper(SignValueNotation);
   function SignValueNotation(numerals) {
     var _this;
     var rounding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -2738,7 +2703,7 @@ var SignValueNotation = /*#__PURE__*/function (_Notation) {
     var zero = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : "";
     var innerNotation = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : new DefaultNotation();
     _classCallCheck(this, SignValueNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, SignValueNotation);
     _this.frontToBack = false;
     _this.roundType = "round";
     _this.max_in_a_row = 4;
@@ -2758,7 +2723,8 @@ var SignValueNotation = /*#__PURE__*/function (_Notation) {
     _this.innerNotation = innerNotation;
     return _this;
   }
-  _createClass(SignValueNotation, [{
+  _inherits(SignValueNotation, _Notation);
+  return _createClass(SignValueNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       var arr = SignValueArray(value, this._numerals, this.rounding, this.roundType);
@@ -2794,7 +2760,6 @@ var SignValueNotation = /*#__PURE__*/function (_Notation) {
       });
     }
   }]);
-  return SignValueNotation;
 }(Notation);
 /**
  * A variant of SignValueNotation where the numbers in truncated expressions are themselves notated in this notation. Once the parentheses are deep enough, brackets are introduced to represent the number of parentheses layers, and later on braces are introduced to represent the number of bracket layers.
@@ -2817,8 +2782,6 @@ var SignValueNotation = /*#__PURE__*/function (_Notation) {
  * This notation does not have an InnerNotation parameter.
  */
 var NestedSignValueNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(NestedSignValueNotation, _Notation2);
-  var _super2 = _createSuper(NestedSignValueNotation);
   function NestedSignValueNotation(numerals) {
     var _this2;
     var rounding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -2835,7 +2798,7 @@ var NestedSignValueNotation = /*#__PURE__*/function (_Notation2) {
     var zero = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : "";
     var showOnLarge = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : [true, true, true];
     _classCallCheck(this, NestedSignValueNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, NestedSignValueNotation);
     _this2.frontToBack = false;
     _this2.roundType = "round";
     _this2.max_in_a_row = 4;
@@ -2865,7 +2828,8 @@ var NestedSignValueNotation = /*#__PURE__*/function (_Notation2) {
     _this2.showOnLarge = showOnLarge;
     return _this2;
   }
-  _createClass(NestedSignValueNotation, [{
+  _inherits(NestedSignValueNotation, _Notation2);
+  return _createClass(NestedSignValueNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       var arr = DetailedSignValueArray(value, this._numerals, this.rounding, this.roundType);
@@ -2939,7 +2903,6 @@ var NestedSignValueNotation = /*#__PURE__*/function (_Notation2) {
       });
     }
   }]);
-  return NestedSignValueNotation;
 }(Notation);
 
 /**
@@ -2959,8 +2922,6 @@ var NestedSignValueNotation = /*#__PURE__*/function (_Notation2) {
  * @param showUnitDenominator ( boolean ) Controls whether the denominator is displayed even if it's 1. Default is false. This does not apply to mixed numbers, since there the fractional part is always hidden if it's zero.
  */
 var FractionNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(FractionNotation, _Notation);
-  var _super = _createSuper(FractionNotation);
   function FractionNotation(precision) {
     var _this;
     var mixedNumber = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -2976,7 +2937,7 @@ var FractionNotation = /*#__PURE__*/function (_Notation) {
     var denominatorInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : numeratorInnerNotation;
     var showUnitDenominator = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : false;
     _classCallCheck(this, FractionNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, FractionNotation);
     _this.mixedNumber = false;
     _this.maxIterations = Infinity;
     _this.maxDenominator = Decimal.dInf;
@@ -3005,7 +2966,8 @@ var FractionNotation = /*#__PURE__*/function (_Notation) {
     _this.showUnitDenominator = showUnitDenominator;
     return _this;
   }
-  _createClass(FractionNotation, [{
+  _inherits(FractionNotation, _Notation);
+  return _createClass(FractionNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       var fraction = fractionApproximationD(value, this.precision, this.mixedNumber ? 3 : 1, this.maxIterations, this.maxDenominator, this.strictMaxDenominator, this.maxNumerator, this.strictMaxNumerator);
@@ -3022,7 +2984,6 @@ var FractionNotation = /*#__PURE__*/function (_Notation) {
       return result;
     }
   }]);
-  return FractionNotation;
 }(Notation);
 
 /**
@@ -3032,14 +2993,12 @@ var FractionNotation = /*#__PURE__*/function (_Notation) {
  * @param infinityStringUsed ( boolean ) This parameter is true by default. If it's true, then infinite numbers aren't run through func - instead, they just use infinityString and negativeInfinityString.
  */
 var CustomNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(CustomNotation, _Notation);
-  var _super = _createSuper(CustomNotation);
   function CustomNotation(func) {
     var _this;
     var negativeStringUsed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var infinityStringUsed = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     _classCallCheck(this, CustomNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, CustomNotation);
     _this.negativeStringUsed = false;
     _this.infinityStringUsed = false;
     _this.name = "Custom Notation";
@@ -3048,7 +3007,8 @@ var CustomNotation = /*#__PURE__*/function (_Notation) {
     _this.infinityStringUsed = infinityStringUsed;
     return _this;
   }
-  _createClass(CustomNotation, [{
+  _inherits(CustomNotation, _Notation);
+  return _createClass(CustomNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -3067,7 +3027,6 @@ var CustomNotation = /*#__PURE__*/function (_Notation) {
       return this.func(value);
     }
   }]);
-  return CustomNotation;
 }(Notation);
 
 /**
@@ -3089,8 +3048,6 @@ var CustomNotation = /*#__PURE__*/function (_Notation) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an (e^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
  */
 var ScientificNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(ScientificNotation, _Notation);
-  var _super = _createSuper(ScientificNotation);
   function ScientificNotation() {
     var _this;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1e12;
@@ -3109,7 +3066,7 @@ var ScientificNotation = /*#__PURE__*/function (_Notation) {
     var exponentInnerNotation = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : mantissaInnerNotation;
     var superexponentInnerNotation = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : exponentInnerNotation;
     _classCallCheck(this, ScientificNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, ScientificNotation);
     _this._maxnum = new Decimal(1e12);
     _this.max_es_in_a_row = 5;
     _this.rounding = Decimal.dZero;
@@ -3144,7 +3101,8 @@ var ScientificNotation = /*#__PURE__*/function (_Notation) {
     _this.negExpChars = negExpChars;
     return _this;
   }
-  _createClass(ScientificNotation, [{
+  _inherits(ScientificNotation, _Notation);
+  return _createClass(ScientificNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.mantissaInnerNotation.format(0);
@@ -3260,7 +3218,6 @@ var ScientificNotation = /*#__PURE__*/function (_Notation) {
       this._expChars = expChars;
     }
   }]);
-  return ScientificNotation;
 }(Notation);
 /**
  * This notation performs scientific notation a certain number of times. 1 iteration means the number is in the form AeB (where A and B are abbreviated using the innerNotation), 2 iterations means the number is in the form AeBeC, and so on.
@@ -3280,8 +3237,6 @@ var ScientificNotation = /*#__PURE__*/function (_Notation) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an (e^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
  */
 var ScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(ScientificIterationsNotation, _Notation2);
-  var _super2 = _createSuper(ScientificIterationsNotation);
   function ScientificIterationsNotation(iterations) {
     var _this2;
     var max_es_in_a_row = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
@@ -3298,7 +3253,7 @@ var ScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
     var exponentInnerNotation = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : mantissaInnerNotation;
     var superexponentInnerNotation = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : exponentInnerNotation;
     _classCallCheck(this, ScientificIterationsNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, ScientificIterationsNotation);
     _this2.max_es_in_a_row = 5;
     _this2.rounding = Decimal.dZero;
     _this2._engineerings = [Decimal.dOne];
@@ -3330,7 +3285,8 @@ var ScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
     _this2.negExpChars = negExpChars;
     return _this2;
   }
-  _createClass(ScientificIterationsNotation, [{
+  _inherits(ScientificIterationsNotation, _Notation2);
+  return _createClass(ScientificIterationsNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.mantissaInnerNotation.format(0);
@@ -3469,7 +3425,6 @@ var ScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
       this._expChars = expChars;
     }
   }]);
-  return ScientificIterationsNotation;
 }(Notation);
 
 /**
@@ -3488,8 +3443,6 @@ var ScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var LogarithmNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(LogarithmNotation, _Notation);
-  var _super = _createSuper(LogarithmNotation);
   function LogarithmNotation() {
     var _this;
     var iterations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
@@ -3505,7 +3458,7 @@ var LogarithmNotation = /*#__PURE__*/function (_Notation) {
     var superexponentInnerNotation = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : innerNotation;
     var baseInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : innerNotation;
     _classCallCheck(this, LogarithmNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, LogarithmNotation);
     _this.iterations = 1;
     _this.max_es_in_a_row = 5;
     _this._base = Decimal.dTen;
@@ -3533,7 +3486,8 @@ var LogarithmNotation = /*#__PURE__*/function (_Notation) {
     _this.baseInnerNotation = baseInnerNotation;
     return _this;
   }
-  _createClass(LogarithmNotation, [{
+  _inherits(LogarithmNotation, _Notation);
+  return _createClass(LogarithmNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -3615,7 +3569,6 @@ var LogarithmNotation = /*#__PURE__*/function (_Notation) {
       this._expMult = expMultD;
     }
   }]);
-  return LogarithmNotation;
 }(Notation);
 /**
  * A variant of logarithm notation that uses a different amount of logarithm iterations depending on how large the number is.
@@ -3635,8 +3588,6 @@ var LogarithmNotation = /*#__PURE__*/function (_Notation) {
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var MultiLogarithmNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(MultiLogarithmNotation, _Notation2);
-  var _super2 = _createSuper(MultiLogarithmNotation);
   function MultiLogarithmNotation() {
     var _this2;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1e12;
@@ -3654,7 +3605,7 @@ var MultiLogarithmNotation = /*#__PURE__*/function (_Notation2) {
     var superexponentInnerNotation = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : innerNotation;
     var baseInnerNotation = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : innerNotation;
     _classCallCheck(this, MultiLogarithmNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, MultiLogarithmNotation);
     _this2._maxnum = new Decimal(1e12);
     _this2.max_es_in_a_row = 5;
     _this2.minIterations = 1;
@@ -3686,7 +3637,8 @@ var MultiLogarithmNotation = /*#__PURE__*/function (_Notation2) {
     _this2.baseInnerNotation = baseInnerNotation;
     return _this2;
   }
-  _createClass(MultiLogarithmNotation, [{
+  _inherits(MultiLogarithmNotation, _Notation2);
+  return _createClass(MultiLogarithmNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -3785,7 +3737,6 @@ var MultiLogarithmNotation = /*#__PURE__*/function (_Notation2) {
       this._expMult = expMultD;
     }
   }]);
-  return MultiLogarithmNotation;
 }(Notation);
 
 /**
@@ -3798,8 +3749,6 @@ var MultiLogarithmNotation = /*#__PURE__*/function (_Notation2) {
  * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
  */
 var StandardNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(StandardNotation, _Notation);
-  var _super = _createSuper(StandardNotation);
   function StandardNotation() {
     var _this;
     var dialect = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
@@ -3809,7 +3758,7 @@ var StandardNotation = /*#__PURE__*/function (_Notation) {
     var charLimit = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 50;
     var innerNotation = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : new DefaultNotation();
     _classCallCheck(this, StandardNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, StandardNotation);
     _this._dialect = 0;
     _this.longScale = false;
     _this.rounding = Decimal.dZero;
@@ -3862,7 +3811,8 @@ var StandardNotation = /*#__PURE__*/function (_Notation) {
     };
     return _this;
   }
-  _createClass(StandardNotation, [{
+  _inherits(StandardNotation, _Notation);
+  return _createClass(StandardNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       this.charLimitReached = false;
@@ -4174,7 +4124,6 @@ var StandardNotation = /*#__PURE__*/function (_Notation) {
       this._charLimit = charLimit;
     }
   }]);
-  return StandardNotation;
 }(Notation);
 
 /**
@@ -4208,8 +4157,6 @@ var StandardNotation = /*#__PURE__*/function (_Notation) {
  * Default is [null, null, null], i.e. no concatenation occurs.
  */
 var LettersNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(LettersNotation, _Notation);
-  var _super = _createSuper(LettersNotation);
   function LettersNotation() {
     var _this;
     var letters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [lowercaseAlphabet, uppercaseAlphabet, ["@"]];
@@ -4230,7 +4177,7 @@ var LettersNotation = /*#__PURE__*/function (_Notation) {
     var fixedLetters = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : [[], [], []];
     var concatenation = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : [null, null, null];
     _classCallCheck(this, LettersNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, LettersNotation);
     _this._letters = [lowercaseAlphabet, uppercaseAlphabet, ["@"]];
     _this._negaLetters = [-1, -1, -1];
     _this.rounding = Decimal.dZero;
@@ -4268,7 +4215,8 @@ var LettersNotation = /*#__PURE__*/function (_Notation) {
     _this.concatenation = concatenation;
     return _this;
   }
-  _createClass(LettersNotation, [{
+  _inherits(LettersNotation, _Notation);
+  return _createClass(LettersNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.innerNotation.format(0);
@@ -4411,7 +4359,6 @@ var LettersNotation = /*#__PURE__*/function (_Notation) {
       this._max_letters = max_letters;
     }
   }]);
-  return LettersNotation;
 }(Notation);
 
 /**
@@ -4435,8 +4382,6 @@ var LettersNotation = /*#__PURE__*/function (_Notation) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an (F^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
  */
 var HyperscientificNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(HyperscientificNotation, _Notation);
-  var _super = _createSuper(HyperscientificNotation);
   function HyperscientificNotation() {
     var _this;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1e10;
@@ -4457,7 +4402,7 @@ var HyperscientificNotation = /*#__PURE__*/function (_Notation) {
     var exponentInnerNotation = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : mantissaInnerNotation;
     var superexponentInnerNotation = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : exponentInnerNotation;
     _classCallCheck(this, HyperscientificNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, HyperscientificNotation);
     _this._maxnum = new Decimal(1e10);
     _this.max_Fs_in_a_row = 5;
     _this.rounding = Decimal.dZero;
@@ -4496,7 +4441,8 @@ var HyperscientificNotation = /*#__PURE__*/function (_Notation) {
     _this.negExpChars = negExpChars;
     return _this;
   }
-  _createClass(HyperscientificNotation, [{
+  _inherits(HyperscientificNotation, _Notation);
+  return _createClass(HyperscientificNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -4631,7 +4577,6 @@ var HyperscientificNotation = /*#__PURE__*/function (_Notation) {
       this._expChars = expChars;
     }
   }]);
-  return HyperscientificNotation;
 }(Notation);
 /**
  * This notation performs hyperscientific notation a certain number of times. 1 iteration means the number is in the form AFB (where A and B are abbreviated using the innerNotation), 2 iterations means the number is in the form AFBFC, and so on.
@@ -4653,8 +4598,6 @@ var HyperscientificNotation = /*#__PURE__*/function (_Notation) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an (F^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
  */
 var HyperscientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(HyperscientificIterationsNotation, _Notation2);
-  var _super2 = _createSuper(HyperscientificIterationsNotation);
   function HyperscientificIterationsNotation(iterations) {
     var _this2;
     var max_Fs_in_a_row = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
@@ -4673,7 +4616,7 @@ var HyperscientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
     var exponentInnerNotation = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : mantissaInnerNotation;
     var superexponentInnerNotation = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : exponentInnerNotation;
     _classCallCheck(this, HyperscientificIterationsNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, HyperscientificIterationsNotation);
     _this2.max_Fs_in_a_row = 5;
     _this2.rounding = Decimal.dZero;
     _this2._engineerings = [Decimal.dOne];
@@ -4709,7 +4652,8 @@ var HyperscientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
     _this2.negExpChars = negExpChars;
     return _this2;
   }
-  _createClass(HyperscientificIterationsNotation, [{
+  _inherits(HyperscientificIterationsNotation, _Notation2);
+  return _createClass(HyperscientificIterationsNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -4851,7 +4795,6 @@ var HyperscientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
       this._expChars = expChars;
     }
   }]);
-  return HyperscientificIterationsNotation;
 }(Notation);
 
 /**
@@ -4871,8 +4814,6 @@ var HyperscientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var SuperLogarithmNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(SuperLogarithmNotation, _Notation);
-  var _super = _createSuper(SuperLogarithmNotation);
   function SuperLogarithmNotation() {
     var _this;
     var iterations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
@@ -4889,7 +4830,7 @@ var SuperLogarithmNotation = /*#__PURE__*/function (_Notation) {
     var superexponentInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : innerNotation;
     var baseInnerNotation = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : innerNotation;
     _classCallCheck(this, SuperLogarithmNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, SuperLogarithmNotation);
     _this._iterations = 1;
     _this.max_Fs_in_a_row = 5;
     _this._base = Decimal.dTen;
@@ -4919,7 +4860,8 @@ var SuperLogarithmNotation = /*#__PURE__*/function (_Notation) {
     _this.baseInnerNotation = baseInnerNotation;
     return _this;
   }
-  _createClass(SuperLogarithmNotation, [{
+  _inherits(SuperLogarithmNotation, _Notation);
+  return _createClass(SuperLogarithmNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -5004,7 +4946,6 @@ var SuperLogarithmNotation = /*#__PURE__*/function (_Notation) {
       this._hyperexpMult = hyperexpMultD;
     }
   }]);
-  return SuperLogarithmNotation;
 }(Notation);
 /**
  * A variant of super-logarithm notation that uses a different amount of super-logarithm iterations depending on how large the number is.
@@ -5025,8 +4966,6 @@ var SuperLogarithmNotation = /*#__PURE__*/function (_Notation) {
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var MultiSuperLogarithmNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(MultiSuperLogarithmNotation, _Notation2);
-  var _super2 = _createSuper(MultiSuperLogarithmNotation);
   function MultiSuperLogarithmNotation() {
     var _this2;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1e10;
@@ -5045,7 +4984,7 @@ var MultiSuperLogarithmNotation = /*#__PURE__*/function (_Notation2) {
     var superexponentInnerNotation = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : innerNotation;
     var baseInnerNotation = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : innerNotation;
     _classCallCheck(this, MultiSuperLogarithmNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, MultiSuperLogarithmNotation);
     _this2._maxnum = new Decimal(1e10);
     _this2.max_Fs_in_a_row = 5;
     _this2.minIterations = 1;
@@ -5079,7 +5018,8 @@ var MultiSuperLogarithmNotation = /*#__PURE__*/function (_Notation2) {
     _this2.baseInnerNotation = baseInnerNotation;
     return _this2;
   }
-  _createClass(MultiSuperLogarithmNotation, [{
+  _inherits(MultiSuperLogarithmNotation, _Notation2);
+  return _createClass(MultiSuperLogarithmNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -5169,7 +5109,6 @@ var MultiSuperLogarithmNotation = /*#__PURE__*/function (_Notation2) {
       this._hyperexpMult = hyperexpMultD;
     }
   }]);
-  return MultiSuperLogarithmNotation;
 }(Notation);
 
 /**
@@ -5194,8 +5133,6 @@ var MultiSuperLogarithmNotation = /*#__PURE__*/function (_Notation2) {
  * @param hyperexpFormat ( [boolean, boolean] ) A pair of booleans that determines whether the numbers in a hyperscientific expression are notated using ExpandedDefaultNotation itself rather than the innerNotations. The first entry is for the mantissa, the second is for the hyperexponent. This only applies to "xFy" expressions; "Fx" expressions (where x is over the maxnum) always formats x in ExpandedDefaultNotation itself. Default is [false, false].
  */
 var ExpandedDefaultNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(ExpandedDefaultNotation, _Notation);
-  var _super = _createSuper(ExpandedDefaultNotation);
   function ExpandedDefaultNotation() {
     var _this;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Decimal(1e12);
@@ -5217,7 +5154,7 @@ var ExpandedDefaultNotation = /*#__PURE__*/function (_Notation) {
     var exponentInnerNotation = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : mantissaInnerNotation;
     var hyperexpFormat = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : [false, false];
     _classCallCheck(this, ExpandedDefaultNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, ExpandedDefaultNotation);
     _this._maxnum = new Decimal(1e12);
     _this._minnum = new Decimal(1e-6);
     _this.max_es_in_a_row = 5;
@@ -5258,7 +5195,8 @@ var ExpandedDefaultNotation = /*#__PURE__*/function (_Notation) {
     _this.negExpChars = negExpChars;
     return _this;
   }
-  _createClass(ExpandedDefaultNotation, [{
+  _inherits(ExpandedDefaultNotation, _Notation);
+  return _createClass(ExpandedDefaultNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0) || value.abs().gte(this._minnum) && value.abs().lt(this._maxnum)) return this.mantissaInnerNotation.format(value);
@@ -5435,7 +5373,6 @@ var ExpandedDefaultNotation = /*#__PURE__*/function (_Notation) {
       this._expChars = expChars;
     }
   }]);
-  return ExpandedDefaultNotation;
 }(Notation);
 
 /**
@@ -5455,8 +5392,6 @@ var ExpandedDefaultNotation = /*#__PURE__*/function (_Notation) {
  * @param exponentInnerNotation ( Notation ) The notation that the number inside a truncated expression is notated with. DefaultNotation is the default.
  */
 var SINotation = /*#__PURE__*/function (_Notation) {
-  _inherits(SINotation, _Notation);
-  var _super = _createSuper(SINotation);
   function SINotation() {
     var _this;
     var logBase = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
@@ -5473,7 +5408,7 @@ var SINotation = /*#__PURE__*/function (_Notation) {
     var mantissaInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : new DefaultNotation();
     var exponentInnerNotation = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : new DefaultNotation();
     _classCallCheck(this, SINotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, SINotation);
     _this._logBase = new Decimal(10);
     _this.frontToBack = true;
     _this.max_in_a_row = 4;
@@ -5500,7 +5435,8 @@ var SINotation = /*#__PURE__*/function (_Notation) {
     _this.exponentInnerNotation = exponentInnerNotation;
     return _this;
   }
-  _createClass(SINotation, [{
+  _inherits(SINotation, _Notation);
+  return _createClass(SINotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.mantissaInnerNotation.format(0);
@@ -5580,7 +5516,6 @@ var SINotation = /*#__PURE__*/function (_Notation) {
       }
     }
   }]);
-  return SINotation;
 }(Notation);
 /**
  * A variant of SINotation where the numbers in truncated expressions are themselves notated in this notation. Once the brackets are deep enough, braces are introduced to represent the number of brackets layers.
@@ -5603,8 +5538,6 @@ var SINotation = /*#__PURE__*/function (_Notation) {
  * showOnLarge[0] is for when brackets are the highest delimiter, showOnLarge[1] is for when braces are the highest delimiter.
  */
 var NestedSINotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(NestedSINotation, _Notation2);
-  var _super2 = _createSuper(NestedSINotation);
   function NestedSINotation() {
     var _this2;
     var logBase = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
@@ -5624,7 +5557,7 @@ var NestedSINotation = /*#__PURE__*/function (_Notation2) {
     var innerNotation = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : new DefaultNotation();
     var showOnLarge = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : [true, true];
     _classCallCheck(this, NestedSINotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, NestedSINotation);
     _this2._logBase = new Decimal(10);
     _this2.frontToBack = true;
     _this2.max_in_a_row = 4;
@@ -5657,7 +5590,8 @@ var NestedSINotation = /*#__PURE__*/function (_Notation2) {
     _this2.showOnLarge = showOnLarge;
     return _this2;
   }
-  _createClass(NestedSINotation, [{
+  _inherits(NestedSINotation, _Notation2);
+  return _createClass(NestedSINotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.innerNotation.format(0);
@@ -5781,7 +5715,6 @@ var NestedSINotation = /*#__PURE__*/function (_Notation2) {
       this._max_nesting = max_nesting;
     }
   }]);
-  return NestedSINotation;
 }(Notation);
 
 /**
@@ -5801,8 +5734,6 @@ var NestedSINotation = /*#__PURE__*/function (_Notation2) {
  * @param exponentInnerNotation ( Notation ) The notation that the number inside a truncated expression is notated with. DefaultNotation is the default.
  */
 var HyperSINotation = /*#__PURE__*/function (_Notation) {
-  _inherits(HyperSINotation, _Notation);
-  var _super = _createSuper(HyperSINotation);
   function HyperSINotation() {
     var _this;
     var slogBase = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
@@ -5819,7 +5750,7 @@ var HyperSINotation = /*#__PURE__*/function (_Notation) {
     var mantissaInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : new DefaultNotation();
     var exponentInnerNotation = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : new DefaultNotation();
     _classCallCheck(this, HyperSINotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, HyperSINotation);
     _this._slogBase = new Decimal(10);
     _this.frontToBack = true;
     _this.max_in_a_row = 4;
@@ -5850,7 +5781,8 @@ var HyperSINotation = /*#__PURE__*/function (_Notation) {
     _this.exponentInnerNotation = exponentInnerNotation;
     return _this;
   }
-  _createClass(HyperSINotation, [{
+  _inherits(HyperSINotation, _Notation);
+  return _createClass(HyperSINotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -5952,7 +5884,6 @@ var HyperSINotation = /*#__PURE__*/function (_Notation) {
       this._mantissaPower = mantissaPowerD;
     }
   }]);
-  return HyperSINotation;
 }(Notation);
 /**
  * A variant of HyperSINotation where the numbers in truncated expressions are themselves notated in this notation.
@@ -5972,8 +5903,6 @@ var HyperSINotation = /*#__PURE__*/function (_Notation) {
  * @param showOnLarge ( boolean ) This parameter shows whether the numeral that the delimiters are placed on is shown - if it's true then the numeral and the delimiters are both shown, if it's false then the delimiters and what's inside them are still shown but the numeral they're on is not.
  */
 var NestedHyperSINotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(NestedHyperSINotation, _Notation2);
-  var _super2 = _createSuper(NestedHyperSINotation);
   function NestedHyperSINotation() {
     var _this2;
     var slogBase = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
@@ -5991,7 +5920,7 @@ var NestedHyperSINotation = /*#__PURE__*/function (_Notation2) {
     var innerNotation = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : new DefaultNotation();
     var showOnLarge = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : true;
     _classCallCheck(this, NestedHyperSINotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, NestedHyperSINotation);
     _this2._slogBase = new Decimal(10);
     _this2.frontToBack = true;
     _this2.max_in_a_row = 4;
@@ -6024,7 +5953,8 @@ var NestedHyperSINotation = /*#__PURE__*/function (_Notation2) {
     _this2.showOnLarge = showOnLarge;
     return _this2;
   }
-  _createClass(NestedHyperSINotation, [{
+  _inherits(NestedHyperSINotation, _Notation2);
+  return _createClass(NestedHyperSINotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -6128,7 +6058,6 @@ var NestedHyperSINotation = /*#__PURE__*/function (_Notation2) {
       this._mantissaPower = mantissaPowerD;
     }
   }]);
-  return NestedHyperSINotation;
 }(Notation);
 
 /**
@@ -6141,8 +6070,6 @@ var NestedHyperSINotation = /*#__PURE__*/function (_Notation2) {
  * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. Default is an AlternateBaseNotation that still works in base 10, but used the myriad system's commas instead of the usual commas.
  */
 var MyriadNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(MyriadNotation, _Notation);
-  var _super = _createSuper(MyriadNotation);
   function MyriadNotation() {
     var _this;
     var dialect = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
@@ -6152,7 +6079,7 @@ var MyriadNotation = /*#__PURE__*/function (_Notation) {
     var charLimit = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 50;
     var innerNotation = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : new AlternateBaseNotation(10, 0, -4, -4, 0, "2^1024", "1e-6", 5, 0, 0, -1, false, 4, [",", ";", ",", ":", ",", ";", ",", ";;", ",", ";", ",", ":", ",", ";", ",", "::", ",", ";", ",", ":", ",", ";", ",", ";;", ",", ";", ",", ":", ",", ";", ",", ";;;", ",", ";", ",", ":", ",", ";", ",", ";;", ",", ";", ",", ":", ",", ";", ",", "::", ",", ";", ",", ":", ",", ";", ",", ";;", ",", ";", ",", ":", ",", ";", ",", ":::"]);
     _classCallCheck(this, MyriadNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, MyriadNotation);
     _this._dialect = 0;
     _this.rounding = Decimal.dZero;
     _this._lowestAbbreviated = 1;
@@ -6180,7 +6107,8 @@ var MyriadNotation = /*#__PURE__*/function (_Notation) {
       ];
     return _this;
   }
-  _createClass(MyriadNotation, [{
+  _inherits(MyriadNotation, _Notation);
+  return _createClass(MyriadNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       this.charLimitReached = false;
@@ -6340,7 +6268,6 @@ var MyriadNotation = /*#__PURE__*/function (_Notation) {
       this._charLimit = charLimit;
     }
   }]);
-  return MyriadNotation;
 }(Notation);
 
 /**
@@ -6358,8 +6285,6 @@ var MyriadNotation = /*#__PURE__*/function (_Notation) {
  * @param expMultipliers ( Decimal | Decimal[] ) An array of up to three Decimals which multiply the exponent, tetration, and pentation respectively; this multiplication happens once to start and one more time between each application of the next hyperoperator. Default is [1, 1, 1]. If just one Decimal is given rather than an array, all three multipliers are the same. If there are less than three entries, the remaining ones are set to 1.
  */
 var HypersplitNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(HypersplitNotation, _Notation);
-  var _super = _createSuper(HypersplitNotation);
   function HypersplitNotation() {
     var _this;
     var delimiters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [["", ""], ["*10^", ""], ["((10^)^", ") "], ["((10^^)^", " "]];
@@ -6374,7 +6299,7 @@ var HypersplitNotation = /*#__PURE__*/function (_Notation) {
     var engineerings = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : 1;
     var expMultipliers = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : 1;
     _classCallCheck(this, HypersplitNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, HypersplitNotation);
     _this._delimiters = [["", ""], ["*10^", ""], ["((10^)^", ") "], ["((10^^)^", ") "]];
     _this._base = Decimal.dTen;
     _this._maximums = [Decimal.dTen, Decimal.dTen, Decimal.dTen];
@@ -6400,7 +6325,8 @@ var HypersplitNotation = /*#__PURE__*/function (_Notation) {
     _this.expMultipliers = expMultipliers;
     return _this;
   }
-  _createClass(HypersplitNotation, [{
+  _inherits(HypersplitNotation, _Notation);
+  return _createClass(HypersplitNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -6513,7 +6439,6 @@ var HypersplitNotation = /*#__PURE__*/function (_Notation) {
       this._expMultipliers = expMultipliers.map(toDecimal);
     }
   }]);
-  return HypersplitNotation;
 }(Notation);
 
 /**
@@ -6527,8 +6452,6 @@ var HypersplitNotation = /*#__PURE__*/function (_Notation) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an !n expression is itself notated with. Is the same as innerNotation by default.
  */
 var FactorialNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(FactorialNotation, _Notation);
-  var _super = _createSuper(FactorialNotation);
   function FactorialNotation() {
     var _this;
     var iterations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
@@ -6539,7 +6462,7 @@ var FactorialNotation = /*#__PURE__*/function (_Notation) {
     var innerNotation = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : new DefaultNotation();
     var superexponentInnerNotation = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : innerNotation;
     _classCallCheck(this, FactorialNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, FactorialNotation);
     _this.iterations = 1;
     _this._max_in_a_row = 5;
     _this.factorialChars = [["", "!"], ["", "!"], ["!", ""]];
@@ -6557,7 +6480,8 @@ var FactorialNotation = /*#__PURE__*/function (_Notation) {
     _this.superexponentInnerNotation = superexponentInnerNotation;
     return _this;
   }
-  _createClass(FactorialNotation, [{
+  _inherits(FactorialNotation, _Notation);
+  return _createClass(FactorialNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0) && this.iterations == 0) return this.innerNotation.format(0);
@@ -6603,7 +6527,6 @@ var FactorialNotation = /*#__PURE__*/function (_Notation) {
       this._max_in_a_row = max_in_a_row;
     }
   }]);
-  return FactorialNotation;
 }(Notation);
 /**
  * A variant of factorial notation that uses a different amount of factorial iterations depending on how large the number is.
@@ -6618,8 +6541,6 @@ var FactorialNotation = /*#__PURE__*/function (_Notation) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an !n expression is itself notated with. Is the same as innerNotation by default.
  */
 var MultiFactorialNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(MultiFactorialNotation, _Notation2);
-  var _super2 = _createSuper(MultiFactorialNotation);
   function MultiFactorialNotation() {
     var _this2;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3628800;
@@ -6632,7 +6553,7 @@ var MultiFactorialNotation = /*#__PURE__*/function (_Notation2) {
     var innerNotation = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : new DefaultNotation();
     var superexponentInnerNotation = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : innerNotation;
     _classCallCheck(this, MultiFactorialNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, MultiFactorialNotation);
     _this2._maxnum = new Decimal(3628800);
     _this2._max_in_a_row = 5;
     _this2.minIterations = 1;
@@ -6654,7 +6575,8 @@ var MultiFactorialNotation = /*#__PURE__*/function (_Notation2) {
     _this2.superexponentInnerNotation = superexponentInnerNotation;
     return _this2;
   }
-  _createClass(MultiFactorialNotation, [{
+  _inherits(MultiFactorialNotation, _Notation2);
+  return _createClass(MultiFactorialNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       var iterations = this.minIterations;
@@ -6706,7 +6628,6 @@ var MultiFactorialNotation = /*#__PURE__*/function (_Notation2) {
       this._max_in_a_row = max_in_a_row;
     }
   }]);
-  return MultiFactorialNotation;
 }(Notation);
 
 /**
@@ -6726,8 +6647,6 @@ var MultiFactorialNotation = /*#__PURE__*/function (_Notation2) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an (!n) expression is itself notated with. Is the same as exponentInnerNotation by default.
  */
 var FactorialScientificNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(FactorialScientificNotation, _Notation);
-  var _super = _createSuper(FactorialScientificNotation);
   function FactorialScientificNotation() {
     var _this;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3628800;
@@ -6744,7 +6663,7 @@ var FactorialScientificNotation = /*#__PURE__*/function (_Notation) {
     var exponentInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : mantissaInnerNotation;
     var superexponentInnerNotation = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : exponentInnerNotation;
     _classCallCheck(this, FactorialScientificNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, FactorialScientificNotation);
     _this._maxnum = new Decimal(3628800);
     _this.max_es_in_a_row = 5;
     _this.rounding = Decimal.dZero;
@@ -6775,7 +6694,8 @@ var FactorialScientificNotation = /*#__PURE__*/function (_Notation) {
     _this.negExpChars = negExpChars;
     return _this;
   }
-  _createClass(FactorialScientificNotation, [{
+  _inherits(FactorialScientificNotation, _Notation);
+  return _createClass(FactorialScientificNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.mantissaInnerNotation.format(0);
@@ -6870,7 +6790,6 @@ var FactorialScientificNotation = /*#__PURE__*/function (_Notation) {
       this._expChars = expChars;
     }
   }]);
-  return FactorialScientificNotation;
 }(Notation);
 /**
  * This notation performs factorial-scientific notation a certain number of times. 1 iteration means the number is in the form A * B! (where A and B are abbreviated using the innerNotation), 2 iterations means the number is in the form A * (B * C!)!, and so on.
@@ -6888,8 +6807,6 @@ var FactorialScientificNotation = /*#__PURE__*/function (_Notation) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an (!n) expression is itself notated with. Is the same as exponentInnerNotation by default.
  */
 var FactorialScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(FactorialScientificIterationsNotation, _Notation2);
-  var _super2 = _createSuper(FactorialScientificIterationsNotation);
   function FactorialScientificIterationsNotation(iterations) {
     var _this2;
     var max_es_in_a_row = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
@@ -6904,7 +6821,7 @@ var FactorialScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
     var exponentInnerNotation = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : mantissaInnerNotation;
     var superexponentInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : exponentInnerNotation;
     _classCallCheck(this, FactorialScientificIterationsNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, FactorialScientificIterationsNotation);
     _this2.max_es_in_a_row = 5;
     _this2.rounding = Decimal.dZero;
     _this2._engineerings = [Decimal.dOne];
@@ -6932,7 +6849,8 @@ var FactorialScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
     _this2.negExpChars = negExpChars;
     return _this2;
   }
-  _createClass(FactorialScientificIterationsNotation, [{
+  _inherits(FactorialScientificIterationsNotation, _Notation2);
+  return _createClass(FactorialScientificIterationsNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.mantissaInnerNotation.format(0);
@@ -7042,7 +6960,6 @@ var FactorialScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
       this._expChars = expChars;
     }
   }]);
-  return FactorialScientificIterationsNotation;
 }(Notation);
 
 /**
@@ -7062,8 +6979,6 @@ var FactorialScientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an (!^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
  */
 var FactorialHyperscientificNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(FactorialHyperscientificNotation, _Notation);
-  var _super = _createSuper(FactorialHyperscientificNotation);
   function FactorialHyperscientificNotation() {
     var _this;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3628800;
@@ -7080,7 +6995,7 @@ var FactorialHyperscientificNotation = /*#__PURE__*/function (_Notation) {
     var exponentInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : mantissaInnerNotation;
     var superexponentInnerNotation = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : exponentInnerNotation;
     _classCallCheck(this, FactorialHyperscientificNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, FactorialHyperscientificNotation);
     _this.maxnum = new Decimal(3628800);
     _this.max_Fs_in_a_row = 5;
     _this.rounding = Decimal.dZero;
@@ -7111,7 +7026,8 @@ var FactorialHyperscientificNotation = /*#__PURE__*/function (_Notation) {
     _this.negExpChars = negExpChars;
     return _this;
   }
-  _createClass(FactorialHyperscientificNotation, [{
+  _inherits(FactorialHyperscientificNotation, _Notation);
+  return _createClass(FactorialHyperscientificNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (this.iteration_zero && value.lt(this.maxnum) && value.gt(this.maxnum.recip())) return this.mantissaInnerNotation.format(value);
@@ -7192,7 +7108,6 @@ var FactorialHyperscientificNotation = /*#__PURE__*/function (_Notation) {
       this._expChars = expChars;
     }
   }]);
-  return FactorialHyperscientificNotation;
 }(Notation);
 /**
  * This notation performs factorial-hyperscientific notation a certain number of times. 1 iteration means the number is in the form A!B (where A and B are abbreviated using the innerNotation), 2 iterations means the number is in the form A!B!C, and so on.
@@ -7210,8 +7125,6 @@ var FactorialHyperscientificNotation = /*#__PURE__*/function (_Notation) {
  * @param superexponentInnerNotation ( Notation ) The notation that the number in an (!^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
  */
 var FactorialHyperscientificIterationsNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(FactorialHyperscientificIterationsNotation, _Notation2);
-  var _super2 = _createSuper(FactorialHyperscientificIterationsNotation);
   function FactorialHyperscientificIterationsNotation(iterations) {
     var _this2;
     var max_Fs_in_a_row = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
@@ -7226,7 +7139,7 @@ var FactorialHyperscientificIterationsNotation = /*#__PURE__*/function (_Notatio
     var exponentInnerNotation = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : mantissaInnerNotation;
     var superexponentInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : exponentInnerNotation;
     _classCallCheck(this, FactorialHyperscientificIterationsNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, FactorialHyperscientificIterationsNotation);
     _this2.max_Fs_in_a_row = 5;
     _this2.rounding = Decimal.dZero;
     _this2._engineerings = [Decimal.dOne];
@@ -7258,7 +7171,8 @@ var FactorialHyperscientificIterationsNotation = /*#__PURE__*/function (_Notatio
     _this2.negExpChars = negExpChars;
     return _this2;
   }
-  _createClass(FactorialHyperscientificIterationsNotation, [{
+  _inherits(FactorialHyperscientificIterationsNotation, _Notation2);
+  return _createClass(FactorialHyperscientificIterationsNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (this._iterations == 0) return this.mantissaInnerNotation.format(value);
@@ -7366,7 +7280,6 @@ var FactorialHyperscientificIterationsNotation = /*#__PURE__*/function (_Notatio
       this._expChars = expChars;
     }
   }]);
-  return FactorialHyperscientificIterationsNotation;
 }(Notation);
 
 /**
@@ -7383,8 +7296,6 @@ var FactorialHyperscientificIterationsNotation = /*#__PURE__*/function (_Notatio
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var FactorialAmountNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(FactorialAmountNotation, _Notation);
-  var _super = _createSuper(FactorialAmountNotation);
   function FactorialAmountNotation() {
     var _this;
     var iterations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
@@ -7398,7 +7309,7 @@ var FactorialAmountNotation = /*#__PURE__*/function (_Notation) {
     var superexponentInnerNotation = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : innerNotation;
     var baseInnerNotation = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : innerNotation;
     _classCallCheck(this, FactorialAmountNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, FactorialAmountNotation);
     _this._iterations = 1;
     _this._max_in_a_row = 5;
     _this._base = new Decimal(3);
@@ -7422,7 +7333,8 @@ var FactorialAmountNotation = /*#__PURE__*/function (_Notation) {
     _this.baseInnerNotation = baseInnerNotation;
     return _this;
   }
-  _createClass(FactorialAmountNotation, [{
+  _inherits(FactorialAmountNotation, _Notation);
+  return _createClass(FactorialAmountNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       var result = "";
@@ -7484,7 +7396,6 @@ var FactorialAmountNotation = /*#__PURE__*/function (_Notation) {
       this._base = baseD;
     }
   }]);
-  return FactorialAmountNotation;
 }(Notation);
 /**
  * A variant of factorial amount notation that uses a different amount of iterations depending on how large the number is.
@@ -7502,8 +7413,6 @@ var FactorialAmountNotation = /*#__PURE__*/function (_Notation) {
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var MultiFactorialAmountNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(MultiFactorialAmountNotation, _Notation2);
-  var _super2 = _createSuper(MultiFactorialAmountNotation);
   function MultiFactorialAmountNotation() {
     var _this2;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1e10;
@@ -7519,7 +7428,7 @@ var MultiFactorialAmountNotation = /*#__PURE__*/function (_Notation2) {
     var superexponentInnerNotation = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : innerNotation;
     var baseInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : innerNotation;
     _classCallCheck(this, MultiFactorialAmountNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, MultiFactorialAmountNotation);
     _this2._maxnum = new Decimal(3628800);
     _this2._max_in_a_row = 5;
     _this2.minIterations = 1;
@@ -7547,7 +7456,8 @@ var MultiFactorialAmountNotation = /*#__PURE__*/function (_Notation2) {
     _this2.baseInnerNotation = baseInnerNotation;
     return _this2;
   }
-  _createClass(MultiFactorialAmountNotation, [{
+  _inherits(MultiFactorialAmountNotation, _Notation2);
+  return _createClass(MultiFactorialAmountNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.lte(1) && value.neq(0)) return "1 / " + this.format(value.recip());
@@ -7614,7 +7524,6 @@ var MultiFactorialAmountNotation = /*#__PURE__*/function (_Notation2) {
       this._base = baseD;
     }
   }]);
-  return MultiFactorialAmountNotation;
 }(Notation);
 
 /**
@@ -7862,8 +7771,6 @@ function FactoradicConvert(value) {
  * This notation does not have an innerNotation parameter.
  */
 var FactoradicNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(FactoradicNotation, _Notation);
-  var _super = _createSuper(FactoradicNotation);
   function FactoradicNotation() {
     var _this;
     var digitList = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultBaseChars;
@@ -7888,7 +7795,7 @@ var FactoradicNotation = /*#__PURE__*/function (_Notation) {
     var specialDigits = arguments.length > 19 && arguments[19] !== undefined ? arguments[19] : [];
     var concatenation = arguments.length > 20 && arguments[20] !== undefined ? arguments[20] : null;
     _classCallCheck(this, FactoradicNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, FactoradicNotation);
     _this.digitList = defaultBaseChars;
     _this.hyperBase = new Decimal(720);
     _this.placesAbove1 = -4;
@@ -7934,7 +7841,8 @@ var FactoradicNotation = /*#__PURE__*/function (_Notation) {
     _this.negExpChars = negExpChars;
     return _this;
   }
-  _createClass(FactoradicNotation, [{
+  _inherits(FactoradicNotation, _Notation);
+  return _createClass(FactoradicNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -8042,7 +7950,6 @@ var FactoradicNotation = /*#__PURE__*/function (_Notation) {
       this._expChars = expChars;
     }
   }]);
-  return FactoradicNotation;
 }(Notation);
 
 /**
@@ -8059,8 +7966,6 @@ var FactoradicNotation = /*#__PURE__*/function (_Notation) {
  * @param heightInnerNotation ( Notation ) The notation that the height within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var RootNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(RootNotation, _Notation);
-  var _super = _createSuper(RootNotation);
   function RootNotation() {
     var _this;
     var height = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
@@ -8074,7 +7979,7 @@ var RootNotation = /*#__PURE__*/function (_Notation) {
     var superexponentInnerNotation = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : innerNotation;
     var heightInnerNotation = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : innerNotation;
     _classCallCheck(this, RootNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, RootNotation);
     _this.height = Decimal.dTwo;
     _this.iterations = Decimal.dOne;
     _this.max_in_a_row = 5;
@@ -8098,7 +8003,8 @@ var RootNotation = /*#__PURE__*/function (_Notation) {
     _this.heightInnerNotation = heightInnerNotation;
     return _this;
   }
-  _createClass(RootNotation, [{
+  _inherits(RootNotation, _Notation);
+  return _createClass(RootNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       var result = "";
@@ -8133,7 +8039,6 @@ var RootNotation = /*#__PURE__*/function (_Notation) {
       return result;
     }
   }]);
-  return RootNotation;
 }(Notation);
 /**
  * A variant of root notation that uses a different root height depending on how large the number is.
@@ -8149,8 +8054,6 @@ var RootNotation = /*#__PURE__*/function (_Notation) {
  * @param heightInnerNotation ( Notation ) The notation that the height within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var IncreasingRootNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(IncreasingRootNotation, _Notation2);
-  var _super2 = _createSuper(IncreasingRootNotation);
   function IncreasingRootNotation() {
     var _this2;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10000;
@@ -8162,7 +8065,7 @@ var IncreasingRootNotation = /*#__PURE__*/function (_Notation2) {
     var innerNotation = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : new DefaultNotation();
     var heightInnerNotation = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : innerNotation;
     _classCallCheck(this, IncreasingRootNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, IncreasingRootNotation);
     _this2._maxnum = new Decimal(10000);
     _this2.minHeight = Decimal.dTwo;
     _this2._engineerings = [Decimal.dOne];
@@ -8182,7 +8085,8 @@ var IncreasingRootNotation = /*#__PURE__*/function (_Notation2) {
     _this2.heightInnerNotation = heightInnerNotation;
     return _this2;
   }
-  _createClass(IncreasingRootNotation, [{
+  _inherits(IncreasingRootNotation, _Notation2);
+  return _createClass(IncreasingRootNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.innerNotation.format(0);
@@ -8216,7 +8120,6 @@ var IncreasingRootNotation = /*#__PURE__*/function (_Notation2) {
       }).reverse();
     }
   }]);
-  return IncreasingRootNotation;
 }(Notation);
 /**
  * A variant of root notation that uses a different amount of root iterations depending on how large the number is. Once the amount of iterations gets too high, we go to a higher layer where the amount of iterations is itself written in this notation, and repeat that layering process for larger and larger numbers.
@@ -8240,8 +8143,6 @@ var IncreasingRootNotation = /*#__PURE__*/function (_Notation2) {
  * @param heightInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var MultiRootNotation = /*#__PURE__*/function (_Notation3) {
-  _inherits(MultiRootNotation, _Notation3);
-  var _super3 = _createSuper(MultiRootNotation);
   function MultiRootNotation() {
     var _this3;
     var height = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
@@ -8263,7 +8164,7 @@ var MultiRootNotation = /*#__PURE__*/function (_Notation3) {
     var superexponentInnerNotation = arguments.length > 16 && arguments[16] !== undefined ? arguments[16] : innerNotation;
     var heightInnerNotation = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : innerNotation;
     _classCallCheck(this, MultiRootNotation);
-    _this3 = _super3.call(this);
+    _this3 = _callSuper(this, MultiRootNotation);
     _this3.height = Decimal.dTwo;
     _this3.maxnum = new Decimal(10000);
     _this3.max_iterations_in_a_row = 5;
@@ -8303,7 +8204,8 @@ var MultiRootNotation = /*#__PURE__*/function (_Notation3) {
     _this3.heightInnerNotation = heightInnerNotation;
     return _this3;
   }
-  _createClass(MultiRootNotation, [{
+  _inherits(MultiRootNotation, _Notation3);
+  return _createClass(MultiRootNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.innerNotation.format(0);
@@ -8384,7 +8286,6 @@ var MultiRootNotation = /*#__PURE__*/function (_Notation3) {
       }).reverse();
     }
   }]);
-  return MultiRootNotation;
 }(Notation);
 
 /**
@@ -8401,8 +8302,6 @@ var MultiRootNotation = /*#__PURE__*/function (_Notation3) {
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var SuperRootNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(SuperRootNotation, _Notation);
-  var _super = _createSuper(SuperRootNotation);
   function SuperRootNotation() {
     var _this;
     var height = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
@@ -8416,7 +8315,7 @@ var SuperRootNotation = /*#__PURE__*/function (_Notation) {
     var superexponentInnerNotation = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : innerNotation;
     var baseInnerNotation = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : innerNotation;
     _classCallCheck(this, SuperRootNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, SuperRootNotation);
     _this._height = 2;
     _this._iterations = 1;
     _this.max_in_a_row = 5;
@@ -8440,7 +8339,8 @@ var SuperRootNotation = /*#__PURE__*/function (_Notation) {
     _this.baseInnerNotation = baseInnerNotation;
     return _this;
   }
-  _createClass(SuperRootNotation, [{
+  _inherits(SuperRootNotation, _Notation);
+  return _createClass(SuperRootNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       var result = "";
@@ -8511,7 +8411,6 @@ var SuperRootNotation = /*#__PURE__*/function (_Notation) {
       this._iterations = iterations;
     }
   }]);
-  return SuperRootNotation;
 }(Notation);
 /**
  * A variant of super-root notation that uses a different amount of super-root iterations depending on how large the number is.
@@ -8529,8 +8428,6 @@ var SuperRootNotation = /*#__PURE__*/function (_Notation) {
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var MultiSuperRootNotation = /*#__PURE__*/function (_Notation2) {
-  _inherits(MultiSuperRootNotation, _Notation2);
-  var _super2 = _createSuper(MultiSuperRootNotation);
   function MultiSuperRootNotation() {
     var _this2;
     var height = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
@@ -8546,7 +8443,7 @@ var MultiSuperRootNotation = /*#__PURE__*/function (_Notation2) {
     var superexponentInnerNotation = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : innerNotation;
     var baseInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : innerNotation;
     _classCallCheck(this, MultiSuperRootNotation);
-    _this2 = _super2.call(this);
+    _this2 = _callSuper(this, MultiSuperRootNotation);
     _this2._height = 2;
     _this2._maxnum = new Decimal(1e10);
     _this2.max_in_a_row = 5;
@@ -8574,7 +8471,8 @@ var MultiSuperRootNotation = /*#__PURE__*/function (_Notation2) {
     _this2.baseInnerNotation = baseInnerNotation;
     return _this2;
   }
-  _createClass(MultiSuperRootNotation, [{
+  _inherits(MultiSuperRootNotation, _Notation2);
+  return _createClass(MultiSuperRootNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.gte(Decimal.tetrate(10, 9e15, 1))) {
@@ -8664,7 +8562,6 @@ var MultiSuperRootNotation = /*#__PURE__*/function (_Notation2) {
       }).reverse();
     }
   }]);
-  return MultiSuperRootNotation;
 }(Notation);
 /**
  * A variant of super-root notation that uses a different super-root height depending on how large the number is.
@@ -8678,8 +8575,6 @@ var MultiSuperRootNotation = /*#__PURE__*/function (_Notation2) {
  * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
  */
 var IncreasingSuperRootNotation = /*#__PURE__*/function (_Notation3) {
-  _inherits(IncreasingSuperRootNotation, _Notation3);
-  var _super3 = _createSuper(IncreasingSuperRootNotation);
   function IncreasingSuperRootNotation() {
     var _this3;
     var maxnum = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 65536;
@@ -8691,7 +8586,7 @@ var IncreasingSuperRootNotation = /*#__PURE__*/function (_Notation3) {
     var innerNotation = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : new DefaultNotation();
     var baseInnerNotation = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : innerNotation;
     _classCallCheck(this, IncreasingSuperRootNotation);
-    _this3 = _super3.call(this);
+    _this3 = _callSuper(this, IncreasingSuperRootNotation);
     _this3._maxnum = new Decimal(65536);
     _this3._minHeight = 2;
     _this3._engineerings = [Decimal.dOne];
@@ -8711,7 +8606,8 @@ var IncreasingSuperRootNotation = /*#__PURE__*/function (_Notation3) {
     _this3.baseInnerNotation = baseInnerNotation;
     return _this3;
   }
-  _createClass(IncreasingSuperRootNotation, [{
+  _inherits(IncreasingSuperRootNotation, _Notation3);
+  return _createClass(IncreasingSuperRootNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.innerNotation.format(0);
@@ -8754,7 +8650,6 @@ var IncreasingSuperRootNotation = /*#__PURE__*/function (_Notation3) {
       }).reverse();
     }
   }]);
-  return IncreasingSuperRootNotation;
 }(Notation);
 
 /**
@@ -8776,8 +8671,6 @@ var IncreasingSuperRootNotation = /*#__PURE__*/function (_Notation3) {
  * @param recipString ( [string, string] | null ) When a number is written in terms of its reciprocal, recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is null, which means recipString is set to ["(", ")" + powerString[0] + -1 + powerString[1]], where that -1 is however powerInnerNotation writes -1.
  */
 var PrimeNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(PrimeNotation, _Notation);
-  var _super = _createSuper(PrimeNotation);
   function PrimeNotation() {
     var _this;
     var maxPrime = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10000;
@@ -8794,7 +8687,7 @@ var PrimeNotation = /*#__PURE__*/function (_Notation) {
     var powerInnerNotation = arguments.length > 11 && arguments[11] !== undefined ? arguments[11] : baseInnerNotation;
     var recipString = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : null;
     _classCallCheck(this, PrimeNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, PrimeNotation);
     _this._maxPrime = 10000;
     _this.max_tower_height = 5;
     _this.fractionPrecision = -1e-6;
@@ -8824,7 +8717,8 @@ var PrimeNotation = /*#__PURE__*/function (_Notation) {
     _this.recipString = recipString;
     return _this;
   }
-  _createClass(PrimeNotation, [{
+  _inherits(PrimeNotation, _Notation);
+  return _createClass(PrimeNotation, [{
     key: "formatNegativeDecimal",
     value: function formatNegativeDecimal(value) {
       return this.baseInnerNotation.format(-1) + this.multiplicationString + this.formatDecimal(value);
@@ -8900,7 +8794,6 @@ var PrimeNotation = /*#__PURE__*/function (_Notation) {
       this._powerBase = powerBase;
     }
   }]);
-  return PrimeNotation;
 }(Notation);
 
 /**
@@ -8919,8 +8812,6 @@ var PrimeNotation = /*#__PURE__*/function (_Notation) {
  * Since this notation relies on its base to format the numbers themselves, it does not have an innerNotation parameter.
  */
 var PsiDashNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(PsiDashNotation, _Notation);
-  var _super = _createSuper(PsiDashNotation);
   function PsiDashNotation() {
     var _this;
     var maxEntries = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [2, 4, 6, 8];
@@ -8930,7 +8821,7 @@ var PsiDashNotation = /*#__PURE__*/function (_Notation) {
     var letters = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : ["E", "F", "G", "H"];
     var recipString = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
     _classCallCheck(this, PsiDashNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, PsiDashNotation);
     _this._maxEntries = [2, 4, 6, 8];
     _this._maxPrecision = 10;
     _this.dashString = "-";
@@ -8945,7 +8836,8 @@ var PsiDashNotation = /*#__PURE__*/function (_Notation) {
     _this.recipString = recipString;
     return _this;
   }
-  _createClass(PsiDashNotation, [{
+  _inherits(PsiDashNotation, _Notation);
+  return _createClass(PsiDashNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       var currentValue = value;
@@ -9061,7 +8953,6 @@ var PsiDashNotation = /*#__PURE__*/function (_Notation) {
       this._maxPrecision = maxPrecision;
     }
   }]);
-  return PsiDashNotation;
 }(Notation);
 
 /**
@@ -9090,8 +8981,6 @@ var PsiDashNotation = /*#__PURE__*/function (_Notation) {
  * @param hypermantissaPower ( number ) Normally, the payload in hyperlayer format is bounded by 1 and requirement, which corresponds to the default hypermantissaPower of 0. If hypermantissaPower is 1, the bounds are requirement and divisorAtLayer(requirement), if hypermantissaPower is 2 then the bounds are divisorAtLayer(requirement) and divisorAtLayer(divisorAtLayer(requirement)), and so on. For example, with a requirement of 1e12, a number normally represented as "{10} 100" would become "{9} [1] 100" with 1 hypermantissaPower and "{8} [[1] 100]" with 2 hypermantissaPower.
  */
 var PrestigeLayerNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(PrestigeLayerNotation, _Notation);
-  var _super = _createSuper(PrestigeLayerNotation);
   function PrestigeLayerNotation(root, requirement) {
     var _this;
     var recursive = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
@@ -9107,7 +8996,7 @@ var PrestigeLayerNotation = /*#__PURE__*/function (_Notation) {
     var hyperlayerBefore = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : true;
     var hypermantissaPower = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : 0;
     _classCallCheck(this, PrestigeLayerNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, PrestigeLayerNotation);
     _this.recursive = false;
     _this._rampings = [];
     _this.layerChars = ["[", "] "];
@@ -9148,7 +9037,8 @@ var PrestigeLayerNotation = /*#__PURE__*/function (_Notation) {
     _this.hypermantissaPower = hypermantissaPower;
     return _this;
   }
-  _createClass(PrestigeLayerNotation, [{
+  _inherits(PrestigeLayerNotation, _Notation);
+  return _createClass(PrestigeLayerNotation, [{
     key: "calculateCheckpoints",
     value: function calculateCheckpoints(root, requirement, rampings) {
       var checkpoints = [[Decimal.dZero, root, requirement, Decimal.dOne, Decimal.dOne]];
@@ -9438,7 +9328,6 @@ var PrestigeLayerNotation = /*#__PURE__*/function (_Notation) {
       this._rampings = rampingsD;
     }
   }]);
-  return PrestigeLayerNotation;
 }(Notation);
 
 /**
@@ -9504,8 +9393,6 @@ var PrestigeLayerNotation = /*#__PURE__*/function (_Notation) {
  * @param recipString ( [string, string] | null ) When a number is written in terms of its reciprocal, recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is null, which means recipString is set to ["1 / (", ")"], where that 1 is however 1 is written in plainInnerNotation.
  */
 var IncreasingOperatorNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(IncreasingOperatorNotation, _Notation);
-  var _super = _createSuper(IncreasingOperatorNotation);
   function IncreasingOperatorNotation() {
     var _this;
     var bases = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
@@ -9524,7 +9411,7 @@ var IncreasingOperatorNotation = /*#__PURE__*/function (_Notation) {
     var minnum = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : undefined;
     var recipString = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
     _classCallCheck(this, IncreasingOperatorNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, IncreasingOperatorNotation);
     _this.name = "Increasing Operator Notation";
     if (!Array.isArray(bases)) bases = [bases];
     _this._bases = bases.map(toDecimal);
@@ -9600,7 +9487,8 @@ var IncreasingOperatorNotation = /*#__PURE__*/function (_Notation) {
     _this.recipString = recipString;
     return _this;
   }
-  _createClass(IncreasingOperatorNotation, [{
+  _inherits(IncreasingOperatorNotation, _Notation);
+  return _createClass(IncreasingOperatorNotation, [{
     key: "setMaximums",
     value: function setMaximums(thresholds) {
       var argumentMaximums = []; //The highest number allowed to stand on its own on each operator before another symbol of that operator is brought in
@@ -9987,7 +9875,6 @@ var IncreasingOperatorNotation = /*#__PURE__*/function (_Notation) {
       this._innerNotations = innerNotations;
     }
   }]);
-  return IncreasingOperatorNotation;
 }(Notation);
 
 /**
@@ -10010,8 +9897,6 @@ var IncreasingOperatorNotation = /*#__PURE__*/function (_Notation) {
  * @param recipString ( [string, string] | null ) When a number is written in terms of its reciprocal, recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is null, which means recipString is set to ["1 / ", ""], where that 1 is however 1 is written in plainInnerNotation.
  */
 var PolygonalNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(PolygonalNotation, _Notation);
-  var _super = _createSuper(PolygonalNotation);
   function PolygonalNotation() {
     var _this;
     var sides = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3;
@@ -10025,7 +9910,7 @@ var PolygonalNotation = /*#__PURE__*/function (_Notation) {
     var minnum = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : polygon(0.1, sides);
     var recipString = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : null;
     _classCallCheck(this, PolygonalNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, PolygonalNotation);
     _this._sides = new Decimal(3);
     _this.polyChars = [["△", ""], ["△(", ")"], ["△△", ""], ["△△(", ")"], ["△△△", ""], ["△△△(", ")"]];
     _this._maxnum = new Decimal(26796);
@@ -10049,7 +9934,8 @@ var PolygonalNotation = /*#__PURE__*/function (_Notation) {
     _this.recipString = recipString;
     return _this;
   }
-  _createClass(PolygonalNotation, [{
+  _inherits(PolygonalNotation, _Notation);
+  return _createClass(PolygonalNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.lt(this._minnum)) {
@@ -10110,7 +9996,6 @@ var PolygonalNotation = /*#__PURE__*/function (_Notation) {
       this._minnum = minnumD;
     }
   }]);
-  return PolygonalNotation;
 }(Notation);
 
 /**
@@ -10138,8 +10023,6 @@ var PolygonalNotation = /*#__PURE__*/function (_Notation) {
  * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal, recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is null, which means recipString is set to ["1 / (", ")"], where that "1 / " is actually the concatenation of (how coefficientInnerNotation formats 1) and divisionSign.
  */
 var DoubleFactorialsNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(DoubleFactorialsNotation, _Notation);
-  var _super = _createSuper(DoubleFactorialsNotation);
   function DoubleFactorialsNotation() {
     var _this;
     var minDF = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 3;
@@ -10159,7 +10042,7 @@ var DoubleFactorialsNotation = /*#__PURE__*/function (_Notation) {
     var factorialInnerNotation = arguments.length > 14 && arguments[14] !== undefined ? arguments[14] : null;
     var recipString = arguments.length > 15 && arguments[15] !== undefined ? arguments[15] : null;
     _classCallCheck(this, DoubleFactorialsNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, DoubleFactorialsNotation);
     _this._minDF = new Decimal(3);
     _this._maxDF = new Decimal(3628800);
     _this.reverseTerms = false;
@@ -10197,7 +10080,8 @@ var DoubleFactorialsNotation = /*#__PURE__*/function (_Notation) {
     _this.recipString = recipString;
     return _this;
   }
-  _createClass(DoubleFactorialsNotation, [{
+  _inherits(DoubleFactorialsNotation, _Notation);
+  return _createClass(DoubleFactorialsNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.coefficientInnerNotation.format(0);
@@ -10293,7 +10177,6 @@ var DoubleFactorialsNotation = /*#__PURE__*/function (_Notation) {
       this._maxTerms = maxTerms;
     }
   }]);
-  return DoubleFactorialsNotation;
 }(Notation);
 
 /**
@@ -10317,8 +10200,6 @@ var DoubleFactorialsNotation = /*#__PURE__*/function (_Notation) {
  * This notation does not have an InnerNotation parameter.
  */
 var GridNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(GridNotation, _Notation);
-  var _super = _createSuper(GridNotation);
   function GridNotation() {
     var _this;
     var width = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
@@ -10333,7 +10214,7 @@ var GridNotation = /*#__PURE__*/function (_Notation) {
     var minimumSizes = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : [width, height, 1];
     var backwards = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : [false, false, false];
     _classCallCheck(this, GridNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, GridNotation);
     _this._width = 8;
     _this._height = 8;
     _this._digits = ["□", "■"];
@@ -10359,7 +10240,8 @@ var GridNotation = /*#__PURE__*/function (_Notation) {
     _this.backwards = backwards;
     return _this;
   }
-  _createClass(GridNotation, [{
+  _inherits(GridNotation, _Notation);
+  return _createClass(GridNotation, [{
     key: "nextDigit",
     value: function nextDigit(value) {
       return [value.mod(this._digits.length), value.div(this._digits.length).floor()];
@@ -10503,7 +10385,6 @@ var GridNotation = /*#__PURE__*/function (_Notation) {
       this._digits = digits;
     }
   }]);
-  return GridNotation;
 }(Notation);
 
 /**
@@ -10543,8 +10424,6 @@ var GridNotation = /*#__PURE__*/function (_Notation) {
  * @param minimumTermRounding ( DecimalSource | ((value : Decimal) => Decimal) ) If the expression includes the minimum term, the minimum term is rounded to the nearest multiple of this value. If this parameter is a function, then the minimum term is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
  */
 var PolynomialNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(PolynomialNotation, _Notation);
-  var _super = _createSuper(PolynomialNotation);
   function PolynomialNotation() {
     var _this;
     var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
@@ -10575,7 +10454,7 @@ var PolynomialNotation = /*#__PURE__*/function (_Notation) {
     var precision = arguments.length > 25 && arguments[25] !== undefined ? arguments[25] : 1.2e-16;
     var minimumTermRounding = arguments.length > 26 && arguments[26] !== undefined ? arguments[26] : 0;
     _classCallCheck(this, PolynomialNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, PolynomialNotation);
     _this._value = Decimal.dTen;
     _this.formatExponents = 1;
     _this.minimumTerm = Decimal.dZero;
@@ -10632,7 +10511,8 @@ var PolynomialNotation = /*#__PURE__*/function (_Notation) {
     _this.minimumTermRounding = minimumTermRounding;
     return _this;
   }
-  _createClass(PolynomialNotation, [{
+  _inherits(PolynomialNotation, _Notation);
+  return _createClass(PolynomialNotation, [{
     key: "format",
     value: function format(value) {
       var decimal = toDecimal(value);
@@ -10662,67 +10542,69 @@ var PolynomialNotation = /*#__PURE__*/function (_Notation) {
       }
       var baseString = this.variableStr;
       var bottomExps = value.slog(this._value, 100, true).sub(this.maxSingleTerm.slog(this._value, 100, true)).plus(1).floor().max(0);
-      value = value.iteratedlog(this._value, bottomExps.toNumber(), true);
-      var currentValue = value;
-      var bottom = value.mul(this.precision);
-      var roundingMultiple = typeof this.minimumTermRounding == "function" ? this.minimumTermRounding(value.mod(this._value.pow(this.minimumTerm))) : toDecimal(this.minimumTermRounding);
-      currentValue = round(currentValue, roundingMultiple);
-      var termsSoFar = 0;
-      var maxTerms = currentValue.lt(this.maxMultiTerm) ? this._maxTerms : 1;
-      var power = currentValue.log(this._value).floor().plus(1);
-      while (termsSoFar < maxTerms && (currentValue.gte(bottom) || this.showZeroTerms > 0)) {
-        termsSoFar++;
-        if (this.showZeroTerms >= 0) power = power.sub(1);else power = currentValue.log(this._value).floor();
-        if (power.lt(this.minimumTerm)) power = this.minimumTerm;
-        var powerNum = this._value.pow(power);
-        var coefficient = currentValue.div(powerNum);
-        if (power.gt(this.minimumTerm)) {
-          if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
-          if (this.showZeroTerms < 0) {
-            while (coefficient.gte(this._value)) {
-              power = power.plus(1);
-              powerNum = this._value.pow(power);
-              coefficient = currentValue.div(powerNum);
-              if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
+      if (bottomExps.lt(9e15)) {
+        value = value.iteratedlog(this._value, bottomExps.toNumber(), true);
+        var currentValue = value;
+        var bottom = value.mul(this.precision);
+        var roundingMultiple = typeof this.minimumTermRounding == "function" ? this.minimumTermRounding(value.mod(this._value.pow(this.minimumTerm))) : toDecimal(this.minimumTermRounding);
+        currentValue = round(currentValue, roundingMultiple);
+        var termsSoFar = 0;
+        var maxTerms = currentValue.lt(this.maxMultiTerm) ? this._maxTerms : 1;
+        var power = currentValue.log(this._value).floor().plus(1);
+        while (termsSoFar < maxTerms && (currentValue.gte(bottom) || this.showZeroTerms > 0)) {
+          termsSoFar++;
+          if (this.showZeroTerms >= 0) power = power.sub(1);else power = currentValue.log(this._value).floor();
+          if (power.lt(this.minimumTerm)) power = this.minimumTerm;
+          var powerNum = this._value.pow(power);
+          var coefficient = currentValue.div(powerNum);
+          if (power.gt(this.minimumTerm)) {
+            if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
+            if (this.showZeroTerms < 0) {
+              while (coefficient.gte(this._value)) {
+                power = power.plus(1);
+                powerNum = this._value.pow(power);
+                coefficient = currentValue.div(powerNum);
+                if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
+              }
+              while (coefficient.lt(1)) {
+                power = power.sub(1);
+                powerNum = this._value.pow(power);
+                coefficient = currentValue.div(powerNum);
+                if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
+              }
             }
-            while (coefficient.lt(1)) {
-              power = power.sub(1);
-              powerNum = this._value.pow(power);
-              coefficient = currentValue.div(powerNum);
-              if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
+          } else coefficient = round(coefficient, this.minimumTermRounding);
+          var subresult = "";
+          if (power.eq(0)) subresult = this.constantStrings[0] + this.innerNotation.format(coefficient) + this.constantStrings[1];else {
+            var reciprocal = false;
+            if (this.fractionInverse && power.lt(0)) {
+              reciprocal = true;
+              power = power.abs();
+            }
+            var powerString = "";
+            if (this.formatExponents != 0 && (this.unitPowerShown || power.neq(1))) {
+              if (this.formatExponents > 0) powerString = this.format(power);else powerString = this.innerNotation.format(power);
+              if (this.parenthesizePower > 0 || this.parenthesizePower == 0 && power.abs().gte(this._value) && this.formatExponents > 0) powerString = "(" + powerString + ")";
+              powerString = this.powerStrings[0] + powerString + this.powerStrings[1];
+            }
+            powerString = baseString + powerString;
+            var coefficientString = "";
+            if (coefficient.neq(1) || this.unitCoefficientShown[0] && !reciprocal || this.unitCoefficientShown[1] && reciprocal) {
+              coefficientString = this.innerNotation.format(coefficient);
+              coefficientString = this.coefficientStrings[0] + coefficientString + this.coefficientStrings[1];
+            }
+            subresult = powerString;
+            var usedSign = reciprocal ? this.divisionSign : this.multiplicationSign;
+            if (coefficientString) {
+              if (this.multiplicationBefore) subresult = coefficientString + usedSign + powerString;else subresult = powerString + usedSign + coefficientString;
             }
           }
-        } else coefficient = round(coefficient, this.minimumTermRounding);
-        var subresult = "";
-        if (power.eq(0)) subresult = this.constantStrings[0] + this.innerNotation.format(coefficient) + this.constantStrings[1];else {
-          var reciprocal = false;
-          if (this.fractionInverse && power.lt(0)) {
-            reciprocal = true;
-            power = power.abs();
+          result += subresult;
+          if (power.lte(this.minimumTerm)) break;
+          currentValue = currentValue.sub(powerNum.mul(coefficient));
+          if (termsSoFar < maxTerms && (currentValue.gt(bottom) || this.showZeroTerms > 0)) {
+            if (negative) result += this.subtractionSign;else result += this.additionSign;
           }
-          var powerString = "";
-          if (this.formatExponents != 0 && (this.unitPowerShown || power.neq(1))) {
-            if (this.formatExponents > 0) powerString = this.format(power);else powerString = this.innerNotation.format(power);
-            if (this.parenthesizePower > 0 || this.parenthesizePower == 0 && power.abs().gte(this._value) && this.formatExponents > 0) powerString = "(" + powerString + ")";
-            powerString = this.powerStrings[0] + powerString + this.powerStrings[1];
-          }
-          powerString = baseString + powerString;
-          var coefficientString = "";
-          if (coefficient.neq(1) || this.unitCoefficientShown[0] && !reciprocal || this.unitCoefficientShown[1] && reciprocal) {
-            coefficientString = this.innerNotation.format(coefficient);
-            coefficientString = this.coefficientStrings[0] + coefficientString + this.coefficientStrings[1];
-          }
-          subresult = powerString;
-          var usedSign = reciprocal ? this.divisionSign : this.multiplicationSign;
-          if (coefficientString) {
-            if (this.multiplicationBefore) subresult = coefficientString + usedSign + powerString;else subresult = powerString + usedSign + coefficientString;
-          }
-        }
-        result += subresult;
-        if (power.lte(this.minimumTerm)) break;
-        currentValue = currentValue.sub(powerNum.mul(coefficient));
-        if (termsSoFar < maxTerms && (currentValue.gt(bottom) || this.showZeroTerms > 0)) {
-          if (negative) result += this.subtractionSign;else result += this.additionSign;
         }
       }
       if (bottomExps.gt(0) && bottomExps.lte(this.maxExps)) {
@@ -10756,7 +10638,6 @@ var PolynomialNotation = /*#__PURE__*/function (_Notation) {
       this._maxTerms = maxTerms;
     }
   }]);
-  return PolynomialNotation;
 }(Notation);
 
 /**
@@ -10794,8 +10675,6 @@ var PolynomialNotation = /*#__PURE__*/function (_Notation) {
  * This notation does not have an innerNotation parameter.
  */
 var LetterDigitsNotation = /*#__PURE__*/function (_Notation) {
-  _inherits(LetterDigitsNotation, _Notation);
-  var _super = _createSuper(LetterDigitsNotation);
   function LetterDigitsNotation() {
     var _this;
     var letters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [lowercaseAlphabet, uppercaseAlphabet, ["@"]];
@@ -10818,7 +10697,7 @@ var LetterDigitsNotation = /*#__PURE__*/function (_Notation) {
     var fixedLetters = arguments.length > 17 && arguments[17] !== undefined ? arguments[17] : [[], [], []];
     var concatenation = arguments.length > 18 && arguments[18] !== undefined ? arguments[18] : [null, null, null];
     _classCallCheck(this, LetterDigitsNotation);
-    _this = _super.call(this);
+    _this = _callSuper(this, LetterDigitsNotation);
     _this._letters = [lowercaseAlphabet, uppercaseAlphabet, ["@"]];
     _this._negaLetters = [-1, -1, -1];
     _this._max_letters = 9;
@@ -10860,7 +10739,8 @@ var LetterDigitsNotation = /*#__PURE__*/function (_Notation) {
     _this.concatenation = concatenation;
     return _this;
   }
-  _createClass(LetterDigitsNotation, [{
+  _inherits(LetterDigitsNotation, _Notation);
+  return _createClass(LetterDigitsNotation, [{
     key: "formatDecimal",
     value: function formatDecimal(value) {
       if (value.eq(0)) return BaseConvert(0, this._letters[0], 0, 0, this._negaLetters[0], 0, -1, this.reverseLetters, this.commaSpacing, this.commaChars, undefined, undefined, undefined, this.specialLetters[0], this.concatenation[0]);
@@ -10980,7 +10860,6 @@ var LetterDigitsNotation = /*#__PURE__*/function (_Notation) {
       this._fraction = fraction;
     }
   }]);
-  return LetterDigitsNotation;
 }(Notation);
 
 /**
@@ -11335,8 +11214,8 @@ Presets.Alphabet = new LettersNotation([["~", "a", "b", "c", "d", "e", "f", "g",
 Presets.GreekLetters = new LettersNotation([["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω"], ["Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"], ["Ϝ"]], -1, defaultRound).setName("Greek Letters");
 Presets.GreekAlphabet = new LettersNotation([["ϙ", "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω", "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"], ["ϙ", "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω", "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"], ["ϙ", "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω", "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"]], 0, alphabetRound, 1000, 9, "", "", "|", true, new DefaultNotation(-3, -3), 0, false, true).setName("Greek Alphabet");
 Presets.ADGreekLetters = new LettersNotation([["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω", "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"], ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω", "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"], ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω", "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"]], -1, defaultRound, 1000, 9, "", "", "|", true, new DefaultNotation(), 0, false, true).setName("AD Greek Letters");
-Presets.Emoji = new LettersNotation([["😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡"], ["🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "👁️‍🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"], ["𓁨"]], -1, defaultRound).setName("Emoji");
-Presets.EmojiAlphabet = new LettersNotation([["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "👁️‍🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"], ["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "👁️‍🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"], ["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "👁️‍🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"]], 0, alphabetRound, 1000, 9, "", "", "|", true, new DefaultNotation(-3, -3), 0, false, true).setName("Emoji Alphabet");
+Presets.Emoji = new LettersNotation([["😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡"], ["🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"], ["𓁨"]], -1, defaultRound).setName("Emoji");
+Presets.EmojiAlphabet = new LettersNotation([["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"], ["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"], ["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"]], 0, alphabetRound, 1000, 9, "", "", "|", true, new DefaultNotation(-3, -3), 0, false, true).setName("Emoji Alphabet");
 Presets.XYZ = new LettersNotation([["X"], ["Y"], ["Z"]], 0, defaultRound, 10, 9, "", "", "", false, new DefaultNotation(), 5).setName("XYZ");
 Presets.ElementLetters = new LettersNotation([["H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Eb", "Tm", "Yb", "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"], ["H\u0305", "H\u0305e\u0305", "L\u0305i\u0305", "B\u0305e\u0305", "B\u0305", "C\u0305", "N\u0305", "O\u0305", "F\u0305", "N\u0305e\u0305", "N\u0305a\u0305", "M\u0305g\u0305", "A\u0305l\u0305", "S\u0305i\u0305", "P\u0305", "S\u0305", "C\u0305l\u0305", "A\u0305r\u0305", "K\u0305", "C\u0305a\u0305", "S\u0305c\u0305", "T\u0305i\u0305", "V\u0305", "C\u0305r\u0305", "M\u0305n\u0305", "F\u0305e\u0305", "C\u0305o\u0305", "N\u0305i\u0305", "C\u0305u\u0305", "Z\u0305n\u0305", "G\u0305a\u0305", "G\u0305e\u0305", "A\u0305s\u0305", "S\u0305e\u0305", "B\u0305r\u0305", "K\u0305r\u0305", "R\u0305b\u0305", "S\u0305r\u0305", "Y\u0305", "Z\u0305r\u0305", "N\u0305b\u0305", "M\u0305o\u0305", "T\u0305c\u0305", "R\u0305u\u0305", "R\u0305h\u0305", "P\u0305d\u0305", "A\u0305g\u0305", "C\u0305d\u0305", "I\u0305n\u0305", "S\u0305n\u0305", "S\u0305b\u0305", "T\u0305e\u0305", "I\u0305", "X\u0305e\u0305", "C\u0305s\u0305", "B\u0305a\u0305", "L\u0305a\u0305", "C\u0305e\u0305", "P\u0305r\u0305", "N\u0305d\u0305", "P\u0305m\u0305", "S\u0305m\u0305", "E\u0305u\u0305", "G\u0305d\u0305", "T\u0305b\u0305", "D\u0305y\u0305", "H\u0305o\u0305", "E\u0305b\u0305", "T\u0305m\u0305", "Y\u0305b\u0305", "L\u0305u\u0305", "H\u0305f\u0305", "T\u0305a\u0305", "W\u0305", "R\u0305e\u0305", "O\u0305s\u0305", "I\u0305r\u0305", "P\u0305t\u0305", "A\u0305u\u0305", "H\u0305g\u0305", "T\u0305l\u0305", "P\u0305b\u0305", "B\u0305i\u0305", "P\u0305o\u0305", "A\u0305t\u0305", "R\u0305n\u0305", "F\u0305r\u0305", "R\u0305a\u0305", "A\u0305c\u0305", "T\u0305h\u0305", "P\u0305a\u0305", "U\u0305", "N\u0305p\u0305", "P\u0305u\u0305", "A\u0305m\u0305", "C\u0305m\u0305", "B\u0305k\u0305", "C\u0305f\u0305", "E\u0305s\u0305", "F\u0305m\u0305", "M\u0305d\u0305", "N\u0305o\u0305", "L\u0305r\u0305", "R\u0305f\u0305", "D\u0305b\u0305", "S\u0305g\u0305", "B\u0305h\u0305", "H\u0305s\u0305", "M\u0305t\u0305", "D\u0305s\u0305", "R\u0305g\u0305", "C\u0305n\u0305", "N\u0305h\u0305", "F\u0305l\u0305", "M\u0305c\u0305", "L\u0305v\u0305", "T\u0305s\u0305", "O\u0305g\u0305"], ["☢"]], -1, defaultRound, 118, 12, " ", "", "", false, undefined, 5, undefined, undefined, ["", "-"], undefined, undefined, [[true, "[", "]", new DefaultNotation()], [true, "[", "]", new DefaultNotation()], null]).setName("Element Letters");
 HTMLPresets.Letters = _construct(LettersNotation, _arrayWithoutHoles([,,]).concat([defaultRound])).setName("Letters");
@@ -11344,8 +11223,8 @@ HTMLPresets.Alphabet = new LettersNotation([["~", "a", "b", "c", "d", "e", "f", 
 HTMLPresets.GreekLetters = new LettersNotation([["&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;"], ["&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"], ["&#x3DC;"]], -1, defaultRound).setName("Greek Letters");
 HTMLPresets.GreekAlphabet = new LettersNotation([["&#x3D9;", "&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;", "&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"], ["&#x3D9;", "&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;", "&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"], ["&#x3D9;", "&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;", "&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"]], 0, alphabetRound, 1000, 9, "", "", "|", true, new DefaultNotation(-3, -3), 0, false, true).setName("Greek Alphabet");
 HTMLPresets.ADGreekLetters = new LettersNotation([["&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;", "&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"], ["&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;", "&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"], ["&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;", "&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"]], -1, defaultRound, 1000, 9, "", "", "|", true, new DefaultNotation(), 0, false, true).setName("AD Greek Letters");
-HTMLPresets.Emoji = new LettersNotation([["&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;"], ["&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F441;&#xFE0F;&#x200D;&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"], ["&#x13068;"]], -1, defaultRound).setName("Emoji");
-HTMLPresets.EmojiAlphabet = new LettersNotation([["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F441;&#xFE0F;&#x200D;&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"], ["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F441;&#xFE0F;&#x200D;&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"], ["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F441;&#xFE0F;&#x200D;&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"]], 0, alphabetRound, 1000, 9, "", "", "|", true, new DefaultNotation(-3, -3), 0, false, true).setName("Emoji Alphabet");
+HTMLPresets.Emoji = new LettersNotation([["&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;"], ["&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"], ["&#x13068;"]], -1, defaultRound).setName("Emoji");
+HTMLPresets.EmojiAlphabet = new LettersNotation([["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"], ["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"], ["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"]], 0, alphabetRound, 1000, 9, "", "", "|", true, new DefaultNotation(-3, -3), 0, false, true).setName("Emoji Alphabet");
 HTMLPresets.XYZ = new LettersNotation([["X"], ["Y"], ["Z"]], 0, defaultRound, 10, 9, "", "", "", false, new DefaultNotation(), 5).setName("XYZ");
 HTMLPresets.ElementLetters = new LettersNotation([["H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Eb", "Tm", "Yb", "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"], ["<span style='text-decoration: overline'>H</span>", "<span style='text-decoration: overline'>He</span>", "<span style='text-decoration: overline'>Li</span>", "<span style='text-decoration: overline'>Be</span>", "<span style='text-decoration: overline'>B</span>", "<span style='text-decoration: overline'>C</span>", "<span style='text-decoration: overline'>N</span>", "<span style='text-decoration: overline'>O</span>", "<span style='text-decoration: overline'>F</span>", "<span style='text-decoration: overline'>Ne</span>", "<span style='text-decoration: overline'>Na</span>", "<span style='text-decoration: overline'>Mg</span>", "<span style='text-decoration: overline'>Al</span>", "<span style='text-decoration: overline'>Si</span>", "<span style='text-decoration: overline'>P</span>", "<span style='text-decoration: overline'>S</span>", "<span style='text-decoration: overline'>Cl</span>", "<span style='text-decoration: overline'>Ar</span>", "<span style='text-decoration: overline'>K</span>", "<span style='text-decoration: overline'>Ca</span>", "<span style='text-decoration: overline'>Sc</span>", "<span style='text-decoration: overline'>Ti</span>", "<span style='text-decoration: overline'>V</span>", "<span style='text-decoration: overline'>Cr</span>", "<span style='text-decoration: overline'>Mn</span>", "<span style='text-decoration: overline'>Fe</span>", "<span style='text-decoration: overline'>Co</span>", "<span style='text-decoration: overline'>Ni</span>", "<span style='text-decoration: overline'>Cu</span>", "<span style='text-decoration: overline'>Zn</span>", "<span style='text-decoration: overline'>Ga</span>", "<span style='text-decoration: overline'>Ge</span>", "<span style='text-decoration: overline'>As</span>", "<span style='text-decoration: overline'>Se</span>", "<span style='text-decoration: overline'>Br</span>", "<span style='text-decoration: overline'>Kr</span>", "<span style='text-decoration: overline'>Rb</span>", "<span style='text-decoration: overline'>Sr</span>", "<span style='text-decoration: overline'>Y</span>", "<span style='text-decoration: overline'>Zr</span>", "<span style='text-decoration: overline'>Nb</span>", "<span style='text-decoration: overline'>Mo</span>", "<span style='text-decoration: overline'>Tc</span>", "<span style='text-decoration: overline'>Ru</span>", "<span style='text-decoration: overline'>Rh</span>", "<span style='text-decoration: overline'>Pd</span>", "<span style='text-decoration: overline'>Ag</span>", "<span style='text-decoration: overline'>Cd</span>", "<span style='text-decoration: overline'>In</span>", "<span style='text-decoration: overline'>Sn</span>", "<span style='text-decoration: overline'>Sb</span>", "<span style='text-decoration: overline'>Te</span>", "<span style='text-decoration: overline'>I</span>", "<span style='text-decoration: overline'>Xe</span>", "<span style='text-decoration: overline'>Cs</span>", "<span style='text-decoration: overline'>Ba</span>", "<span style='text-decoration: overline'>La</span>", "<span style='text-decoration: overline'>Ce</span>", "<span style='text-decoration: overline'>Pr</span>", "<span style='text-decoration: overline'>Nd</span>", "<span style='text-decoration: overline'>Pm</span>", "<span style='text-decoration: overline'>Sm</span>", "<span style='text-decoration: overline'>Eu</span>", "<span style='text-decoration: overline'>Gd</span>", "<span style='text-decoration: overline'>Tb</span>", "<span style='text-decoration: overline'>Dy</span>", "<span style='text-decoration: overline'>Ho</span>", "<span style='text-decoration: overline'>Eb</span>", "<span style='text-decoration: overline'>Tm</span>", "<span style='text-decoration: overline'>Yb</span>", "<span style='text-decoration: overline'>Lu</span>", "<span style='text-decoration: overline'>Hf</span>", "<span style='text-decoration: overline'>Ta</span>", "<span style='text-decoration: overline'>W</span>", "<span style='text-decoration: overline'>Re</span>", "<span style='text-decoration: overline'>Os</span>", "<span style='text-decoration: overline'>Ir</span>", "<span style='text-decoration: overline'>Pt</span>", "<span style='text-decoration: overline'>Au</span>", "<span style='text-decoration: overline'>Hg</span>", "<span style='text-decoration: overline'>Tl</span>", "<span style='text-decoration: overline'>Pb</span>", "<span style='text-decoration: overline'>Bi</span>", "<span style='text-decoration: overline'>Po</span>", "<span style='text-decoration: overline'>At</span>", "<span style='text-decoration: overline'>Rn</span>", "<span style='text-decoration: overline'>Fr</span>", "<span style='text-decoration: overline'>Ra</span>", "<span style='text-decoration: overline'>Ac</span>", "<span style='text-decoration: overline'>Th</span>", "<span style='text-decoration: overline'>Pa</span>", "<span style='text-decoration: overline'>U</span>", "<span style='text-decoration: overline'>Np</span>", "<span style='text-decoration: overline'>Pu</span>", "<span style='text-decoration: overline'>Am</span>", "<span style='text-decoration: overline'>Cm</span>", "<span style='text-decoration: overline'>Bk</span>", "<span style='text-decoration: overline'>Cf</span>", "<span style='text-decoration: overline'>Es</span>", "<span style='text-decoration: overline'>Fm</span>", "<span style='text-decoration: overline'>Md</span>", "<span style='text-decoration: overline'>No</span>", "<span style='text-decoration: overline'>Lr</span>", "<span style='text-decoration: overline'>Rf</span>", "<span style='text-decoration: overline'>Db</span>", "<span style='text-decoration: overline'>Sg</span>", "<span style='text-decoration: overline'>Bh</span>", "<span style='text-decoration: overline'>Hs</span>", "<span style='text-decoration: overline'>Mt</span>", "<span style='text-decoration: overline'>Ds</span>", "<span style='text-decoration: overline'>Rg</span>", "<span style='text-decoration: overline'>Cn</span>", "<span style='text-decoration: overline'>Nh</span>", "<span style='text-decoration: overline'>Fl</span>", "<span style='text-decoration: overline'>Mc</span>", "<span style='text-decoration: overline'>Lv</span>", "<span style='text-decoration: overline'>Ts</span>", "<span style='text-decoration: overline'>Og</span>"], ["&#x2622;"]], -1, defaultRound, 118, 12, " ", "", "", false, undefined, 5, undefined, undefined, ["", "-"], undefined, undefined, [[true, "<sub>", "</sub>", new DefaultNotation()], [true, "<sub>", "</sub>", new DefaultNotation()], null]).setName("Element Letters");
 Presets.RomanNumerals = recipBelow(new NestedSignValueNotation([["M̅", 1000000], ["C̅M̅", 900000], ["D̅", 500000], ["C̅D̅", 400000], ["C̅", 100000], ["X̅C̅", 90000], ["L̅", 50000], ["X̅L̅", 40000], ["X̅", 10000], ["MX̅", 9000], ["V̅", 5000], ["MV̅", 4000], ["M", 1000], ["CM", 900], ["D", 500], ["CD", 400], ["C", 100], ["XC", 90], ["L", 50], ["XL", 40], ["X", 10], ["IX", 9], ["V", 5], ["IV", 4], ["I", 1], ["S", 0.5], ["⁙", 5 / 12], ["∷", 4 / 12], ["∴", 3 / 12], [":", 2 / 12], ["·", 1 / 12]], 1 / 12), 1 / 12, ["I / ", ""], "nulla").setName("Roman Numerals");

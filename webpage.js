@@ -8,6 +8,9 @@ document.getElementById("number_input_form").addEventListener("change", function
     entered = EternalNotations.toDecimal(document.getElementById("number_input").value);
     formatAll(entered);
 })
+document.getElementById("number_input_form").addEventListener("submit", function(e){
+    e.preventDefault();
+})
 for (e of document.getElementsByClassName("notation_group")) {
     let name = e.id.slice(6);
     e.addEventListener("click", function(){

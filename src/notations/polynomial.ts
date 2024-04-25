@@ -164,7 +164,8 @@ export class PolynomialNotation extends Notation {
         }
         let baseString = this.variableStr;
         let bottomExps = value.slog(this._value, 100, true).sub(this.maxSingleTerm.slog(this._value, 100, true)).plus(1).floor().max(0);
-        value = value.iteratedlog(this._value, bottomExps.toNumber(), true);
+        if (bottomExps.lt(9e15)) {
+            value = value.iteratedlog(this._value, bottomExps.toNumber(), true);
         let currentValue = value;
         let bottom = value.mul(this.precision);
         let roundingMultiple = (typeof this.minimumTermRounding == "function") ? this.minimumTermRounding(value.mod(this._value.pow(this.minimumTerm))) : toDecimal(this.minimumTermRounding);
@@ -232,6 +233,7 @@ export class PolynomialNotation extends Notation {
                 if (negative) result += this.subtractionSign;
                 else result += this.additionSign;
             }
+        }
         }
         if (bottomExps.gt(0) && bottomExps.lte(this.maxExps)) {
             result = this.expStrings[0][0] + result + this.expStrings[0][1];
