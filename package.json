@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "bili": "^5.0.5",
+    "rollup": "^4.16.4",
     "rollup-plugin-typescript2": "^0.36.0",
     "typescript": "^5.4.5"
   }

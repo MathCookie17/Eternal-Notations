@@ -1449,10 +1449,6 @@ function biPolygon(value, sides) {
     // But we'll need to get B experimentally, as both payload and sides influence it:
     var B = finalIteration.sub(C).div(A).root(Decimal.pow(2, iterationArray.length));
     iterationArray.push(finalIteration);
-    console.log(iterationArray);
-    console.log(A);
-    console.log(B);
-    console.log(C);
     var valueNum = valueD.toNumber();
     if (valueNum >= 0 && valueNum < iterationArray.length && valueNum % 1 == 0) return iterationArray[valueNum];else if (valueNum < iterationArray.length - 1) {
       // We'll use a linear approximation here: find the two closest whole-iteration values (from iterationArray), find their n's under A * B^2^n + C, and set that n to be between the two based on the given value
@@ -1764,6 +1760,7 @@ function triPolygonRoot(value, sides) {
     valueD = valueD.iteratedlog(10, safeIterations.mul(2).toNumber(), true);
     result += safeIterations.toNumber();
   }
+  if (result > 4.5e15) return new Decimal(result);
   while (valueD.gt(zeroValueD)) {
     result++;
     var newvalueD = biPolygonRoot(valueD, sidesD, baseD);
@@ -1782,7 +1779,6 @@ function triPolygonRoot(value, sides) {
       upper = result;
       has_changed_directions_once = true;
     }
-    console.log(result + " " + tp);
   }
   return new Decimal(result);
 }

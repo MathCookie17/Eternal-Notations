@@ -1349,10 +1349,6 @@ export function biPolygon(value : DecimalSource, sides : DecimalSource, payload 
         let B = finalIteration.sub(C).div(A).root(Decimal.pow(2, iterationArray.length));
     
         iterationArray.push(finalIteration);
-        console.log(iterationArray);
-        console.log(A);
-        console.log(B);
-        console.log(C);
         let valueNum = valueD.toNumber();
         if (valueNum >= 0 && valueNum < iterationArray.length && valueNum % 1 == 0) return iterationArray[valueNum];
         else if (valueNum < iterationArray.length - 1) {
@@ -1693,6 +1689,7 @@ export function triPolygonRoot(value : DecimalSource, sides : DecimalSource, bas
         valueD = valueD.iteratedlog(10, safeIterations.mul(2).toNumber(), true);
         result += safeIterations.toNumber();
     }
+    if (result > 4.5e15) return new Decimal(result);
     while (valueD.gt(zeroValueD)) {
         result++;
         let newvalueD = biPolygonRoot(valueD, sidesD, baseD);
@@ -1714,7 +1711,6 @@ export function triPolygonRoot(value : DecimalSource, sides : DecimalSource, bas
             upper = result;
             has_changed_directions_once = true;
         }
-        console.log(result + " " + tp);
     }
     return new Decimal(result);
 }
