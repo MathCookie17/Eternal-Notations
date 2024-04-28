@@ -1,3 +1,15 @@
+let continuousStatus = 0;
+let continuousIteration = 0;
+let continuousTimer;
+let continuousWorker;
+let continuousErrors = [];
+
+window.addEventListener('keydown', (e) => {
+    if (e.key == "i") output(continuousIteration);
+    if (e.key == "e") output(continuousErrors);
+}
+)
+
 let specialValues = [
     "0", "1", "1.0000000001", "1.01", "1.5", "2", Math.E, "3", "10", "100", "1000", "1e4", "999999", "1e6", "1e9", "1e10", "1e12", "9.9999e15", "1e21", "1e100",
     "2^1024", "2^^5", "F3", "3^^4", "e1e100", "F4", "F4.5", "F5", "F10", "F100", "F1e10", "F1e100", "F1e308",
@@ -5,6 +17,7 @@ let specialValues = [
 
 // test_preset("Default");
 // test_PhysicalScale()
+continuousPresetTest();
 
 function test_preset(name, ...args) {
     let TextPreset = (name == "ColoredDominoes") ? null : EternalNotations.Presets[name];
@@ -95,8 +108,46 @@ function test_PhysicalScale() {
 
 
 // Known "failed" tests (these are bugs and should probably be fixed eventually):
-/**
+/*
  * 12^12 in Dozenal's variants (returns 10#B instead of 1#10 for Duodecimal, and likewise for the other two)
  * 6 * 5! for 720 in Factorial Scientific
  * There are a lot of +2's in Polynomial Base 2, but I'm not sure how to fix those at this point
  */
+
+/**
+ * Runs testAll continuously, logging any "this notation crashes/hangs" errors it finds. Uses a Worker to ensure truly asynchronous running of the presets, so even if a preset hangs, it will be detected rather than killing the program.
+ */
+async function continuousPresetTest() {
+    while (continuousStatus != -1) {
+        let decimalSize = Math.floor(Math.random() * 8);
+        let negative = (Math.random() > 0.5);
+        let recip = (Math.random() > 0.5);
+        let testedDecimal;
+        if (decimalSize < 4) testedDecimal = Decimal.iteratedexp(Math.random() * 9 + 1, decimalSize);
+        else if (decimalSize == 4) testedDecimal = Decimal.tetrate(10, Math.random() * 16 + 4, 1, true);
+        else if (decimalSize == 5) testedDecimal = Decimal.tetrate(10, Math.pow(10, Math.random() * 15), 1, true);
+        else if (decimalSize == 6) testedDecimal = Decimal.tetrate(10, Math.pow(10, Math.random() + 15), 1, true); // F1e15 to F1e16 deserves special attention - lots of errors occur in this range.
+        else if (decimalSize == 7) testedDecimal = Decimal.tetrate(10, Math.pow(10, Math.random() * 308), 1, true);
+        else testedDecimal = Decimal.dZero; //This shouldn't happen
+        if (recip) testedDecimal = testedDecimal.recip();
+        if (negative) testedDecimal = testedDecimal.neg();
+        testedDecimal = testedDecimal.toString();
+        continuousWorker = new Worker("./preset_testing_worker.js");
+        continuousWorker.onmessage = function(e) { if (continuousStatus == 0) continuousStatus = 1; }
+        continuousWorker.onerror = function(e) { continuousStatus = -2; }
+        continuousWorker.postMessage(testedDecimal);
+        continuousTimer = setTimeout(function(){continuousStatus = -1;}, 5000);
+        while (continuousStatus == 0) {
+            await new Promise(resolve => setTimeout(resolve, 1));
+        }
+        continuousWorker.terminate();
+        clearTimeout(continuousTimer);
+        if (continuousStatus < 0) {
+            console.log("A failure occured while testing " + testedDecimal + ", of type " + continuousStatus);
+            continuousErrors.push(testedDecimal);
+        }
+        continuousStatus = 0;
+        if (continuousIteration % 250 == 0) console.log(continuousIteration + " tests run.")
+        continuousIteration++;
+    }
+}

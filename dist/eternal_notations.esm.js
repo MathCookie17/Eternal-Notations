@@ -596,6 +596,10 @@ function currentEngineering(value, engineerings) {
   for (var s = 0; s < engineerings.length; s++) {
     var portion = currentValue.div(engineerings[s]).floor().max(0);
     currentValue = currentValue.sub(portion.mul(engineerings[s]));
+    if (currentValue.lt(0)) {
+      portion = portion.sub(1);
+      currentValue = currentValue.plus(engineerings[s]);
+    }
     arr.push(portion);
   }
   return arr;
@@ -1290,11 +1294,13 @@ function factorial_scientifify(value) {
     } else {
       var oldB = Decimal.dZero;
       var checkComplete = false;
+      var loopWatch = false;
       do {
         oldB = unroundedB;
         var upperLimit = previousEngineeringValue(e, engineeringsD).sub(mantissaPower).factorial().recip();
         var lowerLimit = currentEngineeringValue(e, engineeringsD).sub(mantissaPower).factorial().recip();
         if (e.gt(0) && b.mul(e.factorial().recip()).gte(upperLimit)) {
+          if (loopWatch) break; // Since the mantissa range varies, I can't force its value to the lower limit, so there's a chance this results in a mantissa slightly larger than it's supposed to be. break_eternity factorials are imprecise anyway.
           e = previousEngineeringValue(e, engineeringsD);
           unroundedB = valueD.div(e.factorial().recip());
           b = round(unroundedB, rounding);
@@ -1302,6 +1308,7 @@ function factorial_scientifify(value) {
           e = nextEngineeringValue(e, engineeringsD);
           unroundedB = valueD.div(e.factorial().recip());
           b = round(unroundedB, rounding);
+          loopWatch = true;
         } else checkComplete = true;
       } while (!checkComplete && oldB.neq(unroundedB));
     }
@@ -1317,11 +1324,13 @@ function factorial_scientifify(value) {
     } else {
       var _oldB2 = Decimal.dZero;
       var _checkComplete2 = false;
+      var _loopWatch = false;
       do {
         _oldB2 = unroundedB;
         var nextE = nextEngineeringValue(e, engineeringsD).plus(mantissaPower).factorial();
         var currentE = currentEngineeringValue(e, engineeringsD).plus(mantissaPower).factorial();
         if (b.mul(e.factorial()).gte(nextE)) {
+          if (_loopWatch) break; // Since the mantissa range varies, I can't force its value to the lower limit, so there's a chance this results in a mantissa slightly larger than it's supposed to be. break_eternity factorials are imprecise anyway.
           unroundedB = unroundedB.mul(e.factorial()).div(nextEngineeringValue(e, engineeringsD).factorial());
           e = nextEngineeringValue(e, engineeringsD);
           b = round(unroundedB, rounding);
@@ -1329,6 +1338,7 @@ function factorial_scientifify(value) {
           unroundedB = unroundedB.mul(e.factorial()).div(previousEngineeringValue(e, engineeringsD).factorial());
           e = previousEngineeringValue(e, engineeringsD);
           b = round(unroundedB, rounding);
+          _loopWatch = true;
         } else _checkComplete2 = true;
       } while (!_checkComplete2 && _oldB2.neq(unroundedB));
     }
@@ -8608,6 +8618,16 @@ var IncreasingSuperRootNotation = /*#__PURE__*/function (_Notation3) {
     value: function formatDecimal(value) {
       if (value.eq(0)) return this.innerNotation.format(0);
       var height = nextEngineeringValue(Decimal.slog(value, this._maxnum.toNumber(), true), this._engineerings).max(this._minHeight).toNumber();
+      if (value.gte(Decimal.tetrate(10, 9e15, 1))) {
+        // Imprecision was causing problems, so if we're too high, just ignore the root process and find an equivalent expression with slog
+        var result = this.innerNotation.format(this._maxnum);
+        var eChar = this.rootChars[0][0];
+        var afterChar = this.rootChars[0][1];
+        result = eChar + result + afterChar;
+        var heightStr = this.baseInnerNotation.format(height);
+        if (this.heightShown < 0) result = result + heightStr;else result = heightStr + result;
+        return result;
+      }
       return new SuperRootNotation(height, 1, 5, this.rootChars, this.inverseChars, true, this.heightShown, this.innerNotation, this.innerNotation, this.baseInnerNotation).format(value);
     }
   }, {
@@ -10542,34 +10562,32 @@ var PolynomialNotation = /*#__PURE__*/function (_Notation) {
         value = value.iteratedlog(this._value, bottomExps.toNumber(), true);
         var currentValue = value;
         var bottom = value.mul(this.precision);
-        var roundingMultiple = typeof this.minimumTermRounding == "function" ? this.minimumTermRounding(value.mod(this._value.pow(this.minimumTerm))) : toDecimal(this.minimumTermRounding);
-        currentValue = round(currentValue, roundingMultiple);
+        var roundingMultiple = this.minimumTerm.eq(-Infinity) ? Decimal.dZero : typeof this.minimumTermRounding == "function" ? this.minimumTermRounding(value.mod(this._value.pow(this.minimumTerm))) : toDecimal(this.minimumTermRounding);
+        currentValue = round(currentValue, this.minimumTerm.eq(-Infinity) ? Decimal.dZero : this._value.pow(this.minimumTerm).mul(roundingMultiple));
         var termsSoFar = 0;
         var maxTerms = currentValue.lt(this.maxMultiTerm) ? this._maxTerms : 1;
         var power = currentValue.log(this._value).floor().plus(1);
         while (termsSoFar < maxTerms && (currentValue.gte(bottom) || this.showZeroTerms > 0)) {
           termsSoFar++;
-          if (this.showZeroTerms >= 0) power = power.sub(1);else power = currentValue.log(this._value).floor();
-          if (power.lt(this.minimumTerm)) power = this.minimumTerm;
-          var powerNum = this._value.pow(power);
-          var coefficient = currentValue.div(powerNum);
-          if (power.gt(this.minimumTerm)) {
-            if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
-            if (this.showZeroTerms < 0) {
-              while (coefficient.gte(this._value)) {
-                power = power.plus(1);
-                powerNum = this._value.pow(power);
-                coefficient = currentValue.div(powerNum);
-                if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
-              }
-              while (coefficient.lt(1)) {
-                power = power.sub(1);
-                powerNum = this._value.pow(power);
-                coefficient = currentValue.div(powerNum);
-                if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
-              }
-            }
-          } else coefficient = round(coefficient, this.minimumTermRounding);
+          var coefficient = void 0;
+          var powerNum = void 0;
+          if (this.showZeroTerms >= 0) {
+            power = power.sub(1);
+            powerNum = this._value.pow(power);
+            coefficient = currentValue.div(powerNum);
+          } else {
+            var _scientifify = scientifify(currentValue, this._value);
+            var _scientifify2 = _slicedToArray(_scientifify, 2);
+            coefficient = _scientifify2[0];
+            power = _scientifify2[1];
+            powerNum = this._value.pow(power);
+          }
+          if (power.lt(this.minimumTerm)) {
+            power = this.minimumTerm;
+            powerNum = this._value.pow(power);
+            coefficient = currentValue.div(powerNum);
+          }
+          if (value.lt(this.maxMultiTerm) && power.gt(this.minimumTerm)) coefficient = coefficient.floor();else coefficient = round(coefficient, this.minimumTermRounding);
           var subresult = "";
           if (power.eq(0)) subresult = this.constantStrings[0] + this.innerNotation.format(coefficient) + this.constantStrings[1];else {
             var reciprocal = false;

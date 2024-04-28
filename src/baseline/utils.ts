@@ -451,6 +451,10 @@ export function currentEngineering(value : Decimal, engineerings : Decimal[]) : 
     for (let s = 0; s < engineerings.length; s++) {
         let portion = currentValue.div(engineerings[s]).floor().max(0);
         currentValue = currentValue.sub(portion.mul(engineerings[s]));
+        if (currentValue.lt(0)) {
+            portion = portion.sub(1);
+            currentValue = currentValue.plus(engineerings[s]);
+        }
         arr.push(portion);
     }
     return arr;
@@ -1177,11 +1181,13 @@ export function factorial_scientifify(value: DecimalSource, rounding : DecimalSo
         else {
             let oldB = Decimal.dZero;
             let checkComplete = false;
+            let loopWatch = false;
             do {
                 oldB = unroundedB;
                 let upperLimit = previousEngineeringValue(e, engineeringsD).sub(mantissaPower).factorial().recip();
                 let lowerLimit = currentEngineeringValue(e, engineeringsD).sub(mantissaPower).factorial().recip();
                 if (e.gt(0) && b.mul(e.factorial().recip()).gte(upperLimit)) {
+                    if (loopWatch) break; // Since the mantissa range varies, I can't force its value to the lower limit, so there's a chance this results in a mantissa slightly larger than it's supposed to be. break_eternity factorials are imprecise anyway.
                     e = previousEngineeringValue(e, engineeringsD);
                     unroundedB = valueD.div(e.factorial().recip());
                     b = round(unroundedB, rounding);
@@ -1190,6 +1196,7 @@ export function factorial_scientifify(value: DecimalSource, rounding : DecimalSo
                     e = nextEngineeringValue(e, engineeringsD);
                     unroundedB = valueD.div(e.factorial().recip());
                     b = round(unroundedB, rounding);
+                    loopWatch = true;
                 }
                 else checkComplete = true;
             } while (!checkComplete && oldB.neq(unroundedB))
@@ -1208,11 +1215,13 @@ export function factorial_scientifify(value: DecimalSource, rounding : DecimalSo
         else {
             let oldB = Decimal.dZero;
             let checkComplete = false;
+            let loopWatch = false;
             do {
                 oldB = unroundedB;
                 let nextE = nextEngineeringValue(e, engineeringsD).plus(mantissaPower).factorial();
                 let currentE = currentEngineeringValue(e, engineeringsD).plus(mantissaPower).factorial();
                 if (b.mul(e.factorial()).gte(nextE)) {
+                    if (loopWatch) break; // Since the mantissa range varies, I can't force its value to the lower limit, so there's a chance this results in a mantissa slightly larger than it's supposed to be. break_eternity factorials are imprecise anyway.
                     unroundedB = unroundedB.mul(e.factorial()).div(nextEngineeringValue(e, engineeringsD).factorial());
                     e = nextEngineeringValue(e, engineeringsD);
                     b = round(unroundedB, rounding);
@@ -1221,6 +1230,7 @@ export function factorial_scientifify(value: DecimalSource, rounding : DecimalSo
                     unroundedB = unroundedB.mul(e.factorial()).div(previousEngineeringValue(e, engineeringsD).factorial());
                     e = previousEngineeringValue(e, engineeringsD);
                     b = round(unroundedB, rounding);
+                    loopWatch = true;
                 }
                 else checkComplete = true;
             } while (!checkComplete && oldB.neq(unroundedB))

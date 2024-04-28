@@ -331,6 +331,16 @@ export class MultiSuperRootNotation extends Notation {
       public formatDecimal(value: Decimal): string {
         if (value.eq(0)) return this.innerNotation.format(0);
         let height = nextEngineeringValue(Decimal.slog(value, this._maxnum.toNumber(), true), this._engineerings).max(this._minHeight).toNumber();
+        if (value.gte(Decimal.tetrate(10, 9e15, 1))) { // Imprecision was causing problems, so if we're too high, just ignore the root process and find an equivalent expression with slog
+          let result = this.innerNotation.format(this._maxnum);
+          let eChar = this.rootChars[0][0];
+          let afterChar = this.rootChars[0][1];
+          result = eChar + result + afterChar;
+          let heightStr = this.baseInnerNotation.format(height);
+          if (this.heightShown < 0) result = result + heightStr;
+          else result = heightStr + result;
+          return result;
+        }
         return new SuperRootNotation(height, 1, 5, this.rootChars, this.inverseChars, true, this.heightShown, this.innerNotation, this.innerNotation, this.baseInnerNotation).format(value);
       }
 

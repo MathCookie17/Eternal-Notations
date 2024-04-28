@@ -2,7 +2,7 @@ import Decimal from "break_eternity.js";
 import type { DecimalSource } from "break_eternity.js";
 import { Notation } from "../baseline/notation.js";
 import { DefaultNotation } from "../baseline/defaultNotation.js";
-import { toDecimal, round } from "../baseline/utils.js";
+import { toDecimal, round, scientifify } from "../baseline/utils.js";
 
     /**
      * Writes numbers in the form of a polynomial-ish expression, with x having a certain value. For example, if x is 10, then 346 is written as 3x^2 + 4x + 6.
@@ -168,35 +168,30 @@ export class PolynomialNotation extends Notation {
             value = value.iteratedlog(this._value, bottomExps.toNumber(), true);
         let currentValue = value;
         let bottom = value.mul(this.precision);
-        let roundingMultiple = (typeof this.minimumTermRounding == "function") ? this.minimumTermRounding(value.mod(this._value.pow(this.minimumTerm))) : toDecimal(this.minimumTermRounding);
-        currentValue = round(currentValue, roundingMultiple);
+        let roundingMultiple = (this.minimumTerm.eq(-Infinity)) ? Decimal.dZero : (typeof this.minimumTermRounding == "function") ? this.minimumTermRounding(value.mod(this._value.pow(this.minimumTerm))) : toDecimal(this.minimumTermRounding);
+        currentValue = round(currentValue, (this.minimumTerm.eq(-Infinity)) ? Decimal.dZero : this._value.pow(this.minimumTerm).mul(roundingMultiple));
         let termsSoFar = 0;
         let maxTerms = (currentValue.lt(this.maxMultiTerm)) ? this._maxTerms : 1;
         let power = currentValue.log(this._value).floor().plus(1);
         while (termsSoFar < maxTerms && (currentValue.gte(bottom) || this.showZeroTerms > 0)) {
             termsSoFar++;
-            if (this.showZeroTerms >= 0) power = power.sub(1);
-            else power = currentValue.log(this._value).floor();
-            if (power.lt(this.minimumTerm)) power = this.minimumTerm;
-            let powerNum = this._value.pow(power);
-            let coefficient = currentValue.div(powerNum);
-            if (power.gt(this.minimumTerm)) {
-                if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
-                if (this.showZeroTerms < 0) {
-                    while (coefficient.gte(this._value)) {
-                        power = power.plus(1);
-                        powerNum = this._value.pow(power);
-                        coefficient = currentValue.div(powerNum);
-                        if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
-                    }
-                    while (coefficient.lt(1)) {
-                        power = power.sub(1);
-                        powerNum = this._value.pow(power);
-                        coefficient = currentValue.div(powerNum);
-                        if (value.lt(this.maxMultiTerm)) coefficient = coefficient.floor();
-                    }
-                }
+            let coefficient : Decimal;
+            let powerNum : Decimal;
+            if (this.showZeroTerms >= 0) {
+                power = power.sub(1);
+                powerNum = this._value.pow(power);
+                coefficient = currentValue.div(powerNum);
             }
+            else {
+                [coefficient, power] = scientifify(currentValue, this._value);
+                powerNum = this._value.pow(power);
+            }
+            if (power.lt(this.minimumTerm)) {
+                power = this.minimumTerm;
+                powerNum = this._value.pow(power);
+                coefficient = currentValue.div(powerNum);
+            }
+            if (value.lt(this.maxMultiTerm) && power.gt(this.minimumTerm)) coefficient = coefficient.floor();
             else coefficient = round(coefficient, this.minimumTermRounding);
             let subresult = "";
             if (power.eq(0)) subresult = this.constantStrings[0] + this.innerNotation.format(coefficient) + this.constantStrings[1];
