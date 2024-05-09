@@ -223,14 +223,14 @@ Presets.Emoji = new LettersNotation(
         ["🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"],
         ["𓁨"]
     ], -1, defaultRound
-).setName("Emoji");
+).setNotationGlobals(undefined, "♾️").setName("Emoji");
 Presets.EmojiAlphabet = new LettersNotation(
     [
         ["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"],
         ["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"],
         ["🚫", "😠", "🎂", "🎄", "💀", "🍆", "👪", "🌈", "💯", "🍦", "🎃", "💋", "😂", "🌙", "⛔", "🐙", "💩", "❓", "☢", "🙈", "👍", "☂", "✌", "⚠", "❌", "😋", "⚡", "🚨", "🅱️", "🍒", "😈", "💥", "👠", "🔫", "🏥", "👀", "🤹", "😵", "❤️", "🔢", "🌑", "🍩", "💍", "🗨️", "®", "💰", "🏆", "🦄", "🌋", "🤷", "✂️", "🟡", "💤"]
     ], 0, alphabetRound, 1000, 9, "", "", "|", true, new DefaultNotation(-3, -3), 0, false, true
-).setName("Emoji Alphabet");
+).setNotationGlobals(undefined, "♾️").setName("Emoji Alphabet");
 Presets.XYZ = new LettersNotation([["X"], ["Y"], ["Z"]], 0, defaultRound, 10, 9, "", "", "", false, new DefaultNotation(), 5).setName("XYZ");
 Presets.ElementLetters = new LettersNotation(
     [
@@ -275,14 +275,14 @@ HTMLPresets.Emoji = new LettersNotation(
         ["&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"],
         ["&#x13068;"]
     ], -1, defaultRound
-).setName("Emoji");
+).setNotationGlobals(undefined, "&#x267E;&#xFE0F;").setName("Emoji");
 HTMLPresets.EmojiAlphabet = new LettersNotation(
     [
         ["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"],
         ["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"],
         ["&#x1F6AB;", "&#x1F620;", "&#x1F382;", "&#x1F384;", "&#x1F480;", "&#x1F346;", "&#x1F46A;", "&#x1F308;", "&#x1F4AF;", "&#x1F366;", "&#x1F383;", "&#x1F48B;", "&#x1F602;", "&#x1F319;", "&#x26D4;", "&#x1F419;", "&#x1F4A9;", "&#x2753;", "&#x2622;", "&#x1F648;", "&#x1F44D;", "&#x2602;", "&#x270C;", "&#x26A0;", "&#x274C;", "&#x1F60B;", "&#x26A1;", "&#x1F6A8;", "&#x1F171;&#xFE0F;", "&#x1F352;", "&#x1F608;", "&#x1F4A5;", "&#x1F460;", "&#x1F52B;", "&#x1F3E5;", "&#x1F440;", "&#x1F939;", "&#x1F635;", "&#x2764;&#xFE0F;", "&#x1F522;", "&#x1F311;", "&#x1F369;", "&#x1F48D;", "&#x1F5E8;&#xFE0F;", "&#xAE;", "&#x1F4B0;", "&#x1F3C6;", "&#x1F984;", "&#x1F30B;", "&#x1F937;", "&#x2702;&#xFE0F;", "&#x1F7E1;", "&#x1F4A4;"]
     ], 0, alphabetRound, 1000, 9, "", "", "|", true, new DefaultNotation(-3, -3), 0, false, true
-).setName("Emoji Alphabet");
+).setNotationGlobals(undefined, "&#x267E;&#xFE0F;").setName("Emoji Alphabet");
 HTMLPresets.XYZ = new LettersNotation([["X"], ["Y"], ["Z"]], 0, defaultRound, 10, 9, "", "", "", false, new DefaultNotation(), 5).setName("XYZ");
 HTMLPresets.ElementLetters = new LettersNotation(
     [
@@ -304,14 +304,14 @@ Presets.RomanNumerals = recipBelow(new NestedSignValueNotation([
     ["X̅L̅", 40000], ["X̅", 10000], ["MX̅", 9000], ["V̅", 5000], ["MV̅", 4000], ["M", 1000], ["CM", 900], ["D", 500], ["CD", 400],
     ["C", 100], ["XC", 90], ["L", 50], ["XL", 40], ["X", 10], ["IX", 9], ["V", 5], ["IV", 4], ["I", 1], ["S", 0.5],
     ["⁙", 5/12], ["∷", 4/12], ["∴", 3/12], [":", 2/12], ["·", 1/12]
-], 1/12), 1/12, ["I / ", ""], "nulla").setName("Roman Numerals");
+], 1/12), 1/12, ["I / ", ""], "nulla").setNotationGlobals(undefined, "Infinitus").setName("Roman Numerals");
 Presets.ADRoman = new ExpandedDefaultNotation(4000000, 1/12, 5, 4000000, 0, 0, 1, undefined, undefined, [["↑", ""], ["I↑", ""], ["↑↑", ""], ["I↑↑", ""]], [false, ["I / ", ""]], false, false, 1, 1,
     new SignValueNotation([
         ["M̅", 1000000], ["C̅M̅", 900000], ["D̅", 500000], ["C̅D̅", 400000], ["C̅", 100000], ["X̅C̅", 90000], ["L̅", 50000],
         ["X̅L̅", 40000], ["X̅", 10000], ["MX̅", 9000], ["V̅", 5000], ["MV̅", 4000], ["M", 1000], ["CM", 900], ["D", 500], ["CD", 400],
         ["C", 100], ["XC", 90], ["L", 50], ["XL", 40], ["X", 10], ["IX", 9], ["V", 5], ["IV", 4], ["I", 1], ["S", 0.5],
         ["⁙", 5/12], ["∷", 4/12], ["∴", 3/12], [":", 2/12], ["·", 1/12]
-    ], 1/12, ...[,,,,,], "nulla"), undefined, [true, true]).setName("AD Roman");
+    ], 1/12, ...[,,,,,], "nulla"), undefined, [true, true]).setNotationGlobals(undefined, "Infinitus").setName("AD Roman");
 Presets.Septecoman = new ExpandedDefaultNotation(17**7, 1/289, 3, 17, 1/289, 0, 1, [17, 7], [1], [["[", "]"], ["[", "]I"], ["{", "}"], ["{", "}I"]], [false, ["I / ", ""]], true, true, 1/17, 1/17,
     new SignValueNotation([
         ["OE", 17**6 * 7], ["TEOE", 17**6 * 6], ["TETEOE", 17**6 * 5], ["TE", 17**6], 
@@ -338,14 +338,14 @@ HTMLPresets.RomanNumerals = recipBelow(new NestedSignValueNotation([
     ["X&#x305;L&#x305;", 40000], ["X&#x305;", 10000], ["MX&#x305;", 9000], ["V&#x305;", 5000], ["MV&#x305;", 4000], ["M", 1000], ["CM", 900], ["D", 500], ["CD", 400],
     ["C", 100], ["XC", 90], ["L", 50], ["XL", 40], ["X", 10], ["IX", 9], ["V", 5], ["IV", 4], ["I", 1], ["S", 0.5],
     ["&#x2059;", 5/12], ["&#x2237;", 4/12], ["&#x2234;", 3/12], [":", 2/12], ["&#xB7;", 1/12]
-], 1/12), 1/12, ["I / ", ""], "nulla").setName("Roman Numerals");
+], 1/12), 1/12, ["I / ", ""], "nulla").setNotationGlobals(undefined, "Infinitus").setName("Roman Numerals");
 HTMLPresets.ADRoman = new ExpandedDefaultNotation(4000000, 1/12, 5, 4000000, 0, 0, 1, undefined, undefined, [["&#8593;", ""], ["I&#8593;", ""], ["&#8593;&#8593;", ""], ["I&#8593;&#8593;", ""]], [false, ["I / ", ""]], false, false, 1, 1,
     new SignValueNotation([
         ["M&#x305;", 1000000], ["C&#x305;M&#x305;", 900000], ["D&#x305;", 500000], ["C&#x305;D&#x305;", 400000], ["C&#x305;", 100000], ["X̅C&#x305;", 90000], ["L&#x305;", 50000],
         ["X&#x305;L&#x305;", 40000], ["X&#x305;", 10000], ["MX&#x305;", 9000], ["V&#x305;", 5000], ["MV&#x305;", 4000], ["M", 1000], ["CM", 900], ["D", 500], ["CD", 400],
         ["C", 100], ["XC", 90], ["L", 50], ["XL", 40], ["X", 10], ["IX", 9], ["V", 5], ["IV", 4], ["I", 1], ["S", 0.5],
         ["&#x2059;", 5/12], ["&#x2237;", 4/12], ["&#x2234;", 3/12], [":", 2/12], ["&#xB7;", 1/12]
-    ], 1/12, ...[,,,,,], "nulla"), undefined, [true, true]).setName("AD Roman");
+    ], 1/12, ...[,,,,,], "nulla"), undefined, [true, true]).setNotationGlobals(undefined, "Infinitus").setName("AD Roman");
 HTMLPresets.Septecoman = new ExpandedDefaultNotation(17**7, 1/289, 3, 17, 1/289, 0, 1, [17, 7], [1], [["[", "]"], ["[", "]I"], ["{", "}"], ["{", "}I"]], [false, ["I / ", ""]], true, true, 1/17, 1/17,
 new SignValueNotation([
     ["OE", 17**6 * 7], ["TEOE", 17**6 * 6], ["TETEOE", 17**6 * 5], ["TE", 17**6], 
@@ -449,18 +449,18 @@ HTMLPresets.SandcastleBuilderWritten = new NestedSINotation(
     "/ ", true, defaultRound, 4, 3, 0, 0, " ", " ", [["^(", ")"], ["^^(", ")"]]
 ).setNotationGlobals(undefined, undefined, undefined, "Mustard", undefined).setName("Sandcastle Builder (Written)");
 
-Presets.LooseFraction = new FractionNotation(-1e-3).setName("Fraction (Loose)");
-Presets.MediumFraction = new FractionNotation(-1e-6).setName("Fraction (Medium)");
-Presets.PreciseFraction = new FractionNotation(-1e-10).setName("Fraction (Precise)");
-Presets.LooseMixedNumber = new FractionNotation(-1e-3, true).setName("Mixed Number (Loose)");
-Presets.MediumMixedNumber = new FractionNotation(-1e-6, true).setName("Mixed Number (Medium)");
-Presets.PreciseMixedNumber = new FractionNotation(-1e-10, true).setName("Mixed Number (Precise)");
-HTMLPresets.LooseFraction = new FractionNotation(-1e-3).setName("Fraction (Loose)");
-HTMLPresets.MediumFraction = new FractionNotation(-1e-6).setName("Fraction (Medium)");
-HTMLPresets.PreciseFraction = new FractionNotation(-1e-10).setName("Fraction (Precise)");
-HTMLPresets.LooseMixedNumber = new FractionNotation(-1e-3, true).setName("Mixed Number (Loose)");
-HTMLPresets.MediumMixedNumber = new FractionNotation(-1e-6, true).setName("Mixed Number (Medium)");
-HTMLPresets.PreciseMixedNumber = new FractionNotation(-1e-10, true).setName("Mixed Number (Precise)");
+Presets.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0").setName("Fraction (Loose)");
+Presets.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0").setName("Fraction (Medium)");
+Presets.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0").setName("Fraction (Precise)");
+Presets.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Loose)");
+Presets.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Medium)");
+Presets.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Precise)");
+HTMLPresets.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0").setName("Fraction (Loose)");
+HTMLPresets.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0").setName("Fraction (Medium)");
+HTMLPresets.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0").setName("Fraction (Precise)");
+HTMLPresets.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Loose)");
+HTMLPresets.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Medium)");
+HTMLPresets.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Precise)");
 
 Presets.LetterDigits = zeroString(new LetterDigitsNotation(...[,,,,,,,,,,,,,,], 1/18279),"_").setName("Letter Digits");
 Presets.AlphabetDigits = new LetterDigitsNotation(
@@ -470,14 +470,14 @@ Presets.AlphabetDigits = new LetterDigitsNotation(
         ["~","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
     ], 0, 9, false, -3, -3, ...[,,,,,], "|", true, false, 53**-3
 ).setName("Alphabet Digits");
-HTMLPresets.LetterDigits = zeroString(new LetterDigitsNotation(...[,,,,,,,,,,,,,,], 1/18279),"_").setName("Letter Digits");
+HTMLPresets.LetterDigits = zeroString(new LetterDigitsNotation(...[,,,,,,,,,,,,,,], 1/18279),"_").setNotationGlobals(undefined, "&infin;").setName("Letter Digits");
 HTMLPresets.AlphabetDigits = new LetterDigitsNotation(
     [
         ["~","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
         ["~","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
         ["~","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
     ], 0, 9, false, -3, -3, ...[,,,,,], "|", true, false, 53**-3
-).setName("Alphabet Digits");
+).setNotationGlobals(undefined, "&infin;").setName("Alphabet Digits");
 
 Presets.Myriad = new MyriadNotation(0, defaultRound).setName("Myriad");
 Presets.ADMyriad = new MyriadNotation(1, defaultRound).setName("AD Myriad");
@@ -576,11 +576,11 @@ let SimplifiedWrittenArgam = ["Ze","On","Tw","Th","Fo","Fi","Si","Se","Ei","Ni",
 Presets.SimplifiedWritten = (base : number) => new HypersplitNotation(
     [["", ""], ["(", ") "], ["[", "] "], ["{", "} "]], base, [base**3, base**3, base**3], undefined, 0, ...[,,], 1,
     new AlternateBaseNotation(SimplifiedWrittenArgam.slice(0, base), 0, 0, 0, -1)
-).setName((base == 10) ? "Simplified Written" : "Simplified Written (Base " + new DefaultNotation().format(base) + ")");
+).setNotationGlobals(undefined, "Inf").setName((base == 10) ? "Simplified Written" : "Simplified Written (Base " + new DefaultNotation().format(base) + ")");
 HTMLPresets.SimplifiedWritten = (base : number) => new HypersplitNotation(
     [["", ""], ["(", ") "], ["[", "] "], ["{", "} "]], base, [base**3, base**3, base**3], undefined, 0, ...[,,], 1,
     new AlternateBaseNotation(SimplifiedWrittenArgam.slice(0, base), 0, 0, 0, -1)
-).setName((base == 10) ? "Simplified Written" : "Simplified Written (Base " + new DefaultNotation().format(base) + ")");
+).setNotationGlobals(undefined, "Inf").setName((base == 10) ? "Simplified Written" : "Simplified Written (Base " + new DefaultNotation().format(base) + ")");
 Presets.Dots = new ExpandedDefaultNotation(
     254**3, 254**-1, 3, 254, 1/254, 2, 1, undefined, undefined, [["", "⣿"], ["", "⣿⠂"], ["", "⣿⣿"], ["", "⣿⣿⠂"]], [["(-", ")⣿"], ["⠂;", ""]], true, true, 1, 1,
     new AlternateBaseNotation(
@@ -589,7 +589,7 @@ Presets.Dots = new ExpandedDefaultNotation(
     new AlternateBaseNotation(
         ["⠁","⠂","⠃","⠄","⠅","⠆","⠇","⠈","⠉","⠊","⠋","⠌","⠍","⠎","⠏","⠐","⠑","⠒","⠓","⠔","⠕","⠖","⠗","⠘","⠙","⠚","⠛","⠜","⠝","⠞","⠟","⠠","⠡","⠢","⠣","⠤","⠥","⠦","⠧","⠨","⠩","⠪","⠫","⠬","⠭","⠮","⠯","⠰","⠱","⠲","⠳","⠴","⠵","⠶","⠷","⠸","⠹","⠺","⠻","⠼","⠽","⠾","⠿","⡀","⡁","⡂","⡃","⡄","⡅","⡆","⡇","⡈","⡉","⡊","⡋","⡌","⡍","⡎","⡏","⡐","⡑","⡒","⡓","⡔","⡕","⡖","⡗","⡘","⡙","⡚","⡛","⡜","⡝","⡞","⡟","⡠","⡡","⡢","⡣","⡤","⡥","⡦","⡧","⡨","⡩","⡪","⡫","⡬","⡭","⡮","⡯","⡰","⡱","⡲","⡳","⡴","⡵","⡶","⡷","⡸","⡹","⡺","⡻","⡼","⡽","⡾","⡿","⢀","⢁","⢂","⢃","⢄","⢅","⢆","⢇","⢈","⢉","⢊","⢋","⢌","⢍","⢎","⢏","⢐","⢑","⢒","⢓","⢔","⢕","⢖","⢗","⢘","⢙","⢚","⢛","⢜","⢝","⢞","⢟","⢠","⢡","⢢","⢣","⢤","⢥","⢦","⢧","⢨","⢩","⢪","⢫","⢬","⢭","⢮","⢯","⢰","⢱","⢲","⢳","⢴","⢵","⢶","⢷","⢸","⢹","⢺","⢻","⢼","⢽","⢾","⢿","⣀","⣁","⣂","⣃","⣄","⣅","⣆","⣇","⣈","⣉","⣊","⣋","⣌","⣍","⣎","⣏","⣐","⣑","⣒","⣓","⣔","⣕","⣖","⣗","⣘","⣙","⣚","⣛","⣜","⣝","⣞","⣟","⣠","⣡","⣢","⣣","⣤","⣥","⣦","⣧","⣨","⣩","⣪","⣫","⣬","⣭","⣮","⣯","⣰","⣱","⣲","⣳","⣴","⣵","⣶","⣷","⣸","⣹","⣺","⣻","⣼","⣽","⣾"],
         0, 0, 0, -1), [true, true]
-).setName("Dots");
+).setNotationGlobals(undefined, "⣿ ⣿").setName("Dots");
 HTMLPresets.Dots = new ExpandedDefaultNotation(
     254**3, 254**-1, 3, 254, 1/254, 2, 1, undefined, undefined, [["", "&#x28FF;"], ["", "&#x28FF;&#x2802;"], ["", "&#x28FF;&#x28FF;"], ["", "&#x28FF;&#x28FF;&#x2802;"]], [["(-", ")&#x28FF;"], ["&#x2802;;", ""]], true, true, 1, 1,
     new AlternateBaseNotation(
@@ -598,7 +598,7 @@ HTMLPresets.Dots = new ExpandedDefaultNotation(
     new AlternateBaseNotation(
         ["&#x2801;","&#x2802;","&#x2803;","&#x2804;","&#x2805;","&#x2806;","&#x2807;","&#x2808;","&#x2809;","&#x280A;","&#x280B;","&#x280C;","&#x280D;","&#x280E;","&#x280F;","&#x2810;","&#x2811;","&#x2812;","&#x2813;","&#x2814;","&#x2815;","&#x2816;","&#x2817;","&#x2818;","&#x2819;","&#x281A;","&#x281B;","&#x281C;","&#x281D;","&#x281E;","&#x281F;","&#x2820;","&#x2821;","&#x2822;","&#x2823;","&#x2824;","&#x2825;","&#x2826;","&#x2827;","&#x2828;","&#x2829;","&#x282A;","&#x282B;","&#x282C;","&#x282D;","&#x282E;","&#x282F;","&#x2830;","&#x2831;","&#x2832;","&#x2833;","&#x2834;","&#x2835;","&#x2836;","&#x2837;","&#x2838;","&#x2839;","&#x283A;","&#x283B;","&#x283C;","&#x283D;","&#x283E;","&#x283F;","&#x2840;","&#x2841;","&#x2842;","&#x2843;","&#x2844;","&#x2845;","&#x2846;","&#x2847;","&#x2848;","&#x2849;","&#x284A;","&#x284B;","&#x284C;","&#x284D;","&#x284E;","&#x284F;","&#x2850;","&#x2851;","&#x2852;","&#x2853;","&#x2854;","&#x2855;","&#x2856;","&#x2857;","&#x2858;","&#x2859;","&#x285A;","&#x285B;","&#x285C;","&#x285D;","&#x285E;","&#x285F;","&#x2860;","&#x2861;","&#x2862;","&#x2863;","&#x2864;","&#x2865;","&#x2866;","&#x2867;","&#x2868;","&#x2869;","&#x286A;","&#x286B;","&#x286C;","&#x286D;","&#x286E;","&#x286F;","&#x2870;","&#x2871;","&#x2872;","&#x2873;","&#x2874;","&#x2875;","&#x2876;","&#x2877;","&#x2878;","&#x2879;","&#x287A;","&#x287B;","&#x287C;","&#x287D;","&#x287E;","&#x287F;","&#x2880;","&#x2881;","&#x2882;","&#x2883;","&#x2884;","&#x2885;","&#x2886;","&#x2887;","&#x2888;","&#x2889;","&#x288A;","&#x288B;","&#x288C;","&#x288D;","&#x288E;","&#x288F;","&#x2890;","&#x2891;","&#x2892;","&#x2893;","&#x2894;","&#x2895;","&#x2896;","&#x2897;","&#x2898;","&#x2899;","&#x289A;","&#x289B;","&#x289C;","&#x289D;","&#x289E;","&#x289F;","&#x28A0;","&#x28A1;","&#x28A2;","&#x28A3;","&#x28A4;","&#x28A5;","&#x28A6;","&#x28A7;","&#x28A8;","&#x28A9;","&#x28AA;","&#x28AB;","&#x28AC;","&#x28AD;","&#x28AE;","&#x28AF;","&#x28B0;","&#x28B1;","&#x28B2;","&#x28B3;","&#x28B4;","&#x28B5;","&#x28B6;","&#x28B7;","&#x28B8;","&#x28B9;","&#x28BA;","&#x28BB;","&#x28BC;","&#x28BD;","&#x28BE;","&#x28BF;","&#x28C0;","&#x28C1;","&#x28C2;","&#x28C3;","&#x28C4;","&#x28C5;","&#x28C6;","&#x28C7;","&#x28C8;","&#x28C9;","&#x28CA;","&#x28CB;","&#x28CC;","&#x28CD;","&#x28CE;","&#x28CF;","&#x28D0;","&#x28D1;","&#x28D2;","&#x28D3;","&#x28D4;","&#x28D5;","&#x28D6;","&#x28D7;","&#x28D8;","&#x28D9;","&#x28DA;","&#x28DB;","&#x28DC;","&#x28DD;","&#x28DE;","&#x28DF;","&#x28E0;","&#x28E1;","&#x28E2;","&#x28E3;","&#x28E4;","&#x28E5;","&#x28E6;","&#x28E7;","&#x28E8;","&#x28E9;","&#x28EA;","&#x28EB;","&#x28EC;","&#x28ED;","&#x28EE;","&#x28EF;","&#x28F0;","&#x28F1;","&#x28F2;","&#x28F3;","&#x28F4;","&#x28F5;","&#x28F6;","&#x28F7;","&#x28F8;","&#x28F9;","&#x28FA;","&#x28FB;","&#x28FC;","&#x28FD;","&#x28FE;"],
         0, 0, 0, -1), [true, true]
-).setName("Dots");
+).setNotationGlobals(undefined, "&#x28FF; &#x28FF;").setName("Dots");
 Presets.Hearts = new NestedSINotation(
     10,
     [["🩷", 10], ["🤍", 9], ["🩶", 8], ["💜", 7], ["💙", 6], ["💚", 5], ["💛", 4], ["🧡", 3], ["❤️", 2], ["🤎", 1]],
@@ -607,7 +607,7 @@ Presets.Hearts = new NestedSINotation(
         ["🖤", "🤎", "❤️", "🧡", "💛","💚", "💙", "💜", "🩶", "🤍"],
         0, 0, 0, -1, ...[,,,,,], 1
     ), [true, false]
-).setNotationGlobals(["💔", ""]).setName("Hearts");
+).setNotationGlobals(["💔", ""], "❤️‍🔥").setName("Hearts");
 HTMLPresets.Hearts = new NestedSINotation(
     10,
     [["&#x1FA77;", 10], ["&#x1F90D;", 9], ["&#x1FA76;", 8], ["&#x1F49C;", 7], ["&#x1F499;", 6], ["&#x1F49A;", 5], ["&#x1F49B;", 4], ["&#x1F9E1;", 3], ["&#x2764;&#xFE0F;", 2], ["&#x1F90E;", 1]],
@@ -616,7 +616,7 @@ HTMLPresets.Hearts = new NestedSINotation(
         ["&#x1F5A4;", "&#x1F90E;", "&#x2764;&#xFE0F;", "&#x1F9E1;", "&#x1F49B;","&#x1F49A;", "&#x1F499;", "&#x1F49C;", "&#x1FA76;", "&#x1F90D;"],
         0, 0, 0, -1, ...[,,,,,], 1
     ), [true, false]
-).setNotationGlobals(["&#x1F494;", ""]).setName("Hearts");
+).setNotationGlobals(["&#x1F494;", ""], "&#x2764;&#xFE0F;&#x200D;&#x1F525;").setName("Hearts");
 
 let numericDominoArray : string[] = [];
 let coloredDominoArrays : [string[], string[], string[], string[]] = [[], [], [], []];
@@ -679,7 +679,15 @@ HTMLPresets.ColoredDominoes = (highest : number) => new LetterDigitsNotation(
         [`<span class="domino_box">
         <span class="domino_square" style="background-position: calc(100%/3*2) 0;"></span>
         <span class="domino_square" style="background-position: 0 0;"></span>
-        </span>`, ""]
+        </span>`, ""],
+        `<span class="domino_box">
+        <span class="domino_square" style="background-position: calc(100%/3*1) 100%;"></span>
+        <span class="domino_square" style="background-position: calc(100%/3*2) 100%;"></span>
+        </span>`, undefined,
+        `<span class="domino_box">
+        <span class="domino_square" style="background-position: 100% calc(100%/64*13)"></span>
+        <span class="domino_square" style="background-position: calc(100%/3*1) calc(100%/64*31);"></span>
+        </span>`
     ).setName("Colored Dominoes (Double " + new DefaultNotation().format(highest) + ")");
 
 Presets.Factorial = new MultiFactorialNotation().setName("Factorial");
@@ -829,7 +837,7 @@ Presets.Omega = new IncreasingOperatorNotation(
         [6000, "Ψ<", ">", "", "", (value) => true, new DefaultNotation(0, 0)],
         [7000, "ω<", ">", "", "", (value) => true, new DefaultNotation(0, 0)],
     ], undefined, [], undefined, new DefaultNotation(0, 0), new DefaultNotation(0, 0), 1, ["Ʊ(", ")"]
-).setName("Omega")
+).setNotationGlobals(undefined, "Ω").setName("Omega")
 HTMLPresets.Omega = new IncreasingOperatorNotation(
     8000,
     [8000, Infinity, Infinity, 0, Infinity, 0],
@@ -853,7 +861,7 @@ HTMLPresets.Omega = new IncreasingOperatorNotation(
         [6000, "&Psi;<sub>", "</sub>", "", "", (value) => true, new DefaultNotation(0, 0)],
         [7000, "&omega;<sub>", "</sub>", "", "", (value) => true, new DefaultNotation(0, 0)],
     ], undefined, [], undefined, new DefaultNotation(0, 0), new DefaultNotation(0, 0), 1, ["&#433;(", ")"]
-).setName("Omega")
+).setNotationGlobals(undefined, "Ω").setName("Omega")
 Presets.OmegaShort = new IncreasingOperatorNotation(
     8000,
     [8000, Infinity, Infinity, 0, Infinity, 0],
@@ -881,7 +889,7 @@ Presets.OmegaShort = new IncreasingOperatorNotation(
         [6000, "Ψ<", ">", "", "", (value) => true, new DefaultNotation(0, 0)],
         [7000, "ω<", ">", "", "", (value) => true, new DefaultNotation(0, 0)],
     ], undefined, [], undefined, new DefaultNotation(0, 0), new DefaultNotation(0, 0), 1, ["Ʊ(", ")"]
-).setName("Omega (Short)")
+).setNotationGlobals(undefined, "&Omega;").setName("Omega (Short)")
 HTMLPresets.OmegaShort = new IncreasingOperatorNotation(
     8000,
     [8000, Infinity, Infinity, 0, Infinity, 0],
@@ -909,7 +917,7 @@ HTMLPresets.OmegaShort = new IncreasingOperatorNotation(
         [6000, "&Psi;<sub>", "</sub>", "", "", (value) => true, new DefaultNotation(0, 0)],
         [7000, "&omega;<sub>", "</sub>", "", "", (value) => true, new DefaultNotation(0, 0)],
     ], undefined, [], undefined, new DefaultNotation(0, 0), new DefaultNotation(0, 0), 1, ["&#433;(", ")"]
-).setName("Omega (Short)")
+).setNotationGlobals(undefined, "&Omega;").setName("Omega (Short)")
 let Fours = new IncreasingOperatorNotation(
     [16, 4, 2, 4, 2, 4],
     [16, 1024, 0, Infinity, Infinity, Infinity],
@@ -968,8 +976,8 @@ let Fours = new IncreasingOperatorNotation(
         [(value) => (value.floor().neq(0)), (value) => (value.floor().neq(0)), ["", "4×4"], ["", "4×4"]]
     ], new DefaultNotation(), new DefaultNotation(), 1, ["(4÷4)÷(", ")"]
 )
-Presets.Fours = new ConditionalNotation(false, [new AppliedFunctionNotation((value) => Decimal.div(4, value), Fours, (str) => ("4÷(" + str + ")")), (value) => (value.abs().lt(1) && value.neq(0))], [Fours, (value) => true]).setNotationGlobals(["-(", ")"]).setName("Fours");
-HTMLPresets.Fours = new ConditionalNotation(false, [new AppliedFunctionNotation((value) => Decimal.div(4, value), Fours, (str) => ("4÷(" + str + ")")), (value) => (value.abs().lt(1) && value.neq(0))], [Fours, (value) => true]).setNotationGlobals(["-(", ")"]).setName("Fours");
+Presets.Fours = new ConditionalNotation(false, [new AppliedFunctionNotation((value) => Decimal.div(4, value), Fours, (str) => ("4÷(" + str + ")")), (value) => (value.abs().lt(1) && value.neq(0))], [Fours, (value) => true]).setNotationGlobals(["-(", ")"], "∞").setName("Fours");
+HTMLPresets.Fours = new ConditionalNotation(false, [new AppliedFunctionNotation((value) => Decimal.div(4, value), Fours, (str) => ("4÷(" + str + ")")), (value) => (value.abs().lt(1) && value.neq(0))], [Fours, (value) => true]).setNotationGlobals(["-(", ")"], "&infin;").setName("Fours");
 
 Presets.Triangular = new PolygonalNotation(3, [["△", ""], ["△(", ")"], ["△△", ""], ["△△(", ")"], ["△△△", ""], ["△△△(", ")"]], 26796).setName("Triangular");
 HTMLPresets.Triangular = new PolygonalNotation(3, [["&#x25B3;", ""], ["&#x25B3;(", ")"], ["&#x25B3;&#x25B3;", ""], ["&#x25B3;&#x25B3;(", ")"], ["&#x25B3;&#x25B3;&#x25B3;", ""], ["&#x25B3;&#x25B3;&#x25B3;(", ")"]], 26796).setName("Triangular");

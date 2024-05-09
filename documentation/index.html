@@ -306,9 +306,9 @@
                     </li>
                     <li>
                         isInfinite ( (decimal : Decimal) => boolean ) This function is what tests if a number is considered
-                        infinite by this notation. The default is decimal.abs().gte(Decimal.dInf), which means "only return true if
-                        the Decimal is actually infinite", but by changing this function, this can be changed to, say,
-                        mark anything above 2^1024 as infinite.
+                        infinite by this notation. The default is (decimal.eq(Decimal.dInf) || decimal.eq(Decimal.dNegInf)), which means
+                        "only return true if the Decimal is actually infinite", but by changing this function,
+                        this can be changed to, say, mark anything above 2^1024 as infinite.
                     </li>
                     <li>
                         name ( string ) The name of the notation. In general,

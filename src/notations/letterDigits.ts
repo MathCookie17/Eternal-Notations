@@ -104,6 +104,7 @@ export class LetterDigitsNotation extends Notation {
     }
 
     public name = "Letters Notation";
+    public infinityString = "∞"; //"Infinite" is a string that can appear for a finite number ((e^9)6226554245.028894, to be precise), so we can't use that word for actual infinity
   
     public formatDecimal(value: Decimal): string {
       if (value.eq(0)) return BaseConvert(0, this._letters[0], 0, 0, this._negaLetters[0], 0, -1, this.reverseLetters, this.commaSpacing, this.commaChars, undefined, undefined, undefined, this.specialLetters[0], this.concatenation[0]);

@@ -37,7 +37,7 @@ export abstract class Notation {
     public infinityString : string = "Infinite";
     public negativeInfinityString : string | null = null;
     public NaNString : string = "???";
-    public isInfinite = (decimal: Decimal) : boolean => decimal.abs().gte(Decimal.dInf);
+    public isInfinite = (decimal: Decimal) : boolean => (decimal.eq(Decimal.dInf) || decimal.eq(Decimal.dNegInf));
     public name : string = "";
   
     public get infinite(): string {
@@ -55,7 +55,7 @@ export abstract class Notation {
      * @param infinityString A string or undefined. If this is a string, this becomes what the notation returns for positive infinities ("Infinite" by default). The infinity string is unaltered if this is undefined.
      * @param negativeInfinityString A string, null, or undefined. If this is a string, this becomes what the notation returns for negative infinities. If this is null, then negative infinities use negativeString and infinityString concatenated (this is the default behavior). The negative infinity string is unaltered if this is undefined.
      * @param NaNString A string or undefined. If this is a string, this becomes what the notation returns for NaN ("???" by default). The NaN string is unaltered if this is undefined.
-     * @param isInfinite A Decimal => boolean function, or undefined. If this is a function, then that function is what tests if a number is considered infinite (the default is decimal.abs().gte(Decimal.dInf), which means "only return true if the Decimal is actually infinite", but by changing this function, this can be changed to, say, mark anything above 2^1024 as infinite). The infinite-checking function is unaltered if this is undefined.
+     * @param isInfinite A Decimal => boolean function, or undefined. If this is a function, then that function is what tests if a number is considered infinite (the default is (decimal.eq(Decimal.dInf) || decimal.eq(Decimal.dNegInf)), which means "only return true if the Decimal is actually infinite", but by changing this function, this can be changed to, say, mark anything above 2^1024 as infinite). The infinite-checking function is unaltered if this is undefined.
      */
     public setNotationGlobals(
       negativeString? : [string, string],
