@@ -3952,6 +3952,7 @@
         while (iterations < this._entriesLimit && illion.gt(0)) {
           //Layer 2 loop
           iterations++;
+          illion = illion.floor(); //Combats imprecision
           var superillion = illion.log(1000).floor();
           var coefficient = illion.div(Decimal__default["default"].pow(1000, superillion)).floor();
           var imprecisions = 0;
@@ -4008,6 +4009,7 @@
         while (iterations < this._entriesLimit && illion.gt(0)) {
           //Layer 3 loop
           iterations++;
+          illion = illion.floor(); //Combats imprecision
           var superillion = illion.log(1000).floor();
           var coefficient = illion.div(Decimal__default["default"].pow(1000, superillion)).floor();
           var imprecisions = 0;
@@ -9157,12 +9159,12 @@
         var rounded = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
         var layer = Decimal__default["default"].dZero;
         if (value.lt(this.divisorAtLayer(10))) {
-          var _layer = 0;
+          var layerNum = 0;
           var step_size = 0.001;
           var has_changed_directions_once = false;
           var previously_rose = false;
           for (var i = 1; i < 10000; ++i) {
-            var currently_rose = value.gt(this.divisorAtLayer(_layer));
+            var currently_rose = value.gt(this.divisorAtLayer(layerNum));
             if (i > 1) {
               if (previously_rose != currently_rose) {
                 has_changed_directions_once = true;
@@ -9175,8 +9177,9 @@
               step_size *= 2;
             }
             step_size = Math.abs(step_size) * (currently_rose ? 1 : -1);
-            _layer += step_size;
-            if (step_size === 0) {
+            layerNum += step_size;
+            if (step_size === 0 || i == 9999) {
+              layer = new Decimal__default["default"](layerNum);
               break;
             }
           }

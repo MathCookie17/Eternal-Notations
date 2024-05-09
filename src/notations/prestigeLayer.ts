@@ -179,13 +179,13 @@ export class PrestigeLayerNotation extends Notation {
     public getLayer(value : Decimal, rounded : boolean = true) : Decimal {
         let layer = Decimal.dZero;
         if (value.lt(this.divisorAtLayer(10))) {
-            let layer = 0;
+            let layerNum = 0;
             let step_size = 0.001;
             let has_changed_directions_once = false;
             let previously_rose = false;
             for (var i = 1; i < 10000; ++i)
             {
-                let currently_rose = value.gt(this.divisorAtLayer(layer));
+                let currently_rose = value.gt(this.divisorAtLayer(layerNum));
                 if (i > 1)
                 {
                     if (previously_rose != currently_rose)
@@ -203,8 +203,11 @@ export class PrestigeLayerNotation extends Notation {
                     step_size *= 2;
                 }
                 step_size = Math.abs(step_size) * (currently_rose ? 1 : -1);
-                layer += step_size;
-                if (step_size === 0) { break; }
+                layerNum += step_size;
+                if (step_size === 0 || i == 9999) { 
+                    layer = new Decimal(layerNum);
+                    break; 
+                }
             }
         }
         else {

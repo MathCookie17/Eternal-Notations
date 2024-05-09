@@ -229,6 +229,7 @@ export class StandardNotation extends Notation {
         while (iterations < this._entriesLimit && illion.gt(0)) {
             //Layer 2 loop
             iterations++;
+            illion = illion.floor(); //Combats imprecision
             let superillion = illion.log(1000).floor();
             let coefficient = illion.div(Decimal.pow(1000, superillion)).floor();
             let imprecisions = 0;
@@ -287,6 +288,7 @@ export class StandardNotation extends Notation {
         while (iterations < this._entriesLimit && illion.gt(0)) {
             //Layer 3 loop
             iterations++;
+            illion = illion.floor(); //Combats imprecision
             let superillion = illion.log(1000).floor();
             let coefficient = illion.div(Decimal.pow(1000, superillion)).floor();
             let imprecisions = 0;
