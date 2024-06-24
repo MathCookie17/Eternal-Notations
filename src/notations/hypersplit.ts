@@ -32,7 +32,7 @@ export class HypersplitNotation extends Notation {
     private _expMultipliers : Decimal[] = [Decimal.dOne, Decimal.dOne, Decimal.dOne];
 
     constructor(
-        delimiters : [string, string][] = [["", ""], ["*10^", ""], ["((10^)^", ") "], ["((10^^)^", " "]],
+        delimiters : [string, string][] = [["", ""], ["*10^", ""], ["((10^)^", ") "], ["((10^^)^", ") "]],
         base : DecimalSource = 10,
         maximums : DecimalSource | DecimalSource[] = base,
         showZeroes : number | number[] = [1, -1, -1, -1],

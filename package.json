@@ -2,7 +2,7 @@
   "name": "eternal_notations",
   "packageManager": "yarn@3.6.3",
   "dependencies": {
-    "break_eternity.js": "^1.4.2",
+    "break_eternity.js": "^2.0.0",
     "lru_cache": "^1.0.2"
   },
   "devDependencies": {

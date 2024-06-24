@@ -6295,7 +6295,7 @@ var MyriadNotation = /*#__PURE__*/function (_Notation) {
 var HypersplitNotation = /*#__PURE__*/function (_Notation) {
   function HypersplitNotation() {
     var _this;
-    var delimiters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [["", ""], ["*10^", ""], ["((10^)^", ") "], ["((10^^)^", " "]];
+    var delimiters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [["", ""], ["*10^", ""], ["((10^)^", ") "], ["((10^^)^", ") "]];
     var base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
     var maximums = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : base;
     var showZeroes = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [1, -1, -1, -1];
