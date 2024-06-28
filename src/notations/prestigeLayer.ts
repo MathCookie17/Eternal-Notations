@@ -241,6 +241,7 @@ export class PrestigeLayerNotation extends Notation {
                 if (step_size === 0) { break; }
             }
         }
+        if (layer.lte("1e-320")) return new Decimal(0);
         if (rounded) {
             layer = layer.round();
             if (layer.neq(layer.plus(1))) {

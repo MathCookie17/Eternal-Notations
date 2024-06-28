@@ -9210,6 +9210,7 @@
             }
           }
         }
+        if (layer.lte("1e-320")) return new Decimal__default["default"](0);
         if (rounded) {
           layer = layer.round();
           if (layer.neq(layer.plus(1))) {
