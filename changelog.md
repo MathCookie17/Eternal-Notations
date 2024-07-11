@@ -2,7 +2,9 @@
 
 ### v1.0.x
 
-v1.0.8 [current version] (June 27, 2024): Fixed a bug (seemingly introduced in v1.0.7) where Omega Layers wasn't formatting 1 correctly, and finally updated this changelog (I've been forgetting to do this since v1.0.1)
+v1.0.9 (July 10, 2024): Made some small changes to account for the fact that there's an NPM package now, like adding a gitignore file
+
+v1.0.8 (June 27, 2024): Fixed a bug (seemingly introduced in v1.0.7) where Omega Layers wasn't formatting 1 correctly, and finally updated this changelog (I've been forgetting to do this since v1.0.1)
 
 v1.0.7 (June 24, 2024): Fixed a mismatched parenthesis in Hypersplit, and updated the library to use break_eternity 2.0.0 instead of 1.4.2 (1.4.2 should still work with the library, but now 2.0.0 is the recommended version).
 
