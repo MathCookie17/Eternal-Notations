@@ -2,6 +2,8 @@
 
 ### v1.0.x
 
+v1.0.10 (July 11, 2024): Added TypeScript declaration files, and added better type safety to the Presets and HTMLPresets objects.
+
 v1.0.9 (July 10, 2024): Made some small changes to account for the fact that there's an NPM package now, like adding a gitignore file
 
 v1.0.8 (June 27, 2024): Fixed a bug (seemingly introduced in v1.0.7) where Omega Layers wasn't formatting 1 correctly, and finally updated this changelog (I've been forgetting to do this since v1.0.1)
