@@ -4,7 +4,11 @@ Eternal Notations is a JavaScript library that abbreviates large numbers in vari
 
 ## Setup
 
-I don't know how things like NPM work yet, so for now just download eternal_notations.js or eternal_notations.min.js from the dist folder and include it as a script in your HTML file. Eternal Notations requires break_eternity.js to be included, and will not run without it. Eternal Notations only works with break_eternity. If your game uses break_infinity, use Antimatter Dimensions Notations instead. Including eternal_notations.js or eternal_notations.min.js should be sufficient to use all of the notations and almost all of the presets, but if you wish to use Colored Dominoes, you need to include the eternal_notations_images folder in your project and include the dominoes.css file inside as a CSS stylesheet in your HTML file.
+Note: This README was written by MathCookie.
+
+I don't know how things like NPM work yet, so what I'd do is just download eternal_notations.js or eternal_notations.min.js from the dist folder and include it as a script in your HTML file. Eternal Notations requires break_eternity.js to be included, and will not run without it. Eternal Notations only works with break_eternity. If your game uses break_infinity, use Antimatter Dimensions Notations instead. Including eternal_notations.js or eternal_notations.min.js should be sufficient to use all of the notations and almost all of the presets, but if you wish to use Colored Dominoes, you need to include the eternal_notations_images folder in your project and include the dominoes.css file inside as a CSS stylesheet in your HTML file.
+
+That being said, there IS an NPM package, so if you understand NPM, you can run ```npm i eternal_notations``` to install it - but I suspect you'll probably still need to include dominoes.css in your HTML file to use Colored Dominoes. ghoqyew is the one who posted the library on NPM, so if something's wrong with the NPM package (but not with the original library), they'll probably be able to fix it better than MathCookie can.
 
 ## Use
 
