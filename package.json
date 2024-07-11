@@ -1,6 +1,6 @@
 {
   "name": "eternal_notations",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "A JavaScript library that abbreviates really large numbers in various notations, built on break_eternity.js.",
   "files": [
     "/dist"

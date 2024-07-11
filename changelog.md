@@ -2,6 +2,8 @@
 
 ### v1.0.x
 
+v1.0.11 (July 11, 2024): Added a .npmignore file because v1.0.10's upload to npm didn't port over all the files.
+
 v1.0.10 (July 11, 2024): Added TypeScript declaration files, and added better type safety to the Presets and HTMLPresets objects.
 
 v1.0.9 (July 10, 2024): Made some small changes to account for the fact that there's an NPM package now, like adding a gitignore file
