@@ -1,6 +1,11 @@
 {
   "name": "eternal_notations",
   "version": "1.0.9",
+  "files": ["/dist"],
+  "main": "dist/eternal_notations.js",
+  "module": "dist/eternal_notations.esm.js",
+  "unpkg": "dist/eternal_notations.min.js",
+  "types": "dist/index.d.ts",
   "packageManager": "yarn@3.6.3",
   "homepage": "https://github.com/MathCookie17/Eternal-Notations",
   "bugs": {"url": "https://github.com/MathCookie17/Eternal-Notations/issues"},
