@@ -1,6 +1,9 @@
 {
   "name": "eternal_notations",
+  "version": "1.0.8",
   "packageManager": "yarn@3.6.3",
+  "author": "MathCookie17",
+  "license": "MIT",
   "dependencies": {
     "break_eternity.js": "^2.0.0",
     "lru_cache": "^1.0.2"
