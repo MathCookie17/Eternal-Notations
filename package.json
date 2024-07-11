@@ -12,7 +12,7 @@
   "types": "dist/eternal_notations.d.ts",
   "scripts": {
     "build": "rollup -c",
-    "prepack": "npm run build"
+    "prepare": "npm run build"
   },
   "packageManager": "yarn@3.6.3",
   "homepage": "https://github.com/MathCookie17/Eternal-Notations",
