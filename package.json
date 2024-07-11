@@ -11,8 +11,8 @@
   "unpkg": "dist/eternal_notations.min.js",
   "types": "dist/eternal_notations.d.ts",
   "scripts": {
-    "build": "bili",
-    "prepublishOnly": "npm run build"
+    "build": "rollup -c",
+    "prepack": "npm run build"
   },
   "packageManager": "yarn@3.6.3",
   "homepage": "https://github.com/MathCookie17/Eternal-Notations",
