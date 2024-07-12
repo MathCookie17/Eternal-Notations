@@ -5,7 +5,8 @@
   "files": [
     "dist/*",
     "eternal_notations_images/dominoes.css",
-    "eternal_notations_images/dominoes.png"
+    "eternal_notations_images/dominoes.png",
+    "Other Licenses/*"
   ],
   "main": "dist/eternal_notations.js",
   "module": "dist/eternal_notations.esm.js",
