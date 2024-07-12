@@ -8,7 +8,7 @@ export default {
     {
       file: "eternal_notations.js",
       format: "umd",
-      name: "eternal_notations",
+      name: "EternalNotations",
       globals: { "break_eternity.js": "Decimal" },
     },
     {
@@ -22,7 +22,7 @@ export default {
     {
       file: "eternal_notations.min.js",
       format: "iife",
-      name: "eternal_notations",
+      name: "EternalNotations",
       globals: { "break_eternity.js": "Decimal" },
       plugins: [terser()],
     },

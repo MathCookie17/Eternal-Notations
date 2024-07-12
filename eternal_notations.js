@@ -1,7 +1,7 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('break_eternity.js')) :
     typeof define === 'function' && define.amd ? define(['exports', 'break_eternity.js'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.eternal_notations = {}, global.Decimal));
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.EternalNotations = {}, global.Decimal));
 })(this, (function (exports, Decimal) { 'use strict';
 
     /**
