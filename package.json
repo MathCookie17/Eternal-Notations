@@ -3,13 +3,14 @@
   "version": "1.0.12",
   "description": "A JavaScript library that abbreviates really large numbers in various notations, built on break_eternity.js.",
   "files": [
-    "eternal_notations.*",
-    "dominoes.*"
+    "dist/*",
+    "eternal_notations_images/dominoes.css",
+    "eternal_notations_images/dominoes.png"
   ],
-  "main": "eternal_notations.js",
-  "module": "eternal_notations.esm.js",
-  "unpkg": "eternal_notations.min.js",
-  "types": "eternal_notations.d.ts",
+  "main": "dist/eternal_notations.js",
+  "module": "dist/eternal_notations.esm.js",
+  "unpkg": "dist/eternal_notations.min.js",
+  "types": "dist/eternal_notations.d.ts",
   "scripts": {
     "build": "rollup -c",
     "prepare": "npm run build"
