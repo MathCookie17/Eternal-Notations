@@ -1054,7 +1054,7 @@ let Presets = {
     DoubleLogarithm: PresetAssembly.DoubleLogarithm,
     AlternateBase: PresetAssembly.AlternateBase,
     Binary: PresetAssembly.Binary,
-    BinaryIL: PresetAssembly.Binary,
+    BinaryIL: PresetAssembly.BinaryIL,
     Ternary: PresetAssembly.Ternary,
     Quaternary: PresetAssembly.Quaternary,
     Seximal: PresetAssembly.Seximal,
