@@ -1,17 +1,20 @@
 {
   "name": "eternal_notations",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "A JavaScript library that abbreviates really large numbers in various notations, built on break_eternity.js.",
   "files": [
-    "/dist"
+    "dist/*",
+    "eternal_notations_images/dominoes.css",
+    "eternal_notations_images/dominoes.png",
+    "Other Licenses/*"
   ],
   "main": "dist/eternal_notations.js",
   "module": "dist/eternal_notations.esm.js",
   "unpkg": "dist/eternal_notations.min.js",
   "types": "dist/eternal_notations.d.ts",
   "scripts": {
-    "build": "bili",
-    "prepublishOnly": "npm run build"
+    "build": "rollup -c",
+    "prepare": "npm run build"
   },
   "packageManager": "yarn@3.6.3",
   "homepage": "https://github.com/MathCookie17/Eternal-Notations",
@@ -29,10 +32,9 @@
     "lru_cache": "^1.0.2"
   },
   "devDependencies": {
-    "bili": "^5.0.5",
-    "dts-bundle": "^0.7.3",
-    "rollup": "^4.16.4",
-    "rollup-plugin-typescript2": "^0.36.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.18.1",
+    "rollup-plugin-ts": "^3.4.5",
     "typescript": "^5.4.5"
   }
 }

@@ -2,6 +2,8 @@
 
 ### v1.0.x
 
+v1.0.12 (July 11, 2024): Reworked some bundling stuff to use Rollup instead of bili, simplifying the process of getting this working on NPM.
+
 v1.0.11 (July 11, 2024): Added a .npmignore file because v1.0.10's upload to npm didn't port over all the files.
 
 v1.0.10 (July 11, 2024): Added TypeScript declaration files, and added better type safety to the Presets and HTMLPresets objects.
