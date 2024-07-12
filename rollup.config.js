@@ -6,21 +6,21 @@ export default {
   input: "src/index.ts",
   output: [
     {
-      file: "dist/eternal_notations.js",
+      file: "eternal_notations.js",
       format: "umd",
       name: "eternal_notations",
       globals: { "break_eternity.js": "Decimal" },
     },
     {
-      file: "dist/eternal_notations.cjs.js",
+      file: "eternal_notations.cjs.js",
       format: "cjs",
     },
     {
-      file: "dist/eternal_notations.esm.js",
+      file: "eternal_notations.esm.js",
       format: "es",
     },
     {
-      file: "dist/eternal_notations.min.js",
+      file: "eternal_notations.min.js",
       format: "iife",
       name: "eternal_notations",
       globals: { "break_eternity.js": "Decimal" },
