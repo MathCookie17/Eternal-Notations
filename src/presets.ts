@@ -138,7 +138,7 @@ HTMLPresetAssembly.DoubleLogarithm = new MultiLogarithmNotation(undefined, undef
 
 PresetAssembly.AlternateBase = (base : number) => new AlternateBaseNotation(base).setName("Base " + new DefaultNotation().format(base));
 PresetAssembly.Binary = new AlternateBaseNotation(2, 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary");
-PresetAssembly.BinaryIL = new AlternateBaseNotation(["ı", "l"], 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary");
+PresetAssembly.BinaryIL = new AlternateBaseNotation(["ı", "l"], 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary (ı, l)");
 PresetAssembly.Ternary = new AlternateBaseNotation(3, 0, -7, -7, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Ternary");
 PresetAssembly.Quaternary = new AlternateBaseNotation(4, 0, -6, -6, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Quaternary");
 PresetAssembly.Seximal = new AlternateBaseNotation(6, 0, -5, -5, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Seximal");
@@ -151,7 +151,7 @@ PresetAssembly.BalancedTernary = new AlternateBaseNotation(["-", "0", "+"], 1, -
 PresetAssembly.BijectiveDecimal = recipBelow(new AlternateBaseNotation(["1", "2", "3", "4", "5", "6", "7", "8", "9", "A"], -1, 0, 0, ...[,,,,], 3, 1, ...[,,,,,], [["e", ""], ["e", ""], ["#", ""], ["#", ""]]), 1).setName("Bijective Decimal");
 HTMLPresetAssembly.AlternateBase = (base : number) => new AlternateBaseNotation(base).setName("Base " + new DefaultNotation().format(base));
 HTMLPresetAssembly.Binary = new AlternateBaseNotation(2, 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary");
-HTMLPresetAssembly.BinaryIL = new AlternateBaseNotation(["&#305;", "l"], 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary");
+HTMLPresetAssembly.BinaryIL = new AlternateBaseNotation(["&#305;", "l"], 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary (ı, l)");
 HTMLPresetAssembly.Ternary = new AlternateBaseNotation(3, 0, -7, -7, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Ternary");
 HTMLPresetAssembly.Quaternary = new AlternateBaseNotation(4, 0, -6, -6, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Quaternary");
 HTMLPresetAssembly.Seximal = new AlternateBaseNotation(6, 0, -5, -5, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Seximal");
