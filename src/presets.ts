@@ -724,8 +724,12 @@ HTMLPresetAssembly.Prime = new PrimeNotation(...[,,,,,,,], ["<sup>", "</sup>"]).
 
 PresetAssembly.PsiLetters = new PsiDashNotation(1).setName("Psi Letters");
 PresetAssembly.PsiDash = new PsiDashNotation().setName("Psi Dash");
+PresetAssembly.PsiLettersBinary = new PsiDashNotation(1,16,2).setName("Psi Letters Binary");
+PresetAssembly.PsiDashBinary = new PsiDashNotation(...[,],16,2).setName("Psi Dash Binary");
 HTMLPresetAssembly.PsiLetters = new PsiDashNotation(1).setName("Psi Letters");
 HTMLPresetAssembly.PsiDash = new PsiDashNotation().setName("Psi Dash");
+HTMLPresetAssembly.PsiLettersBinary = new PsiDashNotation(1,16,2).setName("Psi Letters Binary");
+HTMLPresetAssembly.PsiDashBinary = new PsiDashNotation(...[,],16,2).setName("Psi Dash Binary");
 
 // This preset has been removed for now because it's too laggy
 // Presets.PrestigeLayer = (root : Decimal, requirement : Decimal) => new PrestigeLayerNotation(root, requirement, true).setName("Prestige Layer (Root " + new DefaultNotation().format(root) + ", Requirement" + new DefaultNotation().format(requirement) + ")");
@@ -1138,6 +1142,8 @@ let Presets = {
     Prime: PresetAssembly.Prime,
     PsiLetters: PresetAssembly.PsiLetters,
     PsiDash: PresetAssembly.PsiDash,
+    PsiLettersBinary: PresetAssembly.PsiLettersBinary,
+    PsiDashBinary: PresetAssembly.PsiDashBinary,
     OmegaLayers: PresetAssembly.OmegaLayers,
     OmegaLayersRamped: PresetAssembly.OmegaLayersRamped,
     OmegaLayerNumber: PresetAssembly.OmegaLayerNumber,
@@ -1266,6 +1272,8 @@ let HTMLPresets = {
     Prime: HTMLPresetAssembly.Prime,
     PsiLetters: HTMLPresetAssembly.PsiLetters,
     PsiDash: HTMLPresetAssembly.PsiDash,
+    PsiLettersBinary: HTMLPresetAssembly.PsiLettersBinary,
+    PsiDashBinary: HTMLPresetAssembly.PsiDashBinary,
     OmegaLayers: HTMLPresetAssembly.OmegaLayers,
     OmegaLayersRamped: HTMLPresetAssembly.OmegaLayersRamped,
     OmegaLayerNumber: HTMLPresetAssembly.OmegaLayerNumber,

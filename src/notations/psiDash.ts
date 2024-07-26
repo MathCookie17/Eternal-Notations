@@ -60,22 +60,23 @@ export class PsiDashNotation extends Notation {
         let startLetter = -1;
         let [E, F, G, H] = [0, 0, 0, 0];
         let dashArray : Decimal[] = [];
-        if (!baseNumD.tetrate(2).isFinite() || value.lt(baseNumD.tetrate(2))) {
+        let nextLetter = baseNum == 2 ? 3 : 2;
+        if (!baseNumD.tetrate(nextLetter).isFinite() || value.lt(baseNumD.tetrate(nextLetter))) {
             E = 1;
             currentValue = value.log(baseNum);
             startLetter = 0;
         }
-        else if (!baseNumD.pentate(2).isFinite() || value.lt(baseNumD.pentate(2))) {
+        else if (!baseNumD.pentate(nextLetter).isFinite() || value.lt(baseNumD.pentate(nextLetter))) {
             F = 1;
             currentValue = value.slog(baseNum, 100, true);
             startLetter = 1;
         }
-        else if (!baseNumD.pentate(baseNum).isFinite() || value.lt(baseNumD.pentate(baseNum))) {
+        else if (!baseNumD.pentate(baseNum == 2 ? 4 : baseNum).isFinite() || value.lt(baseNumD.pentate(baseNum == 2 ? 4 : baseNum))) {
             G = 1;
             currentValue = hypersplit(value, baseNum, [0, 1, 1])[3];
             startLetter = 2;
         }
-        else { //H is only needed in base 3, but it's still here
+        else { //H is only needed in base 2 and 3, but it's still here
             H = 1;
             let hexaValue = Decimal.dZero;
             while (currentValue.gte(baseNum)) {
@@ -94,7 +95,7 @@ export class PsiDashNotation extends Notation {
         }
         while ((E > 0 || F > 0 || G > 0 || H > 0) && dashArray.length < maxEntries - 1 && currentValue.lte(Decimal.pow(baseNum, this._maxPrecision)) && currentValue.lte(Number.MAX_VALUE)) {
             let sciPair = scientifify(currentValue, baseNum, baseNum**(1 - this._maxPrecision));
-            dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1])).floor().div(baseNumD.pow(sciPair[1])));
+            dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1])));
             if (E > 0) {
                 E--;
                 currentValue = Decimal.pow(baseNum, currentValue);
@@ -116,7 +117,7 @@ export class PsiDashNotation extends Notation {
             }
         }
         let sciPair = scientifify(currentValue, baseNum, baseNum**(1 - this._maxPrecision));
-        dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1])).floor().div(baseNumD.pow(sciPair[1])));
+        dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1])));
         while (dashArray.length > 1 && scientifify(dashArray[dashArray.length - 1], baseNum, baseNum**(-this._maxPrecision + 1))[0].eq(1)) dashArray.pop();
         let innerNotation = new AlternateBaseNotation(this._base, 0, this._maxPrecision - 1, this._maxPrecision - 1, -1, Decimal.dInf, undefined, undefined, undefined, undefined, -Infinity, undefined, undefined, undefined, "", undefined, undefined, undefined, undefined, this._maxPrecision);
         for (let d = 0; d < dashArray.length; d++) {
@@ -138,7 +139,7 @@ export class PsiDashNotation extends Notation {
             base = defaultBaseChars.slice(0, base);
         }
         if (base.length == 0) throw new RangeError("There is no such thing as base 0");
-        if (base.length < 3) throw new RangeError("Psi Dash Notation doesn't work with base 1 or 2");
+        if (base.length < 2) throw new RangeError("Psi Dash Notation doesn't work with base 1");
         this._base = base;
     }
 

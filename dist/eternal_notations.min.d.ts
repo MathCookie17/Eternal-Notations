@@ -5028,6 +5028,8 @@ declare let Presets: {
     Prime: Notation;
     PsiLetters: Notation;
     PsiDash: Notation;
+    PsiLettersBinary: Notation;
+    PsiDashBinary: Notation;
     OmegaLayers: Notation;
     OmegaLayersRamped: Notation;
     OmegaLayerNumber: Notation;
@@ -5155,6 +5157,8 @@ declare let HTMLPresets: {
     Prime: Notation;
     PsiLetters: Notation;
     PsiDash: Notation;
+    PsiLettersBinary: Notation;
+    PsiDashBinary: Notation;
     OmegaLayers: Notation;
     OmegaLayersRamped: Notation;
     OmegaLayerNumber: Notation;
