@@ -15,7 +15,7 @@ let specialValues = [
     "2^1024", "2^^5", "F3", "3^^4", "e1e100", "F4", "F4.5", "F5", "F10", "F100", "F1e10", "F1e100", "F1e308",
     "0.5", "0.1", "0.01", "1e-10", "ee-10", "(e^10)-1", "(e^1e308)-1", "-1", "-10", "-1e10", "-(e^1e308)1", "-1e-100"]
 
-// test_preset("Default");
+// test_preset("FillingFractions");
 // test_PhysicalScale()
 continuousPresetTest();
 
@@ -31,7 +31,7 @@ function test_preset(name, ...args) {
     let formatT, formatH;
     let values = structuredClone(specialValues);
     {
-        if (name.includes("Binary") || name.includes("Base2") || name == "Quaternary" || name == "Hexadecimal" || name == "Fours") values = values.concat(["4", "16", "256", "65535", "65536", "1048576", "16^^2", "4^^3", "2^^6", "2^^^4"]);
+        if (name.includes("Binary") || name.includes("Base2") || name == "Quaternary" || name == "Hexadecimal" || name == "Fours") values = values.concat(["4", "16", "256", "65535", "65536", "1048576", "16^^2", "4^^3", "4^^4", "2^^6", "16^^16", "2^^^4"]);
         if (name.includes("Ternary") || name.includes("Base3")) values = values.concat(["1.4999", "9", "27", "7625597484986", "7625597484987", "3^^^3"])
         if (name == "Seximal" || name == "Brackets") values = values.concat(["6", "36", "46656", "2176782335", "2176782336", "6^^3", "6^^6"])
         if (name == "Octal") values = values.concat(["8", "256", "16777216", "68719476735", "68719476736", "8^^3", "8^^8"])
@@ -43,7 +43,7 @@ function test_preset(name, ...args) {
         if (name == "Dominoes") values = values.concat([Decimal.pow(28, 9).sub(0.001), Decimal.pow(28, 9)])
         if (name.includes("Factorial") || name == "Factoradic") values = values.concat([2.0001, 6, 24, 720, 1307674367999, 1307674368000, "2.6012189436e1746", EternalNotations.iteratedfactorial(3, 10), EternalNotations.iteratedfactorial(3, 1e100)])
     }
-    if (name.includes("Fraction") || name.includes("MixedNumber")) {
+    if ((name.includes("Fraction") || name.includes("MixedNumber")) && !(name == "FillingFractions")) {
         // These notations work best on fractional numbers, not large ones, so they're getting a different set of values.
         values = [
             0, 1, 1/2, 1/3, 2/3, 3/4, 3/30, 3/2, 500/3, 4000004/5, 400/509, 8493/58492, 192940930/1329, 123456789/777777777777,
@@ -109,8 +109,7 @@ function test_PhysicalScale() {
 
 // Known "failed" tests (these are bugs and should probably be fixed eventually):
 /*
- * 12^12 in Dozenal's variants (returns 10#B instead of 1#10 for Duodecimal, and likewise for the other two)
- * 6 * 5! for 720 in Factorial Scientific
+ * 12^^12 in Dozenal's variants (returns 10#B instead of 1#10 for Duodecimal, and likewise for the other two)
  * There are a lot of +2's in Polynomial Base 2, but I'm not sure how to fix those at this point
  */
 

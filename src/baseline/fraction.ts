@@ -18,7 +18,7 @@ import { DefaultNotation } from "./defaultNotation.js";
      * @param numeratorInnerNotation ( Notation ) The notation that the numerator, and by default the rest of the fraction as well, is abbreviated in. DefaultNotation is the default.
      * @param wholeInnerNotation ( Notation ) The notation that the whole number in the mixed number fraction is abbreviated with. Is the same as numeratorInnerNotation by default.
      * @param denominatorInnerNotation ( Notation ) The notation that the denominator in the fraction is abbreviated with. Is the same as numeratorInnerNotation by default.
-     * @param showUnitDenominator ( boolean ) Controls whether the denominator is displayed even if it's 1. Default is false. This does not apply to mixed numbers, since there the fractional part is always hidden if it's zero.
+     * @param showUnitDenominator ( boolean ) Controls whether the denominator is displayed even if it's 1. Default is false. For mixed numbers, if this parameter is false, then whole numbers are just abbreviated using wholeInnerNotation directly.
      */
 export class FractionNotation extends Notation {
     public precision : Decimal;
@@ -48,7 +48,7 @@ export class FractionNotation extends Notation {
         numeratorInnerNotation : Notation = new DefaultNotation(),
         wholeInnerNotation : Notation = numeratorInnerNotation,
         denominatorInnerNotation : Notation = numeratorInnerNotation,
-        showUnitDenominator : boolean = false
+        showUnitDenominator : boolean = false,
     ) {
         super();
         this.precision = toDecimal(precision);
@@ -72,6 +72,7 @@ export class FractionNotation extends Notation {
         let fraction = fractionApproximationD(value, this.precision, (this.mixedNumber ? 3 : 1), this.maxIterations, this.maxDenominator, this.strictMaxDenominator, this.maxNumerator, this.strictMaxNumerator);
         if (fraction.length == 2) fraction.unshift(Decimal.dZero);
         if (fraction[0].eq(0) && fraction[1].eq(0)) return this.wholeInnerNotation.format(0);
+        if (this.mixedNumber && !this.showUnitDenominator && fraction[1].eq(0) && fraction[2].eq(1)) return this.wholeInnerNotation.format(fraction[0]);
         let orderArray = [1];
         orderArray.splice(this.delimiterPermutation % 2, 0, 2);
         orderArray.splice(Math.floor(this.delimiterPermutation / 2) % 3, 0, 3);

@@ -2,7 +2,7 @@ import Decimal from "break_eternity.js";
 import type { DecimalSource } from "break_eternity.js";
 
 /**
- * For reasons unbeknownst to me, break_eternity's Decimal.fromValue does not seem to work on values that are already Decimals, so this function is a version of Decimal.fromValue that does.1
+ * For reasons unbeknownst to me, break_eternity's Decimal.fromValue does not seem to work on values that are already Decimals, so this function is a version of Decimal.fromValue that does.
  * Unlike Decimal.fromValue, this function uses the linear approximation of tetration to convert strings that involve tetration.
  * @param value ( Decimal ! ) The DecimalSource to be converted.
  */
@@ -598,6 +598,68 @@ export function multslog(value : DecimalSource, base : DecimalSource, mult : Dec
 }
 
 /**
+ * Same as iteratedmultlog, except it takes an array of bases and multipliers instead of a single base and multiplier,
+ * and each iteration consists of taking logarithms of each of those bases (with its corresponding multiplier) in order.
+ * For example, multibaseLogarithm(x, [10, 2], 1) = x.log(10).log(2), and multibaseLogarithm(x, [10, 2], 2) = x.log(10).log(2).log(10).log(2)
+ */
+export function multibaseLogarithmmult(value : DecimalSource, bases: DecimalSource[], times : number = 1, mults : DecimalSource[] = []) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.eq(Decimal.dInf)) return new Decimal(Infinity);
+    if (valueD.isNan()) return new Decimal(NaN);
+    let basesD = bases.map(toDecimal);
+    let multsD = mults.map(toDecimal);
+    if (times == 0) return new Decimal(valueD);
+    if (times % 1 != 0) throw new RangeError("multibaseLogarithm does not support non-integer times");
+    while (multsD.length < basesD.length) multsD.push(Decimal.dOne);
+    let highestBase = Decimal.dOne;
+    for (let b = 0; b < basesD.length; b++) highestBase = Decimal.max(highestBase, basesD[b].pow(multsD[b].recip()));
+    let result = new Decimal(valueD);
+    if (times > 0) {
+        if (result.layer - 3 > highestBase.layer) {
+            let layerloss = Math.min(times * basesD.length, valueD.layer - highestBase.layer - 3);
+            layerloss -= (layerloss % basesD.length);
+            times -= (layerloss / basesD.length);
+            result = result.iteratedlog(10, layerloss, true);
+        }
+        while (times > 0) {
+            for (let b = 0; b < basesD.length; b++) {
+                result = iteratedmultlog(result, basesD[b], 1, multsD[b]);
+                // Bail if we're NaN
+                if (result.isNan()) return new Decimal(result);
+            }
+            times--;
+        }
+        return result;
+    }
+    else {
+        while (times < 0) {
+            for (let b = basesD.length - 1; b >= 0; b--) {
+                result = iteratedexpmult(basesD[b], result, 1, multsD[b]);
+            }
+            times++;
+            if (valueD.layer - 3 > highestBase.layer) {
+                result = Decimal.iteratedexp(10, -times * basesD.length, result, true);
+                return result;
+            }
+        }
+        return result;
+    }
+}
+
+/**
+ * Same as Decimal's iteratedlog, except it takes an array of bases instead of a single base,
+ * and each iteration consists of taking logarithms of each of those bases in order.
+ * Unlike iteratedlog, fractional 'times' is not supported here.
+ * For example, multibaseLogarithm(x, [10, 2], 1) = x.log(10).log(2), and multibaseLogarithm(x, [10, 2], 2) = x.log(10).log(2).log(10).log(2)
+ * @param value ( Decimal ! ) The value to take the multi-base logarithm of.
+ * @param bases ( Decimal[] ! ) The array of bases that the logarithms are taken in.
+ * @param times ( number ) The amount of iterations. Each iteration, the entire array of bases is cycled through once. Default is 1.
+ */
+export function multibaseLogarithm(value : DecimalSource, bases: DecimalSource[], times : number = 1) : Decimal {
+    return multibaseLogarithmmult(value, bases, times);
+}
+
+/**
  * Converts a Decimal into a list of two Decimals, [b, e], such that b * (base)^e equals the original value.
  * @param value ( Decimal ! ) The value we want to turn into scientific notation.
  * @param base ( Decimal ) The base of the scientific notation we're using (default is 10)
@@ -759,6 +821,274 @@ export function hyperscientifify(value: DecimalSource, base: DecimalSource = Dec
     }
     e = e.mul(hyperexpMultiplierD);
     return [b, e];
+}
+
+/**
+ * "Weak tetration" is, like regular tetration, repeated exponentiation, but evaluated from bottom to top instead of from top to bottom.
+ * For example, 10↓↓5 is (((10^10)^10)^10)^10. It turns out that a↓↓b is equal to a^(a^(b - 1)).
+ * @param value ( Decimal ! ) The value to repeatedly exponentiate.
+ * @param height ( Decimal ! ) The amount of layers in the power tower.
+ * @param lowest ( Decimal ) The number at the bottom of the power tower. Is equal to 'value' by default.
+ */
+export function weak_tetrate(value : DecimalSource, height: DecimalSource, lowest : DecimalSource = value) : Decimal {
+    return Decimal.pow(lowest, Decimal.pow(value, Decimal.sub(height, 1)));
+}
+
+/**
+ * One of weak tetration's inverses: given that base↓↓x = value, what is x?
+ * This turns out to just be log(log(value)) + 1, with 'base' as the base of the logarithms.
+ * @param value ( Decimal ! ) The value to find the weak super-logarithm of.
+ * @param base ( Decimal ) The base of the weak super-logarithm. Default is 10.
+ */
+export function weak_slog(value: DecimalSource, base: DecimalSource = 10): Decimal {
+    return new Decimal(value).log(base).log(base).plus(1);
+  }
+
+/**
+ * Converts a Decimal into a list of two Decimals, [b, e], such that ((base)↓↓e)^b equals the original value, where x↓↓y is "weak tetration", x↓↓y = x^x^(y - 1).
+ * @param value ( Decimal ! ) The value we want to turn into weak hyperscientific notation.
+ * @param base ( Decimal ) The base of the weak hyperscientific notation we're using (default is 10).
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in weak hyperscientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^2, if mantissaPower is 2 then the bounds are base^2 and base^3, and so on. For example, 1e350 in base 10, which normally returns [3.5, 3], would become [35, 2] with 1 mantissaPower and [350, 1] with 2 mantissaPower.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param expMultiplier ( Decimal ) In the returned pair, e is multiplied by this value. Default is 1.
+ */
+export function weak_hyperscientifify(value: DecimalSource, base: DecimalSource = Decimal.dTen, rounding : DecimalSource | ((value : Decimal) => Decimal) = Decimal.dZero, mantissaPower : DecimalSource = Decimal.dZero, engineerings : DecimalSource | DecimalSource[] = Decimal.dOne, expMultiplier : DecimalSource = Decimal.dOne): [Decimal, Decimal] {
+    let valueD = toDecimal(value);
+    let baseD = toDecimal(base);
+    let mantissaPowerD = toDecimal(mantissaPower);
+    let expMultiplierD = toDecimal(expMultiplier);
+    if (!Array.isArray(engineerings)) engineerings = [engineerings];
+    let engineeringsD : Decimal[] = engineerings.map(toDecimal);
+    engineeringsD = engineeringsD.sort(function(a, b){
+        if (a.lt(b)) return -1;
+        else if (a.eq(b)) return 0;
+        else return 1;
+    }).reverse();
+    if (valueD.eq(1)) return [new Decimal(1), new Decimal(-Infinity)];
+    if (valueD.eq(Decimal.dInf)) return [new Decimal(Infinity), new Decimal(Infinity)];
+    if (valueD.lt(1) || !valueD.isFinite()) return [new Decimal(NaN), new Decimal(NaN)];
+    if (baseD.lte(1)) {
+        console.log("Base <= 1 in weak_hyperscientifify");
+        return [baseD, new Decimal(NaN)];
+    }
+    let b = weak_slog(valueD, baseD);
+    let e = currentEngineeringValue(b.sub(mantissaPowerD), engineeringsD);
+    if (e.lt(0) && e.neq(b.sub(mantissaPowerD))) e = previousEngineeringValue(b.sub(mantissaPowerD), engineeringsD);
+    b = Decimal.pow(base, b.sub(e));
+    let unroundedB = b;
+    b = round(b, rounding);
+    if (e.abs().gte(9e15)) b = Decimal.pow(baseD, mantissaPowerD);
+    else {
+        let oldB = Decimal.dZero;
+        let checkComplete = false;
+        let loopWatch = false;
+        do {
+            oldB = unroundedB;
+            let upperLimit = baseD.pow(nextEngineeringValue(e, engineeringsD).sub(currentEngineeringValue(e, engineeringsD)).plus(mantissaPower));
+            let lowerLimit = baseD.pow(mantissaPowerD);
+            if (b.gte(upperLimit)) {
+                b = unroundedB.mul(baseD.pow(e)).root(baseD.pow(nextEngineeringValue(e, engineeringsD)));
+                e = nextEngineeringValue(e, engineeringsD);
+                unroundedB = b;
+                if (loopWatch) b = lowerLimit; //If we've gone both up and down, the mantissa is too close to the boundary, so just set it to the boundary value
+                b = round(b, rounding);
+                if (loopWatch) break;
+            }
+            else if (b.lt(lowerLimit)) {
+                b = unroundedB.pow(baseD.pow(e)).root(baseD.pow(previousEngineeringValue(e, engineeringsD)));
+                e = previousEngineeringValue(e, engineeringsD);
+                unroundedB = b;
+                b = round(b, rounding);
+                loopWatch = true;
+            }
+            else checkComplete = true;
+        } while (!checkComplete && oldB.neq(unroundedB))
+    }
+    e = e.mul(expMultiplierD);
+    return [b, e];
+}
+
+/**
+ * Converts a Decimal into a list of two Decimals, [b, e], such that Decimal.pentate(base, e, b, true) equals the original value.
+ * @param value ( Decimal ! ) The value we want to turn into penta-scientific notation.
+ * @param base ( Decimal ) The base of the penta-scientific notation we're using (default is 10).
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param hypermantissaPower ( Decimal ) Normally, the mantissa in penta-scientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^^^2, if mantissaPower is 2 then the bounds are base^^^2 and base^^^3, and so on. For example, 10^^10 in base 10, which normally returns [1, 2], would become [10, 1] with 1 mantissaPower and [10^^10, 0] with 2 mantissaPower.
+ * @param engineerings ( Decimal | DecimalSource[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ */
+export function pentascientifify(value: DecimalSource, base: DecimalSource = Decimal.dTen, rounding : DecimalSource | ((value : Decimal) => Decimal) = Decimal.dZero, hypermantissaPower : DecimalSource = Decimal.dZero, engineerings : DecimalSource | DecimalSource[] = Decimal.dOne): [Decimal, Decimal] {
+    let valueD = toDecimal(value);
+    let baseD = toDecimal(base);
+    let hypermantissaPowerD = toDecimal(hypermantissaPower);
+    if (!Array.isArray(engineerings)) engineerings = [engineerings];
+    let engineeringsD : Decimal[] = engineerings.map(toDecimal);
+    engineeringsD = engineeringsD.sort(function(a, b){
+        if (a.lt(b)) return -1;
+        else if (a.eq(b)) return 0;
+        else return 1;
+    }).reverse();
+    if (baseD.lte(1)) return [baseD, new Decimal(NaN)];
+    if (valueD.eq(Decimal.dInf)) return [new Decimal(Infinity), new Decimal(Infinity)];
+    if (valueD.eq(baseD.tetrate(valueD.toNumber(), 1, true))) return [new Decimal(1), new Decimal(-Infinity)];
+    if (!valueD.isFinite() || valueD.lte(-2) || valueD.gt(baseD.tetrate(valueD.toNumber(), 1, true))) return [new Decimal(NaN), new Decimal(NaN)];
+    if (baseD.pentate(Infinity, 1, true).isFinite() && valueD.gte(baseD.pentate(Infinity, 1, true))) return [valueD.div(baseD.pentate(Infinity, 1, true)), new Decimal(Infinity)];
+    let e : Decimal, b : Decimal;
+    // lowerLoopLimit stuff is to avoid calling slog on negatives
+    let lowerLoopLimit = -1;
+    if (engineeringsD[engineeringsD.length - 1].lt(0.1)) lowerLoopLimit = 0;
+    if (engineeringsD[engineeringsD.length - 1].lt(0.05)) lowerLoopLimit = 1;
+    if (valueD.lt(Decimal.pentate(baseD, engineeringsD[engineeringsD.length - 1].mul(10).toNumber(), 1, true)) && (valueD.gt(lowerLoopLimit))) {
+        // We really want to avoid calling penta_log on small numbers, so just let the "oldB" loop below handle it. The loop limit of 10 was chosen arbitrarily.
+        e = new Decimal(0);
+        b = valueD;
+    }
+    else {
+        e = currentEngineeringValue(Decimal.penta_log(valueD, baseD, true).sub(hypermantissaPowerD), engineeringsD);
+        if (e.lt(0) && e.neq(Decimal.penta_log(valueD, baseD, true).sub(hypermantissaPowerD))) e = previousEngineeringValue(Decimal.penta_log(valueD, baseD, true).sub(hypermantissaPowerD), engineeringsD);
+        b = Decimal.increasingInverse((v : Decimal) => Decimal.pentate(baseD, e.toNumber(), v, true))(valueD);
+    }
+    let unroundedB = b;
+    b = round(b, rounding);
+    if (e.abs().gte(9e15)) b = baseD.pentate(hypermantissaPowerD.toNumber(), Decimal.dOne, true); //iteratedslog isn't a thing, so here's the best solution I've got
+    else {
+        let oldB = Decimal.dZero;
+        let checkComplete = false;
+        let loopWatch = false;
+        do {
+            oldB = unroundedB;
+            let upperLimit = Decimal.pentate(baseD, nextEngineeringValue(e, engineeringsD).sub(currentEngineeringValue(e, engineeringsD)).plus(hypermantissaPowerD).toNumber(), Decimal.dOne, true);
+            let lowerLimit = Decimal.pentate(baseD, hypermantissaPowerD.toNumber(), Decimal.dOne, true);
+            if (b.gte(upperLimit)) {
+                e = nextEngineeringValue(e, engineeringsD);
+                b = Decimal.increasingInverse((v : Decimal) => Decimal.pentate(baseD, e.toNumber(), v, true))(valueD);
+                unroundedB = b;
+                if (loopWatch) b = lowerLimit; //If we've gone both up and down, the mantissa is too close to the boundary, so just set it to the boundary value
+                b = round(b, rounding);
+                if (loopWatch) break;
+            }
+            else if (b.lt(lowerLimit)) {
+                e = previousEngineeringValue(e, engineeringsD);
+                b = Decimal.increasingInverse((v : Decimal) => Decimal.pentate(baseD, e.toNumber(), v, true))(valueD);
+                unroundedB = b;
+                b = round(b, rounding);
+                loopWatch = true;
+            }
+            else checkComplete = true;
+        } while (!checkComplete && oldB.neq(unroundedB))
+    }
+    return [b, e];
+}
+
+/**
+ * An advanced version of scientifify that takes any strictly increasing function with any amount of Decimal arguments and uses Decimal.increasingInverse to turn it into a scientific notation-like expression.
+ * The last argument is considered the highest priority argument to increment, like how the exponent is higher-priority than the mantissa in regular scientifify.
+ * Returns an array of Decimals containing the values of each parameter that, when plugged into the function, will give the original value.
+ * @param value ( Decimal ! ) The value being inputted into the function.
+ * @param func ( (...values : Decimal[]) => Decimal ! ) The function that is being used. It can have any amount of Decimal arguments, but it must return a Decimal (and it must have a fixed amount of arguments - the arguments can't themselves be an array of Decimals)
+ * @param limits ( Decimal[] ! ) limits[0] is the minimum value that the first argument is allowed to have; anything less, and the second argument is decreased to bring the first argument back over that limit. Likewise, limits[1] is the minimum for the second argument, limits[2] is the minimum for the third argument, and so on.
+ * The last argument does not have a limit. If this array has less values than (amount of arguments - 1), then all unfilled values will be set equal to the last value that was given.
+ * @param limitsAreMaximums ( boolean ) If this parameter is true, the limits are maximums instead of minimums. Default is false.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed values for each argument: for example, if engineerings[0] is [3], then the second argument will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted values for the third argument are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * The first argument does not have an engineerings array. If engineerings is a single value, then every argument is given that single value as its engineerings entry. If engineerings is an array with less arguments than (amount of arguments - 1), then all unfilled entries will be set equal to the last entry that was given.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The first argument is rounded to the nearest multiple of this value. If this parameter is a function, then the first argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * NOTE: Unlike the rounding parameter in other scientifify functions, this one does not detect "overflow", so rounding may cause the first argument to go under or over its limit.
+ * @param rangeLimits ( [Decimal, Decimal][] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ * @param revertValues ( (Decimal | boolean)[] ) If an argument would end up with a non-finite value (such as if increasingInverse returned NaN), that argument's revertValue entry determines what it becomes instead.
+ * If the revertValues entry is 'true', then that argument reverts to its limit. If the revertValues entry is a Decimal, then that argument becomes that value. If the revertValues entry is 'false', the non-finite value remains.
+ */
+export function increasingFunctionScientifify(
+    value : DecimalSource,
+    func : (...values : Decimal[]) => Decimal,
+    limits : DecimalSource[],
+    limitsAreMaximums : boolean = false,
+    engineerings : DecimalSource | DecimalSource[][] = 1,
+    rounding : DecimalSource | ((value : Decimal) => Decimal) = Decimal.dZero,
+    rangeLimits : [DecimalSource, DecimalSource][] = [[-Infinity, Infinity]],
+    revertValues : (DecimalSource | boolean)[] = [false]
+): Decimal[] {
+    let argamount = func.length;
+    if (argamount < 1) throw new Error("increasingFunctionScientifify does not work with an empty function");
+    let currentValue = toDecimal(value);
+    let limitsD = limits.map(toDecimal);
+    if (limitsD.length == 0) throw new Error("increasingFunctionScientifify does not work with an empty limits array");
+    if (!Array.isArray(engineerings)) engineerings = [[engineerings]];
+    let engineeringsD : Decimal[][] = engineerings.map(value => value.map(toDecimal));
+    engineeringsD = engineeringsD.map(value => value.sort(function(a, b){
+        if (a.lt(b)) return -1;
+        else if (a.eq(b)) return 0;
+        else return 1;
+    }).reverse());
+    if (engineeringsD.length == 0) engineeringsD.push([Decimal.dOne]);
+    let revertValuesD = revertValues.map(value => ((typeof value == "boolean") ? value : toDecimal(value)));
+    if (revertValuesD.length == 0) revertValuesD.push(false);
+    let rangeLimitsD = rangeLimits.map(value => value.map(toDecimal));
+    if (rangeLimitsD.length == 0) rangeLimitsD.push([Decimal.dNegInf, Decimal.dInf]);
+    while (limitsD.length < argamount - 1) limitsD.push(limitsD[limitsD.length - 1]);
+    limitsD[argamount - 1] = (limitsAreMaximums) ? Decimal.dInf : Decimal.dNegInf;
+    while (engineeringsD.length < argamount - 1) engineeringsD.push(engineeringsD[engineeringsD.length - 1]);
+    while (rangeLimitsD.length < argamount) rangeLimitsD.push(rangeLimitsD[rangeLimitsD.length - 1]);
+    while (revertValuesD.length < argamount) revertValuesD.push(revertValuesD[revertValuesD.length - 1]);
+    // This loop avoids engineerings putting arguments past their limits. I unfortunately don't know how to do the same for rounding here
+    for (let b = 1; b < argamount - 1; b++) {
+        if (limitsAreMaximums) {
+            let engineeredLimit = currentEngineeringValue(limitsD[b], engineeringsD[b - 1]);
+            while (engineeredLimit.gte(limitsD[b])) engineeredLimit = previousEngineeringValue(engineeredLimit, engineeringsD[b - 1]);
+            limitsD[b] = engineeredLimit;
+            if (limitsD[b].gt(rangeLimitsD[b][1])) throw new Error("In increasingFunctionScientifify, a limit maximum cannot be greater than the corresponding range maximum");
+        }
+        else {
+            let engineeredLimit = upperCurrentEngineeringValue(limitsD[b], engineeringsD[b - 1]);
+            while (engineeredLimit.lt(limitsD[b])) engineeredLimit = nextEngineeringValue(engineeredLimit, engineeringsD[b - 1]);
+            limitsD[b] = engineeredLimit;
+            if (limitsD[b].lt(rangeLimitsD[b][0])) throw new Error("In increasingFunctionScientifify, a limit minimum cannot be less than the corresponding range minimum");
+        }
+    }
+    let result : Decimal[] = [];
+    for (let a = argamount - 1; a >= 0; a--) {
+        let leftargs = limitsD.slice(0, a);
+        let rightargs = result;
+        let newargument = Decimal.increasingInverse((value : Decimal) => func(...leftargs, value, ...rightargs), false, undefined, rangeLimitsD[a][0], rangeLimitsD[a][1])(currentValue);
+        if (!newargument.isFinite()) {
+            let revert = revertValuesD[a]; // Declaring this as a new variable makes TypeScript accept what comes next
+            if (revert === true) newargument = limitsD[a];
+            else if (revert !== false) newargument = revert;
+        }
+        else if (a > 0) {
+            if (limitsAreMaximums) newargument = upperCurrentEngineeringValue(newargument, engineeringsD[a - 1]);
+            else newargument = currentEngineeringValue(newargument, engineeringsD[a - 1]);
+        }
+        else newargument = round(newargument, rounding);
+        result.unshift(newargument);
+    }
+    return result;
+}
+
+/**
+ * Returns a function that, when a Decimal value is plugged into it, runs increasingFunctionScientifify on that value with the arguments given here.
+ * @param func ( (...values : Decimal[]) => Decimal ! ) The function that is being used. It can have any amount of Decimal arguments, but it must return a Decimal (and it must have a fixed amount of arguments - the arguments can't themselves be an array of Decimals)
+ * @param limits ( Decimal[] ! ) limits[0] is the minimum value that the first argument is allowed to have; anything less, and the second argument is decreased to bring the first argument back over that limit. Likewise, limits[1] is the minimum for the second argument, limits[2] is the minimum for the third argument, and so on.
+ * The last argument does not have a limit. If this array has less values than (amount of arguments - 1), then all unfilled values will be set equal to the last value that was given.
+ * @param limitsAreMaximums ( boolean ) If this parameter is true, the limits are maximums instead of minimums. Default is false.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed values for each argument: for example, if engineerings[0] is [3], then the second argument will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted values for the third argument are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * The first argument does not have an engineerings array. If engineerings is a single value, then every argument is given that single value as its engineerings entry. If engineerings is an array with less arguments than (amount of arguments - 1), then all unfilled entries will be set equal to the last entry that was given
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The first argument is rounded to the nearest multiple of this value. If this parameter is a function, then the first argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * NOTE: Unlike the rounding parameter in other scientifify functions, this one does not detect "overflow", so rounding may cause the first argument to go under or over its limit.
+ * @param rangeLimits ( [Decimal, Decimal][] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ */
+export function increasingScientififyFunction(
+    func : (...values : Decimal[]) => Decimal,
+    limits : DecimalSource[],
+    limitsAreMaximums : boolean = false,
+    engineerings : DecimalSource | DecimalSource[][] = 1,
+    rounding : DecimalSource | ((value : Decimal) => Decimal) = Decimal.dZero,
+    rangeLimits : [DecimalSource, DecimalSource][] = [[-Infinity, Infinity]]
+) { 
+    return ((value : DecimalSource) => increasingFunctionScientifify(value, func, limits, limitsAreMaximums, engineerings, rounding, rangeLimits))
 }
 
 /**
@@ -1723,4 +2053,451 @@ export function triPolygonRoot(value : DecimalSource, sides : DecimalSource, bas
         }
     }
     return new Decimal(result);
+}
+
+/**
+ * f0(n) in the Fast-Growing Hierarchy. This is the successor function, f0(n) = n + 1.
+ * @param value ( Decimal ) The input to f0.
+ */
+export function FGH0(value : DecimalSource) : Decimal {
+    return Decimal.plus(value, 1);
+}
+
+/**
+ * The inverse of f0(n) in the Fast-Growing Hierarchy. Equal to n - 1.
+ * @param value ( Decimal ) The value that FGH0 will return when given the result of this function.
+ */
+export function FGH0inverse(value : DecimalSource) : Decimal {
+    return Decimal.sub(value, 1);
+}
+
+/**
+ * Applies FGH0 to 'value' 'times' times. Equivalent to value + times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH0 to.
+ * @param times ( Decimal ) The amount of times FGH0 is applied to value.
+ */
+export function iteratedFGH0(value : DecimalSource, times : DecimalSource) : Decimal {
+    return Decimal.plus(value, times);
+}
+
+/**
+ * Applies FGH0inverse to 'value' 'times' times. Equivalent to value - times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH0inverse to.
+ * @param times ( Decimal ) The amount of times FGH0inverse is applied to value.
+ */
+export function iteratedFGH0inverse(value : DecimalSource, times : DecimalSource) : Decimal {
+    return Decimal.sub(value, times);
+}
+
+/**
+ * f1(n) in the Fast-Growing Hierarchy. f1(n) = f0(f0(f0(f0...(n)))) with n f0's. Since f0() is just adding 1, f1(n) equals n * 2.
+ * @param value ( Decimal ) The input to f1.
+ */
+export function FGH1(value : DecimalSource) : Decimal {
+    return Decimal.mul(value, 2)
+}
+
+/**
+ * The inverse of f1(n) in the Fast-Growing Hierarchy. Equal to n / 2.
+ * @param value ( Decimal ) The value that FGH1 will return when given the result of this function.
+ */
+export function FGH1inverse(value : DecimalSource) : Decimal {
+    return Decimal.div(value, 2);
+}
+
+/**
+ * Applies FGH1 to 'value' 'times' times. Equivalent to value * 2^times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH1 to.
+ * @param times ( Decimal ) The amount of times FGH1 is applied to value.
+ */
+export function iteratedFGH1(value : DecimalSource, times : DecimalSource) : Decimal {
+    return Decimal.mul(value, Decimal.pow(2, times));
+}
+
+/**
+ * One of the inverses of iteratedFGH1: given iteratedFGH1(base, x) = value and knowing what the base and value are, finds x.
+ * Equivalent to the base-2 logarithm of (value / base).
+ * @param value ( Decimal ) The answer given by iteratedFGH1 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH1 is called on with the result this inverse outputs to return the given value.
+ */
+export function iteratedFGH1log(value : DecimalSource, base : DecimalSource) : Decimal {
+    return Decimal.log2(Decimal.div(value, base));
+}
+
+/**
+ * f2(n) in the Fast-Growing Hierarchy. f2(n) = f1(f1(f1(f1...(n)))) with n f1's. f2(n) = n * 2^n.
+ * @param value ( Decimal ) The input to f2.
+ */
+export function FGH2(value : DecimalSource) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.eq(-Infinity)) return new Decimal(0);
+    if (valueD.isNan()) return new Decimal(NaN);
+    return Decimal.mul(value, Decimal.pow(2, value));
+}
+
+/**
+ * The inverse of f2(n) in the Fast-Growing Hierarchy. Similar to the base-2 logarithm for larger numbers.
+ * This is basically the Lambert W function, just with a base of 2 instead of e.
+ * @param value ( Decimal ) The value that FGH2 will output when given the result of this function.
+ */
+export function FGH2inverse(value : DecimalSource) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.lt(-1 / (Math.E*Math.LN2)) || valueD.isNan()) return new Decimal(NaN);
+    if (valueD.eq(0)) return new Decimal(0);
+    if (valueD.gt("ee18")) return valueD.log2();
+    return Decimal.increasingInverse((value : Decimal) => FGH2(value), false, undefined, undefined, undefined, -1 / (Math.E*Math.LN2))(value);
+//     let has_changed_directions_once = false;
+//     let previously_rose = false;
+//     let result = (valueD.gt(1)) ? valueD.log2().toNumber() : 0;
+//     let step_size = Math.max(0.001, result * 0.001);
+//     for (var i = 1; i < 100; ++i)
+//     {
+//       let new_decimal = FGH2(result);
+//       let currently_rose = new_decimal.gt(valueD);
+//       if (i > 1)
+//       {
+//         if (previously_rose != currently_rose)
+//         {
+//           has_changed_directions_once = true;
+//         }
+//       }
+//       previously_rose = currently_rose;
+//       if (has_changed_directions_once)
+//       {
+//         step_size /= 2;
+//       }
+//       else
+//       {
+//         step_size *= 2;
+//       }
+//       step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+//       result += step_size;
+//       if (step_size === 0) { break; }
+//     }
+//     return Decimal.fromNumber(result);
+}
+
+/**
+ * Applies FGH2 to 'value' 'times' times. Similar in growth rate to base 2 iteratedexp.
+ * @param value ( Decimal ) The value to repeatedly apply FGH2 to.
+ * @param times ( number ) The amount of times FGH2 is applied to value.
+ */
+export function iteratedFGH2(value : DecimalSource, times : number) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.eq(0) || times == 0) return valueD;
+    if (valueD.gt(0) && valueD.lt(0.01) && times > 0) {
+        let coveredDistance = iteratedFGH2log(valueD, 1).toNumber();
+        return iteratedFGH2(1, coveredDistance + times);
+    }
+    if (valueD.eq(Infinity)) return new Decimal(Infinity);
+    if (valueD.isNan()) return new Decimal(NaN);
+    let wholetimes = Math.floor(times);
+    let fractimes = times - wholetimes;
+    if (fractimes != 0) {
+        /* I really want the property of "f2^[n](x) = f2^[n - 1](f2(x))" to always hold: for example, regardless of what n is,
+        f2^n(2) = f2^[n - 1](8). Therefore, rather than a straightforward linear approximation,
+        I'm using a base of 1 as the base case and going from there. */
+        if (valueD.eq(1)) valueD = Decimal.pow(2, fractimes);
+        else return iteratedFGH2(1, iteratedFGH2log(valueD, 1).plus(times).toNumber());
+        // valueD = valueD.mul(Decimal.pow(2, fractimes))
+    }
+    if (wholetimes < 0) {
+        if (valueD.lt(0)) {
+            // Starts decreasing, then goes NaN. I'm not bothering with this one, as it serves no use for Eternal Notations.
+            return new Decimal(NaN);
+        }
+        else {
+            if (times == Infinity) return new Decimal(0);
+            if (valueD.gt("eee20")) {
+                let safeIterations = Decimal.slog(valueD, 2, true).sub(Decimal.slog("eee20", 2, true)).floor().min(Math.abs(wholetimes)).toNumber();
+                valueD = Decimal.iteratedlog(valueD, 2, safeIterations, true);
+                wholetimes += safeIterations;
+            }
+            // Approaches 0 at a reciprocal rate, but offset by a factor of ln(2): for example, it takes 1,000/ln(2) iterations to go from 1 to 0.001
+            while (wholetimes < 0) {
+                valueD = FGH2inverse(valueD);
+                wholetimes++;
+                if (!valueD.isFinite) return new Decimal(valueD);
+                if (valueD.lt(0.01)) {
+                    let totaliterations = valueD.recip().mul(Math.LOG2E).sub(wholetimes);
+                    return totaliterations.mul(Math.LN2).recip();
+                }
+            }
+        }
+    }
+    else {
+        if (valueD.lt(0)) {
+            // Approaches 0 at a reciprocal rate, but offset by a factor of ln(2): for example, it takes 1,000/ln(2) iterations to go from -1 to -0.001
+            if (times == Infinity) return new Decimal(0);
+            while (wholetimes > 0) {
+                valueD = FGH2(valueD);
+                wholetimes--;
+                if (valueD.gt(-0.01)) {
+                    let totaliterations = valueD.recip().abs().mul(Math.LOG2E).plus(wholetimes);
+                    return totaliterations.mul(Math.LN2).recip().neg();
+                }
+            }
+        }
+        else {
+            // Tetrational growth
+            if (times == Infinity) return new Decimal(Infinity);
+            while (wholetimes > 0) {
+                valueD = FGH2(valueD);
+                wholetimes--;
+                if (valueD.gt("1e20")) return Decimal.iteratedexp(2, wholetimes, valueD, true);
+            }
+        }
+    }
+    return valueD;
+}
+
+/**
+ * One of the inverses of iteratedFGH2: given iteratedFGH2(base, x) = value and knowing what the base and value are, finds x.
+ * Similar to base 2 slog.
+ * @param value ( Decimal ) The answer given by iteratedFGH2 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH2 is called on with the result this inverse outputs to return the given value.
+ */
+export function iteratedFGH2log(value : DecimalSource, base : DecimalSource) : Decimal {
+    let valueD = toDecimal(value);
+    let baseD = toDecimal(base);
+    if (valueD.lt(0) || baseD.lte(0) || !baseD.isFinite()) return new Decimal(NaN);
+    if (valueD.eq(0)) return new Decimal(-Infinity);
+    if (valueD.lt(1e-20)) return valueD.recip().neg().mul(Math.LOG2E);
+    if (valueD.eq(Infinity)) return new Decimal(Infinity);
+    if (valueD.isNan()) return new Decimal(NaN);
+    if (baseD.neq(1)) return iteratedFGH2log(valueD, 1).sub(iteratedFGH2log(baseD, 1));
+    // For some reason calling Decimal.increasingInverse here is faster than just running the loop
+    if (valueD.gte(baseD)) return Decimal.increasingInverse((value : Decimal) => iteratedFGH2(base, value.toNumber()))(valueD);
+    let has_changed_directions_once = false;
+    let previously_rose = false;
+    let result = (valueD.gte(1)) ? valueD.slog(2, undefined, true).sub(baseD.slog(2, undefined, true)).toNumber() : valueD.recip().neg().mul(Math.LOG2E).toNumber();
+    let step_size = Math.abs(Math.max(0.001, result * 0.001));
+    for (var i = 1; i < 100; ++i)
+    {
+      let new_decimal = iteratedFGH2(base, result);
+      let currently_rose = new_decimal.gt(valueD);
+      if (i > 1)
+      {
+        if (previously_rose != currently_rose)
+        {
+          has_changed_directions_once = true;
+        }
+      }
+      previously_rose = currently_rose;
+      if (has_changed_directions_once)
+      {
+        step_size /= 2;
+      }
+      else
+      {
+        step_size *= 2;
+      }
+      step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+      result += step_size;
+      if (result + step_size == result) { break; }
+    }
+    return Decimal.fromNumber(result);
+}
+
+/**
+ * f3(n) in the Fast-Growing Hierarchy. f3(n) = f2(f2(f2(f2...(n)))) with n f2's. Grows tetrationally.
+ * @param value ( Decimal ) The input to f3.
+ */
+export function FGH3(value : DecimalSource) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
+    if (valueD.lt(1e-17)) return valueD;
+    if (valueD.eq(Infinity)) return new Decimal(Infinity);
+    return iteratedFGH2(valueD, valueD.toNumber());
+}
+
+/**
+ * The inverse of f3(n) in the Fast-Growing Hierarchy. Similar to super-logarithm.
+ * @param value ( Decimal ) The value that FGH3 will output when given the result of this function.
+ */
+export function FGH3inverse(value : DecimalSource) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
+    if (valueD.lt(1e-17)) return valueD;
+    if (valueD.eq(Infinity)) return new Decimal(Infinity);
+    return Decimal.increasingInverse((value : Decimal) => FGH3(value))(valueD);
+    // let has_changed_directions_once = false;
+    // let previously_rose = false;
+    // let result = (valueD.gte(2)) ? valueD.slog(2, undefined, true).toNumber() : valueD.toNumber();
+    // let step_size = Math.abs(Math.max(0.001, result * 0.001));
+    // for (var i = 1; i < 100; ++i)
+    // {
+    //   let new_decimal = FGH3(result);
+    //   let currently_rose = new_decimal.gt(valueD);
+    //   if (i > 1)
+    //   {
+    //     if (previously_rose != currently_rose)
+    //     {
+    //       has_changed_directions_once = true;
+    //     }
+    //   }
+    //   previously_rose = currently_rose;
+    //   if (has_changed_directions_once)
+    //   {
+    //     step_size /= 2;
+    //   }
+    //   else
+    //   {
+    //     step_size *= 2;
+    //   }
+    //   step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+    //   result += step_size;
+    //   if (result + step_size == result) { break; }
+    // }
+    // return Decimal.fromNumber(result);
+}
+
+/**
+ * Applies FGH3 to 'value' 'times' times. Grows pentationally with respect to 'times'.
+ * @param value ( Decimal ) The value to repeatedly apply FGH3 to.
+ * @param times ( number ) The amount of times FGH3 is applied to value.
+ */
+export function iteratedFGH3(value : DecimalSource, times : number) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.eq(0) || times == 0) return valueD;
+    if (valueD.eq(Infinity)) return new Decimal(Infinity);
+    if (valueD.isNan() || Number.isNaN(times)) return new Decimal(NaN);
+    let wholetimes = Math.floor(times);
+    let fractimes = times - wholetimes;
+    if (fractimes != 0) {
+        if (valueD.eq(1)) valueD = Decimal.pow(2, fractimes);
+        else return iteratedFGH3(1, iteratedFGH3log(valueD, 1).plus(times).toNumber());
+        // let iteration1 = Decimal.slog(FGH3(valueD), 2, true).toNumber();
+        // let iteration0 = Decimal.slog(valueD, 2, true).toNumber();
+        // valueD = Decimal.tetrate(2, iteration0 * (1 - fractimes) + iteration1 * fractimes, 1, true);
+    }
+    if (wholetimes < 0) {
+        let oldValue = Decimal.dZero;
+        for (let i = 0; i < Math.abs(wholetimes); i++) {
+            oldValue = valueD;
+            valueD = FGH3inverse(valueD);
+            if (valueD.eq(oldValue) || !valueD.isFinite()) return valueD;
+        }
+    }
+    else {
+        let oldValue = Decimal.dZero;
+        for (let i = 0; i < wholetimes; i++) {
+            oldValue = valueD;
+            valueD = FGH3(valueD);
+            if (valueD.eq(oldValue) || !valueD.isFinite()) return valueD;
+        }
+    }
+    return valueD;
+}
+
+/**
+ * One of the inverses of iteratedFGH3: given iteratedFGH3(base, x) = value and knowing what the base and value are, finds x.
+ * Similar to penta_log.
+ * @param value ( Decimal ) The answer given by iteratedFGH3 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH3 is called on with the result this inverse outputs to return the given value.
+ */
+export function iteratedFGH3log(value : DecimalSource, base : DecimalSource) : Decimal {
+    let valueD = toDecimal(value);
+    let baseD = toDecimal(base);
+    if (valueD.lt(0) || baseD.lte(0)) return new Decimal(NaN);
+    if (valueD.eq(0)) return new Decimal(-Infinity);
+    if (valueD.eq(Infinity)) return new Decimal(Infinity);
+    if (valueD.isNan() || Number.isNaN(base)) return new Decimal(NaN);
+    // return Decimal.increasingInverse((value : Decimal) => iteratedFGH3(base, value.toNumber()))(valueD);
+    if (baseD.neq(1)) return iteratedFGH3log(valueD, 1).sub(iteratedFGH3log(baseD, 1));
+    let result = 0;
+    if (valueD.gt(baseD)) {
+        let currentValue = baseD;
+        while (currentValue.lt(valueD)) {
+            currentValue = FGH3(currentValue);
+            result += 1;
+        }
+    }
+    else {
+        let currentValue = baseD;
+        while (currentValue.gt(valueD)) {
+            currentValue = FGH3inverse(currentValue);
+            result -= 1;
+        }
+    }
+
+    let has_changed_directions_once = false;
+    let previously_rose = false;
+    let step_size = 1;
+    for (var i = 1; i < 100; ++i)
+    {
+      let new_decimal = iteratedFGH3(base, result);
+      let currently_rose = new_decimal.gt(valueD);
+      if (i > 1)
+      {
+        if (previously_rose != currently_rose)
+        {
+          has_changed_directions_once = true;
+        }
+      }
+      previously_rose = currently_rose;
+      if (has_changed_directions_once)
+      {
+        step_size /= 2;
+      }
+      else
+      {
+        step_size *= 2;
+      }
+      step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+      result += step_size;
+      if (result + step_size == result) { break; }
+    }
+    return Decimal.fromNumber(result);
+}
+
+/**
+ * f4(n) in the Fast-Growing Hierarchy. f4(n) = f3(f3(f3(f3...(n)))) with n f3's. Grows pentationally.
+ * @param value ( Decimal ) The input to f4.
+ */
+export function FGH4(value : DecimalSource) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
+    if (valueD.eq(Infinity)) return new Decimal(Infinity);
+    return iteratedFGH3(valueD, valueD.toNumber());
+}
+
+/**
+ * The inverse of f4(n) in the Fast-Growing Hierarchy. Similar to penta-logarithm.
+ * @param value ( Decimal ) The value that FGH4 will output when given the result of this function.
+ */
+export function FGH4inverse(value : DecimalSource) : Decimal {
+    let valueD = toDecimal(value);
+    if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
+    if (valueD.eq(Infinity)) return new Decimal(Infinity);
+    // return Decimal.increasingInverse((value : Decimal) => FGH4(value))(valueD);
+    let has_changed_directions_once = false;
+    let previously_rose = false;
+    let result = 0;
+    let step_size = 0.001;
+    for (var i = 1; i < 100; ++i)
+    {
+      let new_decimal = FGH4(result);
+      let currently_rose = new_decimal.gt(valueD);
+      if (i > 1)
+      {
+        if (previously_rose != currently_rose)
+        {
+          has_changed_directions_once = true;
+        }
+      }
+      previously_rose = currently_rose;
+      if (has_changed_directions_once)
+      {
+        step_size /= 2;
+      }
+      else
+      {
+        step_size *= 2;
+      }
+      step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+      result += step_size;
+      if (result + step_size == result) { break; }
+    }
+    return Decimal.fromNumber(result);
 }

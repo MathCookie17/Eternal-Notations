@@ -1,7 +1,7 @@
 import Decimal from "break_eternity.js";
 import { DecimalSource } from "break_eternity.js";
 /**
- * For reasons unbeknownst to me, break_eternity's Decimal.fromValue does not seem to work on values that are already Decimals, so this function is a version of Decimal.fromValue that does.1
+ * For reasons unbeknownst to me, break_eternity's Decimal.fromValue does not seem to work on values that are already Decimals, so this function is a version of Decimal.fromValue that does.
  * Unlike Decimal.fromValue, this function uses the linear approximation of tetration to convert strings that involve tetration.
  * @param value ( Decimal ! ) The DecimalSource to be converted.
  */
@@ -72,6 +72,16 @@ declare function primeFactorizeFraction(value: number, primes: number | number[]
     number
 ][];
 /**
+ * Same as Decimal's iteratedlog, except it takes an array of bases instead of a single base,
+ * and each iteration consists of taking logarithms of each of those bases in order.
+ * Unlike iteratedlog, fractional 'times' is not supported here.
+ * For example, multibaseLogarithm(x, [10, 2], 1) = x.log(10).log(2), and multibaseLogarithm(x, [10, 2], 2) = x.log(10).log(2).log(10).log(2)
+ * @param value ( Decimal ! ) The value to take the multi-base logarithm of.
+ * @param bases ( Decimal[] ! ) The array of bases that the logarithms are taken in.
+ * @param times ( number ) The amount of iterations. Each iteration, the entire array of bases is cycled through once. Default is 1.
+ */
+declare function multibaseLogarithm(value: DecimalSource, bases: DecimalSource[], times?: number): Decimal;
+/**
  * Converts a Decimal into a list of two Decimals, [b, e], such that b * (base)^e equals the original value.
  * @param value ( Decimal ! ) The value we want to turn into scientific notation.
  * @param base ( Decimal ) The base of the scientific notation we're using (default is 10)
@@ -98,6 +108,87 @@ declare function hyperscientifify(value: DecimalSource, base?: DecimalSource, ro
     Decimal,
     Decimal
 ];
+/**
+ * "Weak tetration" is, like regular tetration, repeated exponentiation, but evaluated from bottom to top instead of from top to bottom.
+ * For example, 10↓↓5 is (((10^10)^10)^10)^10. It turns out that a↓↓b is equal to a^(a^(b - 1)).
+ * @param value ( Decimal ! ) The value to repeatedly exponentiate.
+ * @param height ( Decimal ! ) The amount of layers in the power tower.
+ * @param lowest ( Decimal ) The number at the bottom of the power tower. Is equal to 'value' by default.
+ */
+declare function weak_tetrate(value: DecimalSource, height: DecimalSource, lowest?: DecimalSource): Decimal;
+/**
+ * One of weak tetration's inverses: given that base↓↓x = value, what is x?
+ * This turns out to just be log(log(value)) + 1, with 'base' as the base of the logarithms.
+ * @param value ( Decimal ! ) The value to find the weak super-logarithm of.
+ * @param base ( Decimal ) The base of the weak super-logarithm. Default is 10.
+ */
+declare function weak_slog(value: DecimalSource, base?: DecimalSource): Decimal;
+/**
+ * Converts a Decimal into a list of two Decimals, [b, e], such that ((base)↓↓e)^b equals the original value, where x↓↓y is "weak tetration", x↓↓y = x^x^(y - 1).
+ * @param value ( Decimal ! ) The value we want to turn into weak hyperscientific notation.
+ * @param base ( Decimal ) The base of the weak hyperscientific notation we're using (default is 10).
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in weak hyperscientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^2, if mantissaPower is 2 then the bounds are base^2 and base^3, and so on. For example, 1e350 in base 10, which normally returns [3.5, 3], would become [35, 2] with 1 mantissaPower and [350, 1] with 2 mantissaPower.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param expMultiplier ( Decimal ) In the returned pair, e is multiplied by this value. Default is 1.
+ */
+declare function weak_hyperscientifify(value: DecimalSource, base?: DecimalSource, rounding?: DecimalSource | ((value: Decimal) => Decimal), mantissaPower?: DecimalSource, engineerings?: DecimalSource | DecimalSource[], expMultiplier?: DecimalSource): [
+    Decimal,
+    Decimal
+];
+/**
+ * Converts a Decimal into a list of two Decimals, [b, e], such that Decimal.pentate(base, e, b, true) equals the original value.
+ * @param value ( Decimal ! ) The value we want to turn into penta-scientific notation.
+ * @param base ( Decimal ) The base of the penta-scientific notation we're using (default is 10).
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param hypermantissaPower ( Decimal ) Normally, the mantissa in penta-scientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^^^2, if mantissaPower is 2 then the bounds are base^^^2 and base^^^3, and so on. For example, 10^^10 in base 10, which normally returns [1, 2], would become [10, 1] with 1 mantissaPower and [10^^10, 0] with 2 mantissaPower.
+ * @param engineerings ( Decimal | DecimalSource[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ */
+declare function pentascientifify(value: DecimalSource, base?: DecimalSource, rounding?: DecimalSource | ((value: Decimal) => Decimal), hypermantissaPower?: DecimalSource, engineerings?: DecimalSource | DecimalSource[]): [
+    Decimal,
+    Decimal
+];
+/**
+ * An advanced version of scientifify that takes any strictly increasing function with any amount of Decimal arguments and uses Decimal.increasingInverse to turn it into a scientific notation-like expression.
+ * The last argument is considered the highest priority argument to increment, like how the exponent is higher-priority than the mantissa in regular scientifify.
+ * Returns an array of Decimals containing the values of each parameter that, when plugged into the function, will give the original value.
+ * @param value ( Decimal ! ) The value being inputted into the function.
+ * @param func ( (...values : Decimal[]) => Decimal ! ) The function that is being used. It can have any amount of Decimal arguments, but it must return a Decimal (and it must have a fixed amount of arguments - the arguments can't themselves be an array of Decimals)
+ * @param limits ( Decimal[] ! ) limits[0] is the minimum value that the first argument is allowed to have; anything less, and the second argument is decreased to bring the first argument back over that limit. Likewise, limits[1] is the minimum for the second argument, limits[2] is the minimum for the third argument, and so on.
+ * The last argument does not have a limit. If this array has less values than (amount of arguments - 1), then all unfilled values will be set equal to the last value that was given.
+ * @param limitsAreMaximums ( boolean ) If this parameter is true, the limits are maximums instead of minimums. Default is false.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed values for each argument: for example, if engineerings[0] is [3], then the second argument will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted values for the third argument are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * The first argument does not have an engineerings array. If engineerings is a single value, then every argument is given that single value as its engineerings entry. If engineerings is an array with less arguments than (amount of arguments - 1), then all unfilled entries will be set equal to the last entry that was given.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The first argument is rounded to the nearest multiple of this value. If this parameter is a function, then the first argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * NOTE: Unlike the rounding parameter in other scientifify functions, this one does not detect "overflow", so rounding may cause the first argument to go under or over its limit.
+ * @param rangeLimits ( [Decimal, Decimal][] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ * @param revertValues ( (Decimal | boolean)[] ) If an argument would end up with a non-finite value (such as if increasingInverse returned NaN), that argument's revertValue entry determines what it becomes instead.
+ * If the revertValues entry is 'true', then that argument reverts to its limit. If the revertValues entry is a Decimal, then that argument becomes that value. If the revertValues entry is 'false', the non-finite value remains.
+ */
+declare function increasingFunctionScientifify(value: DecimalSource, func: (...values: Decimal[]) => Decimal, limits: DecimalSource[], limitsAreMaximums?: boolean, engineerings?: DecimalSource | DecimalSource[][], rounding?: DecimalSource | ((value: Decimal) => Decimal), rangeLimits?: [
+    DecimalSource,
+    DecimalSource
+][], revertValues?: (DecimalSource | boolean)[]): Decimal[];
+/**
+ * Returns a function that, when a Decimal value is plugged into it, runs increasingFunctionScientifify on that value with the arguments given here.
+ * @param func ( (...values : Decimal[]) => Decimal ! ) The function that is being used. It can have any amount of Decimal arguments, but it must return a Decimal (and it must have a fixed amount of arguments - the arguments can't themselves be an array of Decimals)
+ * @param limits ( Decimal[] ! ) limits[0] is the minimum value that the first argument is allowed to have; anything less, and the second argument is decreased to bring the first argument back over that limit. Likewise, limits[1] is the minimum for the second argument, limits[2] is the minimum for the third argument, and so on.
+ * The last argument does not have a limit. If this array has less values than (amount of arguments - 1), then all unfilled values will be set equal to the last value that was given.
+ * @param limitsAreMaximums ( boolean ) If this parameter is true, the limits are maximums instead of minimums. Default is false.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed values for each argument: for example, if engineerings[0] is [3], then the second argument will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted values for the third argument are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * The first argument does not have an engineerings array. If engineerings is a single value, then every argument is given that single value as its engineerings entry. If engineerings is an array with less arguments than (amount of arguments - 1), then all unfilled entries will be set equal to the last entry that was given
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The first argument is rounded to the nearest multiple of this value. If this parameter is a function, then the first argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * NOTE: Unlike the rounding parameter in other scientifify functions, this one does not detect "overflow", so rounding may cause the first argument to go under or over its limit.
+ * @param rangeLimits ( [Decimal, Decimal][] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ */
+declare function increasingScientififyFunction(func: (...values: Decimal[]) => Decimal, limits: DecimalSource[], limitsAreMaximums?: boolean, engineerings?: DecimalSource | DecimalSource[][], rounding?: DecimalSource | ((value: Decimal) => Decimal), rangeLimits?: [
+    DecimalSource,
+    DecimalSource
+][]): (value: DecimalSource) => Decimal[];
 /**
  * Splits a Decimal into an array of four decimals, [M, E, T, P], such that if b is the base, b^^b^^b^^...^^(b^b^b^b...^(m * b^e))) = the original Decimal, where there are T b^'s and P b^^'s.
  * In other words, this function splits a Decimal into a hyperoperator array like in OmegaNum, except there's an exponentiation entry between the mantissa and the tetration entry.
@@ -230,6 +321,108 @@ declare function iteratedBiPolygonRoot(payload: DecimalSource, iterations: numbe
  * @param zeroValue ( Decimal ) The value that returns 0 for its root, a.k.a. the p in the above example. Default is 2.
  */
 declare function triPolygonRoot(value: DecimalSource, sides: DecimalSource, base?: DecimalSource, zeroValue?: DecimalSource): Decimal;
+/**
+ * f0(n) in the Fast-Growing Hierarchy. This is the successor function, f0(n) = n + 1.
+ * @param value ( Decimal ) The input to f0.
+ */
+declare function FGH0(value: DecimalSource): Decimal;
+/**
+ * The inverse of f0(n) in the Fast-Growing Hierarchy. Equal to n - 1.
+ * @param value ( Decimal ) The value that FGH0 will return when given the result of this function.
+ */
+declare function FGH0inverse(value: DecimalSource): Decimal;
+/**
+ * Applies FGH0 to 'value' 'times' times. Equivalent to value + times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH0 to.
+ * @param times ( Decimal ) The amount of times FGH0 is applied to value.
+ */
+declare function iteratedFGH0(value: DecimalSource, times: DecimalSource): Decimal;
+/**
+ * Applies FGH0inverse to 'value' 'times' times. Equivalent to value - times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH0inverse to.
+ * @param times ( Decimal ) The amount of times FGH0inverse is applied to value.
+ */
+declare function iteratedFGH0inverse(value: DecimalSource, times: DecimalSource): Decimal;
+/**
+ * f1(n) in the Fast-Growing Hierarchy. f1(n) = f0(f0(f0(f0...(n)))) with n f0's. Since f0() is just adding 1, f1(n) equals n * 2.
+ * @param value ( Decimal ) The input to f1.
+ */
+declare function FGH1(value: DecimalSource): Decimal;
+/**
+ * The inverse of f1(n) in the Fast-Growing Hierarchy. Equal to n / 2.
+ * @param value ( Decimal ) The value that FGH1 will return when given the result of this function.
+ */
+declare function FGH1inverse(value: DecimalSource): Decimal;
+/**
+ * Applies FGH1 to 'value' 'times' times. Equivalent to value * 2^times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH1 to.
+ * @param times ( Decimal ) The amount of times FGH1 is applied to value.
+ */
+declare function iteratedFGH1(value: DecimalSource, times: DecimalSource): Decimal;
+/**
+ * One of the inverses of iteratedFGH1: given iteratedFGH1(base, x) = value and knowing what the base and value are, finds x.
+ * Equivalent to the base-2 logarithm of (value / base).
+ * @param value ( Decimal ) The answer given by iteratedFGH1 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH1 is called on with the result this inverse outputs to return the given value.
+ */
+declare function iteratedFGH1log(value: DecimalSource, base: DecimalSource): Decimal;
+/**
+ * f2(n) in the Fast-Growing Hierarchy. f2(n) = f1(f1(f1(f1...(n)))) with n f1's. f2(n) = n * 2^n.
+ * @param value ( Decimal ) The input to f2.
+ */
+declare function FGH2(value: DecimalSource): Decimal;
+/**
+ * The inverse of f2(n) in the Fast-Growing Hierarchy. Similar to the base-2 logarithm for larger numbers.
+ * This is basically the Lambert W function, just with a base of 2 instead of e.
+ * @param value ( Decimal ) The value that FGH2 will output when given the result of this function.
+ */
+declare function FGH2inverse(value: DecimalSource): Decimal;
+/**
+ * Applies FGH2 to 'value' 'times' times. Similar in growth rate to base 2 iteratedexp.
+ * @param value ( Decimal ) The value to repeatedly apply FGH2 to.
+ * @param times ( number ) The amount of times FGH2 is applied to value.
+ */
+declare function iteratedFGH2(value: DecimalSource, times: number): Decimal;
+/**
+ * One of the inverses of iteratedFGH2: given iteratedFGH2(base, x) = value and knowing what the base and value are, finds x.
+ * Similar to base 2 slog.
+ * @param value ( Decimal ) The answer given by iteratedFGH2 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH2 is called on with the result this inverse outputs to return the given value.
+ */
+declare function iteratedFGH2log(value: DecimalSource, base: DecimalSource): Decimal;
+/**
+ * f3(n) in the Fast-Growing Hierarchy. f3(n) = f2(f2(f2(f2...(n)))) with n f2's. Grows tetrationally.
+ * @param value ( Decimal ) The input to f3.
+ */
+declare function FGH3(value: DecimalSource): Decimal;
+/**
+ * The inverse of f3(n) in the Fast-Growing Hierarchy. Similar to super-logarithm.
+ * @param value ( Decimal ) The value that FGH3 will output when given the result of this function.
+ */
+declare function FGH3inverse(value: DecimalSource): Decimal;
+/**
+ * Applies FGH3 to 'value' 'times' times. Grows pentationally with respect to 'times'.
+ * @param value ( Decimal ) The value to repeatedly apply FGH3 to.
+ * @param times ( number ) The amount of times FGH3 is applied to value.
+ */
+declare function iteratedFGH3(value: DecimalSource, times: number): Decimal;
+/**
+ * One of the inverses of iteratedFGH3: given iteratedFGH3(base, x) = value and knowing what the base and value are, finds x.
+ * Similar to penta_log.
+ * @param value ( Decimal ) The answer given by iteratedFGH3 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH3 is called on with the result this inverse outputs to return the given value.
+ */
+declare function iteratedFGH3log(value: DecimalSource, base: DecimalSource): Decimal;
+/**
+ * f4(n) in the Fast-Growing Hierarchy. f4(n) = f3(f3(f3(f3...(n)))) with n f3's. Grows pentationally.
+ * @param value ( Decimal ) The input to f4.
+ */
+declare function FGH4(value: DecimalSource): Decimal;
+/**
+ * The inverse of f4(n) in the Fast-Growing Hierarchy. Similar to penta-logarithm.
+ * @param value ( Decimal ) The value that FGH4 will output when given the result of this function.
+ */
+declare function FGH4inverse(value: DecimalSource): Decimal;
 declare abstract class Notation {
     //Notation stuff
     format(value: DecimalSource): string;
@@ -667,7 +860,7 @@ declare class NestedSignValueNotation extends Notation {
  * @param numeratorInnerNotation ( Notation ) The notation that the numerator, and by default the rest of the fraction as well, is abbreviated in. DefaultNotation is the default.
  * @param wholeInnerNotation ( Notation ) The notation that the whole number in the mixed number fraction is abbreviated with. Is the same as numeratorInnerNotation by default.
  * @param denominatorInnerNotation ( Notation ) The notation that the denominator in the fraction is abbreviated with. Is the same as numeratorInnerNotation by default.
- * @param showUnitDenominator ( boolean ) Controls whether the denominator is displayed even if it's 1. Default is false. This does not apply to mixed numbers, since there the fractional part is always hidden if it's zero.
+ * @param showUnitDenominator ( boolean ) Controls whether the denominator is displayed even if it's 1. Default is false. For mixed numbers, if this parameter is false, then whole numbers are just abbreviated using wholeInnerNotation directly.
  */
 declare class FractionNotation extends Notation {
     precision: Decimal;
@@ -4925,6 +5118,2143 @@ declare class LetterDigitsNotation extends Notation {
  * @param value ( Decimal ! ) The value to give a description of.
  */
 declare function physicalScale(value: DecimalSource): string;
+/**
+ * Similar to LogarithmNotation, but each iteration takes multiple logarithms of different bases.
+ * @param bases ( Decimal[] ! ) The list of bases for the logarithm iterations. For example, if bases is [10, 2], then each iteration performs .log(10).log(2) on the value.
+ * @param iterations ( number ) The amount of logarithm iterations. This can be negative.
+ * @param max_es_in_a_row ( number ) If the logarithm representation would have more E's at the beginning than this, those E's are made into an E^n expression. Default is 5.
+ * @param expChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate logarithm notation. In each pair, the first entry goes before the number, the second entry goes after the number. expChars[0] takes the place of the E in "E10", expChars[1] takes the place of the first E in "EE10" (expChars[0] is for the innermost logarithm, expChars[1] is for the outer ones), and expChars[2] takes the place of the (E^) in (E^10)4. Default is [["E", ""], ["E", ""], ["(E^", ")"]].
+ * @param logChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of expChars used for a logarithm of negative iterations. Default is [["lg", ""], ["lg", ""], ["(lg^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of expChars[2], such as E^-1.
+ * @param superexpAfter ( boolean ) This is false by default; if it's true, an (E^n) expression comes after the number instead of before.
+ * @param expMults ( Decimal[] ) On each logarithm, the result is multiplied by the corresponding number in this array. If expMults has less entries than bases, the remaining entries are given an expMult of 1. Default is an empty array, which is equivalent to an array of 1s.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (E^n) expression is itself notated with. Is the same as innerNotation by default.
+ */
+declare class MultibaseLogarithmNotation extends Notation {
+    private _bases;
+    _iterations: number;
+    max_es_in_a_row: number;
+    expChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    logChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null;
+    superexpAfter: boolean;
+    private _expMults;
+    innerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    constructor(bases: DecimalSource[], iterations?: number, max_es_in_a_row?: number, expChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], logChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null, superexpAfter?: boolean, expMults?: DecimalSource[], innerNotation?: Notation, superexponentInnerNotation?: Notation);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    private setBasesAndExpMults;
+    get bases(): DecimalSource[];
+    set bases(bases: DecimalSource[]);
+    get expMults(): DecimalSource[];
+    set expMults(expMults: DecimalSource[]);
+    get iterations(): number;
+    set iterations(iterations: number);
+}
+/**
+ * Similar to MultiLogarithmNotation, but each iteration takes multiple logarithms of different bases.
+ * @param bases ( Decimal[] ! ) The list of bases for the logarithm iterations. For example, if bases is [10, 2], then each iteration performs .log(10).log(2) on the value.
+ * @param maxnum ( Decimal ) Only numbers below this value are allowed to show up on their own - anything higher and the amount of iterations increases. Default is 1e12.
+ * @param max_es_in_a_row ( number ) If the logarithm representation would have more E's at the beginning than this, those E's are made into an E^n expression. Default is 5.
+ * @param minIterations ( number ) The minimum amount of logarithm iterations. Default is 1.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed iteration amounts: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted iteration amounts are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param expChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate logarithm notation. In each pair, the first entry goes before the number, the second entry goes after the number. expChars[0] takes the place of the E in "E10", expChars[1] takes the place of the first E in "EE10" (expChars[0] is for the innermost logarithm, expChars[1] is for the outer ones), and expChars[2] takes the place of the (E^) in (E^10)4. Default is [["E", ""], ["E", ""], ["(E^", ")"]].
+ * @param logChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of expChars used for a logarithm of negative iterations. Default is [["lg", ""], ["lg", ""], ["(lg^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of expChars[2], such as E^-1.
+ * @param superexpAfter ( boolean ) This is false by default; if it's true, an (E^n) expression comes after the number instead of before.
+ * @param expMults ( Decimal[] ) On each logarithm, the result is multiplied by the corresponding number in this array. If expMults has less entries than bases, the remaining entries are given an expMult of 1. Default is an empty array, which is equivalent to an array of 1s.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (E^n) expression is itself notated with. Is the same as innerNotation by default.
+ */
+declare class MultibaseMultiLogarithmNotation extends Notation {
+    private _bases;
+    private _maxnum;
+    max_es_in_a_row: number;
+    _minIterations: number;
+    private _engineerings;
+    expChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    logChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null;
+    superexpAfter: boolean;
+    private _expMults;
+    innerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    constructor(bases: DecimalSource[], maxnum?: DecimalSource, max_es_in_a_row?: number, minIterations?: number, engineerings?: DecimalSource | DecimalSource[], expChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], logChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null, superexpAfter?: boolean, expMults?: DecimalSource[], innerNotation?: Notation, superexponentInnerNotation?: Notation);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    get maxnum(): DecimalSource;
+    set maxnum(maxnum: DecimalSource);
+    get engineerings(): DecimalSource | DecimalSource[];
+    set engineerings(engineerings: DecimalSource | DecimalSource[]);
+    private setBasesAndExpMults;
+    get bases(): DecimalSource[];
+    set bases(bases: DecimalSource[]);
+    get expMults(): DecimalSource[];
+    set expMults(expMults: DecimalSource[]);
+    get minIterations(): number;
+    set minIterations(minIterations: number);
+}
+/**
+ * Scientific notation, but with "weak tetration" instead of exponentiation, where weak tetration is repeated exponentiation but evaluated bottom-to-top instead of top-to-bottom. xfy = (base↓↓y)^x, where base↓↓y = (((base^base)^base)^base...)^base = base^base^(y - 1).
+ * @param maxnum ( Decimal ) Only exponents below this value are allowed - anything higher and the exponent itself is abbreviated in weak hyperscientific notation. Default is 1e12.
+ * @param max_fs_in_a_row ( number ) If the weak hyperscientific representation would have more f's at the beginning than this, those f's are made into an f^n expression. Default is 5.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0). Default is 1, which corresponds to regular scientific notation.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in weak hyperscientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^2, if mantissaPower is 2 then the bounds are base^2 and base^3, and so on. For example, a number normally represented as "3.543f2" would become "35.43f1" with 1 mantissaPower and "354.3f0" with 2 mantissaPower.
+ * @param iteration_zero ( boolean ) If this is true, then numbers less than maxnum will ignore the weak hyperscientific notation and jump directly to the innerNotation - useful if you want 100 to just be abbreviated as "100" instead of "2f1". Default is false.
+ * @param base ( Decimal ) This notation normally works in powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 81 becomes "2f1".
+ * @param expChars ( [[string, string], [string | boolean, string | boolean], [string, string]] ) An array of three pairs of strings that are used as the between characters for weak hyperscientific notation. In each pair, the first entry goes before the exponent, the second entry goes after the exponent. expChars[0] takes the place of the f in "1f10", expChars[1] takes the place of the first f in "f1f10", and expChars[2] takes the place of the (f^) in (f^10)4. If expChars[1][0] is a boolean instead of a string: if it's false, then expChars[1][0] is set to be expChars[0][0] with the way mantissaInnerNotation formats 1 tacked on the beginning, and if it's true than the 1 is tacked on the end instead. Likewise for expChars[1][1] (expChars[0][1] with a 1 on it). Default is [["f", ""], ["f", ""], ["(f^", ")"]].
+ * @param negExpChars ( null | [[string, string], [string, string], [string, string]] ) This can either be null or an array of three pairs of strings. Ignore this parameter if it's null, which is the default. Otherwise, this acts like expChars, but it's used when the exponent is negative. Default is null.
+ * @param recipString ( null | [string, string] ) If this parameter is null, numbers below 1 are just written in mantissaInnerNotation. If this parameter is a pair of strings, then numbers below 1 are written in terms of their reciprocal, with recipString[0] going before the reciprocal and recipString[1] going after the reciprocal. Default is ["1 / ", ""].
+ * @param expBefore ( boolean ) If this parameter is true, the exponent comes before the mantissa instead of after. Default is false.
+ * @param superexpAfter ( boolean ) If this parameter is true, (f^n) expressions come after the rest of the number instead of before. Default is false.
+ * @param mantissaInnerNotation ( Notation ) The notation that the numbers within the mantissas are themselves notated with. DefaultNotation is the default.
+ * @param exponentInnerNotation ( Notation ) The notation that the highest exponent is itself notated with. Is the same as mantissaInnerNotation by default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (f^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
+ */
+declare class WeakHyperscientificNotation extends Notation {
+    private _maxnum;
+    max_fs_in_a_row: number;
+    rounding: DecimalSource | ((value: Decimal) => Decimal);
+    private _engineerings;
+    mantissaPower: Decimal;
+    iteration_zero: boolean;
+    private _base;
+    private _expChars;
+    private _negExpChars;
+    recipString: null | [
+        string,
+        string
+    ];
+    expBefore: boolean;
+    superexpAfter: boolean;
+    mantissaInnerNotation: Notation;
+    exponentInnerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    private unconvertedExpChars;
+    private unconvertedNegExpChars;
+    constructor(maxnum?: DecimalSource, max_fs_in_a_row?: number, rounding?: DecimalSource | ((value: Decimal) => Decimal), engineerings?: DecimalSource | DecimalSource[], mantissaPower?: DecimalSource, iteration_zero?: boolean, base?: DecimalSource, expChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ], negExpChars?: null | [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ], recipString?: [
+        string,
+        string
+    ], expBefore?: boolean, superexpAfter?: boolean, mantissaInnerNotation?: Notation, exponentInnerNotation?: Notation, superexponentInnerNotation?: Notation);
+    name: string;
+    formatDecimal(value: Decimal): string;
+    get maxnum(): DecimalSource;
+    set maxnum(maxnum: DecimalSource);
+    get engineerings(): DecimalSource | DecimalSource[];
+    set engineerings(engineerings: DecimalSource | DecimalSource[]);
+    get base(): DecimalSource;
+    set base(base: DecimalSource);
+    get expChars(): [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    set expChars(input: [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ]);
+    get negExpChars(): null | [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    set negExpChars(input: null | [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ]);
+}
+/**
+ * This notation performs weak hyperscientific notation a certain number of times. 1 iteration means the number is in the form AfB (where A and B are abbreviated using the innerNotation), 2 iterations means the number is in the form AfBfC, and so on.
+ * @param iterations ( number ! ) The amount of iterations.
+ * @param max_fs_in_a_row ( number ) If the scientific representation would have more f's at the beginning than this, those f's are made into an f^n expression. Default is 5.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0). Default is 1, which corresponds to regular scientific notation.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in weak hyperscientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^2, if mantissaPower is 2 then the bounds are base^2 and base^3, and so on. For example, a number normally represented as "3.543f2" would become "35.43f1" with 1 mantissaPower and "354.3f0" with 2 mantissaPower.
+ * @param base ( Decimal ) This notation normally works in powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 81 becomes "2f1".
+ * @param expChars ( [[string, string], [string | boolean, string | boolean], [string, string]] ) An array of three pairs of strings that are used as the between characters for weak hyperscientific notation. In each pair, the first entry goes before the exponent, the second entry goes after the exponent. expChars[0] takes the place of the f in "1f10", expChars[1] takes the place of the first f in "f1f10", and expChars[2] takes the place of the (f^) in (f^10)4. If expChars[1][0] is a boolean instead of a string: if it's false, then expChars[1][0] is set to be expChars[0][0] with the way mantissaInnerNotation formats 1 tacked on the beginning, and if it's true than the 1 is tacked on the end instead. Likewise for expChars[1][1] (expChars[0][1] with a 1 on it). Default is [["f", ""], ["f", ""], ["(f^", ")"]].
+ * @param negExpChars ( null | [string, string] ) This can either be null or a pair of strings. Ignore this parameter if it's null, which is the default. Otherwise, this acts like expChars[0], but it's used when the exponent is negative. Default is null.
+ * @param recipString ( null | [string, string] ) If this parameter is null, numbers below 1 are just written in mantissaInnerNotation. If this parameter is a pair of strings, then numbers below 1 are written in terms of their reciprocal, with recipString[0] going before the reciprocal and recipString[1] going after the reciprocal. Default is ["1 / ", ""].
+ * @param expBefore ( boolean ) If this parameter is true, the exponent comes before the mantissa instead of after. Default is false.
+ * @param superexpAfter ( boolean ) If this parameter is true, (f^n) expressions come after the rest of the number instead of before. Default is false.
+ * @param mantissaInnerNotation ( Notation ) The notation that the numbers within the mantissas are themselves notated with. DefaultNotation is the default.
+ * @param exponentInnerNotation ( Notation ) The notation that the highest exponent is itself notated with. Is the same as mantissaInnerNotation by default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (f^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
+ */
+declare class WeakHyperscientificIterationsNotation extends Notation {
+    private _iterations;
+    max_fs_in_a_row: number;
+    rounding: DecimalSource | ((value: Decimal) => Decimal);
+    private _engineerings;
+    mantissaPower: Decimal;
+    _base: Decimal;
+    private _expChars;
+    negExpChars: null | [
+        string,
+        string
+    ];
+    recipString: null | [
+        string,
+        string
+    ];
+    expBefore: boolean;
+    superexpAfter: boolean;
+    mantissaInnerNotation: Notation;
+    exponentInnerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    private unconvertedExpChars;
+    constructor(iterations: number, max_fs_in_a_row?: number, rounding?: DecimalSource | ((value: Decimal) => Decimal), engineerings?: DecimalSource | DecimalSource[], mantissaPower?: DecimalSource, base?: DecimalSource, expChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ], negExpChars?: null | [
+        string,
+        string
+    ], recipString?: [
+        string,
+        string
+    ], expBefore?: boolean, superexpAfter?: boolean, mantissaInnerNotation?: Notation, exponentInnerNotation?: Notation, superexponentInnerNotation?: Notation);
+    name: string;
+    formatDecimal(value: Decimal): string;
+    get iterations(): number;
+    set iterations(iterations: number);
+    get engineerings(): DecimalSource | DecimalSource[];
+    set engineerings(engineerings: DecimalSource | DecimalSource[]);
+    get base(): DecimalSource;
+    set base(base: DecimalSource);
+    get expChars(): [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    set expChars(input: [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ]);
+}
+/**
+ * Hyperscientific notation, but with pentation instead of tetration. Abbreviates 9 as "9G0", 10^10^10 as "3G1", and 10^^10,000,000,000 as "2G2" (though that last one is too big for this library).
+ * @param maxnum ( Decimal ) Only exponents below this value are allowed - anything higher and the exponent itself is abbreviated in penta-scientific notation. Default is 1e10.
+ * @param max_Gs_in_a_row ( number ) If the penta-scientific representation would have more G's at the beginning than this, those G's are made into an G^n expression. Default is 5.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed hyperexponent values: if it's three then the hyperexponent will always be a multiple of 3, like in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted hyperexponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0). Default is 1, which corresponds to regular hyperscientific notation.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in penta-scientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^^^2, if mantissaPower is 2 then the bounds are base^^^2 and base^^^3, and so on. For example, a number normally represented as "2G2" would become "(1e10)G1" with 1 mantissaPower and "(10^^1e10)G0" with 2 mantissaPower.
+ * @param iteration_zero ( boolean ) If this is true, then numbers less than maxnum will ignore the scientific notation and jump directly to the innerNotation - useful if you want 2 to just be abbreviated as "2" instead of "2G0". Default is false.
+ * @param base ( Decimal ) Penta-scientific notation normally works in penta-powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 9^^2 becomes "2G1".
+ * @param expChars ( [[string, string], [string | boolean, string | boolean], [string, string]] ) An array of three pairs of strings that are used as the between characters for scientific notation. In each pair, the first entry goes before the penta-exponent, the second entry goes after the penta-exponent. expChars[0] takes the place of the G in "1G10", expChars[1] takes the place of the first G in "G1G10", and expChars[2] takes the place of the (G^) in (G^10)4. If expChars[1][0] is a boolean instead of a string: if it's false, then expChars[1][0] is set to be expChars[0][0] with the way mantissaInnerNotation formats 1 tacked on the beginning, and if it's true than the 1 is tacked on the end instead. Likewise for expChars[1][1] (expChars[0][1] with a 1 on it). Default is [["G", ""], ["G", ""], ["(G^", ")"]].
+ * @param negExpChars ( null | [[string, string] | boolean, [string, string]] ) This can either be null or a pair of pairs of strings (in which the first pair of strings may be a boolean instead). Ignore this parameter if it's null, which is the default. If it's a pair of pairs of strings, then the first pair is used like expChars[0] but for negative exponents (so if it's ["d", ""], then 2e-4 would be 2d4 instead), and the second pair is used on small numbers whose reciprocals are large enough to need expChars[1], in which case the second pair indicates that a reciprocal has been taken. If negExpChars[0] is a boolean instead, then if it's true the notation goes directly to the reciprocal behavior for all inputs less than 1, while if it's false then single-iteration inputs don't use negExpChars but multi-iteration ones still use reciprocal behavior.
+ * @param expBefore ( boolean ) If this parameter is true, the penta-exponent comes before the mantissa instead of after. Default is false.
+ * @param superexpAfter ( boolean ) If this parameter is true, (G^n) expressions come after the rest of the number instead of before. Default is false.
+ * @param formatNegatives ( boolean ) If this parameter is false, negative numbers are just formatted using their absolute value with negativeString around it, like in most notations. If this parameter is true, negative numbers are formatted in penta-scientific directly. Default is true.
+ * @param mantissaInnerNotation ( Notation ) The notation that the numbers within the mantissas are themselves notated with. DefaultNotation is the default.
+ * @param exponentInnerNotation ( Notation ) The notation that the highest penta-exponent is itself notated with. Is the same as mantissaInnerNotation by default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (G^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
+ */
+declare class PentaScientificNotation extends Notation {
+    private _maxnum;
+    max_Gs_in_a_row: number;
+    rounding: DecimalSource | ((value: Decimal) => Decimal);
+    private _engineerings;
+    mantissaPower: Decimal;
+    iteration_zero: boolean;
+    private _base;
+    private _expChars;
+    negExpChars: null | [
+        [
+            string,
+            string
+        ] | boolean,
+        [
+            string,
+            string
+        ]
+    ];
+    expBefore: boolean;
+    superexpAfter: boolean;
+    formatNegatives: boolean;
+    mantissaInnerNotation: Notation;
+    exponentInnerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    private unconvertedExpChars;
+    constructor(maxnum?: DecimalSource, max_Gs_in_a_row?: number, rounding?: DecimalSource | ((value: Decimal) => Decimal), engineerings?: DecimalSource | DecimalSource[], mantissaPower?: DecimalSource, iteration_zero?: boolean, base?: DecimalSource, expChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ], negExpChars?: null | [
+        [
+            string,
+            string
+        ] | boolean,
+        [
+            string,
+            string
+        ]
+    ], expBefore?: boolean, superexpAfter?: boolean, formatNegatives?: boolean, mantissaInnerNotation?: Notation, exponentInnerNotation?: Notation, superexponentInnerNotation?: Notation);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    get maxnum(): DecimalSource;
+    set maxnum(maxnum: DecimalSource);
+    get engineerings(): DecimalSource | DecimalSource[];
+    set engineerings(engineerings: DecimalSource | DecimalSource[]);
+    get base(): DecimalSource;
+    set base(base: DecimalSource);
+    get expChars(): [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    set expChars(input: [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ]);
+}
+/**
+ * This notation performs penta-scientific notation a certain number of times. 1 iteration means the number is in the form AGB (where A and B are abbreviated using the innerNotation), 2 iterations means the number is in the form AGBGC, and so on.
+ * @param iterations ( number ! ) The amount of iterations.
+ * @param max_Gs_in_a_row ( number ) If the penta-scientific representation would have more G's at the beginning than this, those G's are made into an G^n expression. Default is 5.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed hyperexponent values: if it's three then the hyperexponent will always be a multiple of 3, like in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted hyperexponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0). Default is 1, which corresponds to regular hyperscientific notation.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in penta-scientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^^^2, if mantissaPower is 2 then the bounds are base^^^2 and base^^^3, and so on. For example, a number normally represented as "2G2" would become "(1e10)G1" with 1 mantissaPower and "(10^^1e10)G0" with 2 mantissaPower.
+ * @param base ( Decimal ) Penta-scientific notation normally works in penta-powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 9^^2 becomes "2G1".
+ * @param expChars ( [[string, string], [string | boolean, string | boolean], [string, string]] ) An array of three pairs of strings that are used as the between characters for scientific notation. In each pair, the first entry goes before the penta-exponent, the second entry goes after the penta-exponent. expChars[0] takes the place of the G in "1G10", expChars[1] takes the place of the first G in "G1G10", and expChars[2] takes the place of the (G^) in (G^10)4. If expChars[1][0] is a boolean instead of a string: if it's false, then expChars[1][0] is set to be expChars[0][0] with the way mantissaInnerNotation formats 1 tacked on the beginning, and if it's true than the 1 is tacked on the end instead. Likewise for expChars[1][1] (expChars[0][1] with a 1 on it). Default is [["G", ""], ["G", ""], ["(G^", ")"]].
+ * @param negExpChars ( null | [[string, string] | boolean, [string, string]] ) This can either be null or a pair of pairs of strings (in which the first pair of strings may be a boolean instead). Ignore this parameter if it's null, which is the default. If it's a pair of pairs of strings, then the first pair is used like expChars[0] but for negative exponents (so if it's ["d", ""], then 2e-4 would be 2d4 instead), and the second pair is used on small numbers whose reciprocals are large enough to need expChars[1], in which case the second pair indicates that a reciprocal has been taken. If negExpChars[0] is a boolean instead, then if it's true the notation goes directly to the reciprocal behavior for all inputs less than 1, while if it's false then single-iteration inputs don't use negExpChars but multi-iteration ones still use reciprocal behavior.
+ * @param expBefore ( boolean ) If this parameter is true, the penta-exponent comes before the mantissa instead of after. Default is false.
+ * @param superexpAfter ( boolean ) If this parameter is true, (G^n) expressions come after the rest of the number instead of before. Default is false.
+ * @param formatNegatives ( boolean ) If this parameter is false, negative numbers are just formatted using their absolute value with negativeString around it, like in most notations. If this parameter is true, negative numbers are formatted in penta-scientific directly. Default is true.
+ * @param mantissaInnerNotation ( Notation ) The notation that the numbers within the mantissas are themselves notated with. DefaultNotation is the default.
+ * @param exponentInnerNotation ( Notation ) The notation that the highest penta-exponent is itself notated with. Is the same as mantissaInnerNotation by default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (G^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
+ */
+declare class PentaScientificIterationsNotation extends Notation {
+    private _iterations;
+    max_Gs_in_a_row: number;
+    rounding: DecimalSource | ((value: Decimal) => Decimal);
+    private _engineerings;
+    mantissaPower: Decimal;
+    private _base;
+    private _expChars;
+    negExpChars: null | [
+        [
+            string,
+            string
+        ] | boolean,
+        [
+            string,
+            string
+        ]
+    ];
+    expBefore: boolean;
+    superexpAfter: boolean;
+    formatNegatives: boolean;
+    mantissaInnerNotation: Notation;
+    exponentInnerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    private unconvertedExpChars;
+    constructor(iterations: number, max_Gs_in_a_row?: number, rounding?: DecimalSource | ((value: Decimal) => Decimal), engineerings?: DecimalSource | DecimalSource[], mantissaPower?: DecimalSource, base?: DecimalSource, expChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ], negExpChars?: null | [
+        [
+            string,
+            string
+        ] | boolean,
+        [
+            string,
+            string
+        ]
+    ], expBefore?: boolean, superexpAfter?: boolean, formatNegatives?: boolean, mantissaInnerNotation?: Notation, exponentInnerNotation?: Notation, superexponentInnerNotation?: Notation);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    get engineerings(): DecimalSource | DecimalSource[];
+    set engineerings(engineerings: DecimalSource | DecimalSource[]);
+    get iterations(): number;
+    set iterations(iterations: number);
+    get base(): DecimalSource;
+    set base(base: DecimalSource);
+    get expChars(): [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    set expChars(input: [
+        [
+            string,
+            string
+        ],
+        [
+            string | boolean,
+            string | boolean
+        ],
+        [
+            string,
+            string
+        ]
+    ]);
+}
+/**
+ * Abbreviates numbers in terms of their pentational logarithm, so 10 is "G1" and 10^^10^^10 is "G3". Uses the linear approximations of tetration and pentation.
+ * @param iterations ( number ) The amount of logarithm iterations: 1 is basic Penta-Logarithm notation, 2 is double Penta-Logarithm, and so on. This can be negative: with -1 iterations, 2 would be "plg(10^^10)".
+ * @param max_Gs_in_a_row ( number ) If the penta-logarithm representation would have more G's at the beginning than this, those G's are made into an G^n expression. Default is 5.
+ * @param base ( Decimal ) This notation normally works in penta-powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 9^^9 becomes "G2".
+ * @param expChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate logarithm notation. In each pair, the first entry goes before the number, the second entry goes after the number. expChars[0] takes the place of the G in "G10", expChars[1] takes the place of the first G in "GG10" (expChars[0] is for the innermost logarithm, expChars[1] is for the outer ones), and expChars[2] takes the place of the (G^) in (G^10)4. Default is [["G", ""], ["G", ""], ["(G^", ")"]].
+ * @param logChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of expChars used for a logarithm of negative iterations. Default is [["plg", ""], ["plg", ""], ["(plg^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of expChars[2], such as G^-1.
+ * @param superexpAfter ( boolean ) This is false by default; if it's true, a (G^n) expression comes after the number instead of before.
+ * @param baseShown ( number ) This is 0 by default. If this is 0, the base is not shown. If this is positive, the base is shown at the beginning of the expression. If this is negative, the base is shown at the end of the expression.
+ * @param formatNegatives ( boolean ) If this parameter is false, negative numbers are just formatted using their absolute value with negativeString around it, like in most notations. If this parameter is true, negative numbers are formatted in penta-logarithm notation directly. Default is false.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (G^n) expression is itself notated with. Is the same as innerNotation by default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+declare class PentaLogarithmNotation extends Notation {
+    private _iterations;
+    max_Gs_in_a_row: number;
+    private _base;
+    expChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    logChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null;
+    superexpAfter: boolean;
+    baseShown: number;
+    formatNegatives: boolean;
+    innerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    baseInnerNotation: Notation;
+    constructor(iterations?: number, max_Gs_in_a_row?: number, base?: DecimalSource, expChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], logChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null, superexpAfter?: boolean, baseShown?: number, formatNegatives?: boolean, innerNotation?: Notation, superexponentInnerNotation?: Notation, baseInnerNotation?: Notation);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    get iterations(): number;
+    set iterations(iterations: number);
+    get base(): DecimalSource;
+    set base(base: DecimalSource);
+}
+/**
+ * A variant of penta-logarithm notation that uses a different amount of penta-logarithm iterations depending on how large the number is.
+ * @param maxnum ( Decimal ) Only numbers below this value are allowed to show up on their own - anything higher and the amount of iterations increases. Default is 1e10.
+ * @param max_Gs_in_a_row ( number ) If the penta-logarithm representation would have more G's at the beginning than this, those G's are made into an G^n expression. Default is 5.
+ * @param minIterations ( number ) The minimum amount of logarithm iterations. Default is 1.
+ * @param base ( Decimal ) This notation normally works in penta-powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 9^^9 becomes "G2".
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed iteration amounts: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted iteration amounts are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param expChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate logarithm notation. In each pair, the first entry goes before the number, the second entry goes after the number. expChars[0] takes the place of the G in "G10", expChars[1] takes the place of the first G in "GG10" (expChars[0] is for the innermost logarithm, expChars[1] is for the outer ones), and expChars[2] takes the place of the (G^) in (G^10)4. Default is [["G", ""], ["G", ""], ["(G^", ")"]].
+ * @param logChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of expChars used for a logarithm of negative iterations. Default is [["plg", ""], ["plg", ""], ["(plg^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of expChars[2], such as G^-1.
+ * @param superexpAfter ( boolean ) This is false by default; if it's true, a (G^n) expression comes after the number instead of before.
+ * @param baseShown ( number ) This is 0 by default. If this is 0, the base is not shown. If this is positive, the base is shown at the beginning of the expression. If this is negative, the base is shown at the end of the expression.
+ * @param formatNegatives ( boolean ) If this parameter is false, negative numbers are just formatted using their absolute value with negativeString around it, like in most notations. If this parameter is true, negative numbers are formatted in penta-logarithm notation directly. Default is false.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (G^n) expression is itself notated with. Is the same as innerNotation by default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+declare class MultiPentaLogarithmNotation extends Notation {
+    private _maxnum;
+    max_Gs_in_a_row: number;
+    minIterations: number;
+    private _base;
+    private _engineerings;
+    expChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    logChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null;
+    superexpAfter: boolean;
+    baseShown: number;
+    formatNegatives: boolean;
+    innerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    baseInnerNotation: Notation;
+    constructor(maxnum?: DecimalSource, max_Gs_in_a_row?: number, minIterations?: number, base?: DecimalSource, engineerings?: DecimalSource | DecimalSource[], expChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], logChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null, superexpAfter?: boolean, baseShown?: number, formatNegatives?: boolean, innerNotation?: Notation, superexponentInnerNotation?: Notation, baseInnerNotation?: Notation);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    get maxnum(): DecimalSource;
+    set maxnum(maxnum: DecimalSource);
+    get engineerings(): DecimalSource | DecimalSource[];
+    set engineerings(engineerings: DecimalSource | DecimalSource[]);
+    get base(): DecimalSource;
+    set base(base: DecimalSource);
+}
+/**
+ * Abbreviates numbers in terms of their pentational root; this is the square penta-root by default, so e8.0723e153 is 4↑↑↑2 and eee2.069e36,305 is 6↑↑↑2.
+ * @param height ( number ) The height of the penta-root. Default is 2. This notation does not work with a penta-root height less than 1.
+ * @param iterations ( number ) The amount of penta-root iterations: 1 is regular Penta-Root notation, 2 means the penta-root is taken twice, and so on. This can be negative.
+ * @param max_in_a_row ( number ) If there are more penta-root iterations than this, then the ↑↑↑b's are made into a (↑↑↑b^n) expression. Default is 5.
+ * @param rootChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate penta-root notation. In each pair, the first entry goes before the number, the second entry goes after the number. rootChars[0] takes the place of the ↑↑↑ in "7↑↑↑2", rootChars[1] takes the place of the second ↑↑ in "(8↑↑↑2)↑↑↑2" (rootChars[0] is for the innermost root, rootChars[1] is for the outer ones), and rootChars[2] takes the place of the (↑↑↑^) in 6(↑↑↑^7)2. Default is [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]].
+ * @param inverseChars ( [[string, string], [string, string], [string, string]] ) An equivalent of rootChars used for a penta-root of negative iterations. Default is [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of rootChars[2], such as (↑↑↑^-1).
+ * @param superexpAfter ( boolean ) This is true by default; if it's true, an (↑↑↑^n) expression comes after the number instead of before.
+ * @param heightShown ( number ) This is 0 by default. If this is 0, the height is not shown. If this is positive, the height is shown at the beginning of the expression. If this is negative, the height is shown at the end of the expression.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (↑↑↑^n) expression is itself notated with. Is the same as innerNotation by default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+declare class PentaRootNotation extends Notation {
+    private _height;
+    private _iterations;
+    max_in_a_row: number;
+    rootChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    inverseChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null;
+    superexpAfter: boolean;
+    heightShown: number;
+    innerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    baseInnerNotation: Notation;
+    constructor(height?: number, iterations?: number, max_Gs_in_a_row?: number, rootChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], inverseChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null, superexpAfter?: boolean, heightShown?: number, innerNotation?: Notation, superexponentInnerNotation?: Notation, baseInnerNotation?: Notation);
+    name: string;
+    formatDecimal(value: Decimal): string;
+    get height(): number;
+    set height(height: number);
+    get iterations(): number;
+    set iterations(iterations: number);
+}
+/**
+ * A variant of penta-root notation that uses a different amount of penta-root iterations depending on how large the number is.
+ * @param height ( number ) The height of the penta-root. Default is 2. This notation does not work with a penta-root height less than 1.
+ * @param maxnum ( Decimal ) Only numbers below this value are allowed to show up on their own - anything higher and the amount of iterations increases. Default is 1e10.
+ * @param max_in_a_row ( number ) If there are more penta-root iterations than this, then the ↑↑↑b's are made into a (↑↑↑b^n) expression. Default is 5.
+ * @param minIterations ( number ) The minimum amount of penta-root iterations. Default is 1.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed iteration amounts: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted iteration amounts are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param rootChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate penta-root notation. In each pair, the first entry goes before the number, the second entry goes after the number. rootChars[0] takes the place of the ↑↑↑ in "7↑↑↑2", rootChars[1] takes the place of the second ↑↑ in "(8↑↑↑2)↑↑↑2" (rootChars[0] is for the innermost root, rootChars[1] is for the outer ones), and rootChars[2] takes the place of the (↑↑↑^) in 6(↑↑↑^7)2. Default is [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]].
+ * @param inverseChars ( [[string, string], [string, string], [string, string]] ) An equivalent of rootChars used for a penta-root of negative iterations. Default is [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of rootChars[2], such as (↑↑↑^-1).
+ * @param superexpAfter ( boolean ) This is true by default; if it's true, an (↑↑↑^n) expression comes after the number instead of before.
+ * @param heightShown ( number ) This is 0 by default. If this is 0, the height is not shown. If this is positive, the height is shown at the beginning of the expression. If this is negative, the height is shown at the end of the expression.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (↑↑↑^n) expression is itself notated with. Is the same as innerNotation by default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+declare class MultiPentaRootNotation extends Notation {
+    private _height;
+    private _maxnum;
+    max_in_a_row: number;
+    minIterations: number;
+    private _engineerings;
+    rootChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    inverseChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null;
+    superexpAfter: boolean;
+    heightShown: number;
+    innerNotation: Notation;
+    superexponentInnerNotation: Notation;
+    baseInnerNotation: Notation;
+    constructor(height?: number, maxnum?: DecimalSource, max_in_a_row?: number, minIterations?: number, engineerings?: DecimalSource | DecimalSource[], rootChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], inverseChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null, superexpAfter?: boolean, heightShown?: number, innerNotation?: Notation, superexponentInnerNotation?: Notation, baseInnerNotation?: Notation);
+    name: string;
+    formatDecimal(value: Decimal): string;
+    get height(): number;
+    set height(height: number);
+    get maxnum(): DecimalSource;
+    set maxnum(maxnum: DecimalSource);
+    get engineerings(): DecimalSource | DecimalSource[];
+    set engineerings(engineerings: DecimalSource | DecimalSource[]);
+}
+/**
+ * A variant of penta-root notation that uses a different penta-root height depending on how large the number is.
+ * @param maxnum ( Decimal ) Only numbers below this value are allowed to show up on their own - anything higher and the height increases. Default is 65536.
+ * @param minHeight ( number ) The minimum penta-root height. Default is 2.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed height values: if it's three then the height will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted height values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param rootChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate penta-root notation. In each pair, the first entry goes before the number, the second entry goes after the number. rootChars[0] takes the place of the ↑↑↑ in "7↑↑↑2", rootChars[1] takes the place of the second ↑↑ in "(8↑↑↑2)↑↑↑2" (rootChars[0] is for the innermost root, rootChars[1] is for the outer ones), and rootChars[2] takes the place of the (↑↑↑^) in 6(↑↑↑^7)2. Default is [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]].
+ * @param inverseChars ( [[string, string], [string, string], [string, string]] ) An equivalent of rootChars used for a penta-root of negative iterations. Default is [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of rootChars[2], such as (↑↑↑^-1).
+ * @param heightShown ( number ) This is 0 by default. If this is 0, the height is not shown. If this is positive, the height is shown at the beginning of the expression. If this is negative, the height is shown at the end of the expression.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+declare class IncreasingPentaRootNotation extends Notation {
+    private _maxnum;
+    private _minHeight;
+    private _engineerings;
+    rootChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    inverseChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null;
+    heightShown: number;
+    innerNotation: Notation;
+    baseInnerNotation: Notation;
+    constructor(maxnum?: DecimalSource, minHeight?: number, engineerings?: DecimalSource | DecimalSource[], rootChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], inverseChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ] | null, heightShown?: number, innerNotation?: Notation, baseInnerNotation?: Notation);
+    name: string;
+    formatDecimal(value: Decimal): string;
+    get maxnum(): DecimalSource;
+    set maxnum(maxnum: DecimalSource);
+    get minHeight(): number;
+    set minHeight(minHeight: number);
+    get engineerings(): DecimalSource | DecimalSource[];
+    set engineerings(engineerings: DecimalSource | DecimalSource[]);
+}
+/**
+ * Takes any strictly increasing Decimal => Decimal function (preferrably one whose outputs are larger than its inputs) and uses Decimal.increasingInverse to create a Logarithm-style notation using it.
+ * For example, if the function is (v => v.pow(6)), then 729 would be written as f(3).
+ * @param func ( (value : Decimal) => Decimal ! ) The function that this notation uses. This function must be strictly increasing, and unless maxnum is false, it should return an output larger than its input, at least for numbers above the maxnum.
+ * @param inverseAlready ( boolean ) If this parameter is false, then "func" is the function to take the inverse of. If this parameter is true, then "func" is already the inverse function.
+ * For example, if you want the function to be (v => Decimal.tetrate(2, v)) (which would make this notation equivalent to base-2 super logarithm), then if inverseAlready is true,
+ * you'd enter (v => Decimal.slog(v, 2)) as func instead. Decimal.increasingInverse can be slow, so doing this is mostly useful for speed purposes.
+ * @param layerFunction ( (value : Decimal) => Decimal ) For numbers too large to just repeatedly apply func, layerFunction is used to determine how many extra "layers" to add on.
+ * The default value of layerFunction is value => Decimal.tetrate(10, value.toNumber(), 1, true), i.e. each layer increases the tetra-exponent by 1, i.e. each layer is a power tower layer.
+ * @param layerInverseAlready ( boolean ) Same as inverseAlready, but for layerFunction instead.
+ * @param layerMimics ( boolean ) If this parameter is false, then layers and iterations are treated as separate. If this parameter is true, then layers act as if they're additional iterations.
+ * You should probably only make this parameter true if your layerFunction is approximating what repeatedly applying func would do to large numbers.
+ * @param iterationChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate iterations of the function. In each pair, the first entry goes before the number, the second entry goes after the number. iterationChars[0] takes the place of the f() in "f(25)", iterationChars[1] takes the place of the first f() in "f(f(654))" (iterationChars[0] is for the innermost iteration, iterationChars[1] is for the outer ones), and iterationChars[2] takes the place of the (f^) in (f^10)4. Default is [["f(", ")"], ["f(", ")"], ["(f^", ")"]].
+ * @param negIterationChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of iterationChars used for negative iterations. Default is [["f^-1(", ")"], ["f^-1(", ")"], ["(f^-", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of iterationChars[2], such as (f^-2).
+ * @param layerChars ( [[string, string], [string, string], [string, string]] ) Same as iterationChars, but for layers instead of iterations. Since each layer is equivalent to an exponent level by default, the default is [["e", ""], ["e", ""], ["(e^", ")"]]. This parameter is unused if layerMimics is true.
+ * @param minIterations ( Decimal ) The minimum amount of iterations of the function. Default is 1.
+ * @param maxnum ( Decimal | null ) If this parameter is a Decimal, then whenever the number within the function would exceed this value, another iteration of the function is taken to bring it back below this value. If this value is null, then there is no maximum, so the amount of iterations does not change. Default is 1e12.
+ * @param layer_maxnum ( Decimal ) Whenever the number, before applying any function iterations, is above this value, the amount of layers is increased to bring it back below this value. Default is (e^6)12.
+ * @param rangeMinimum ( Decimal ) The minimum value that is allowed to be put into the function. If the value given would result in a function argument below this value, the function cannot be applied, and so the amount of iterations is reduced. Default is 0, which doesn't really do anything because notations already handle negatives separately... except if this value is below 0, negatives above this value are handled directly by the function instead of using negativeSign.
+ * @param rangeMaximum ( Decimal ) The maximum value that is allowed to be put into the function. This value must be greater than maxnum, so this parameter doesn't really do anything for the notation, but depending on what function you're using, it may be useful in ensuring Decimal.increasingInverse doesn't try testing invalid values.
+ * @param max_iterations_in_a_row ( number ) If there are more iterations than this, the f()'s are made into an f^n expression. Default is 5.
+ * @param max_layers_in_a_row ( number ) If there are more layers than this, the e's are made into an e^n expression. Default is 3. This parameter is unused if layerMimics is true.
+ * @param superexpAfter ( [boolean, boolean, boolean] ) If superexpAfter[0] is true, the f^n expression from iterationChars comes after the number instead of before. superexpAfter[1] is for negExpChars, superexpAfter[2] is for layerChars. Default is [false, false, false].
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The number within the function is rounded to the nearest multiple of this value. If this parameter is a function, then the value is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param iterationEngineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed amounts of iterations: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted amounts of iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param layerEngineerings ( Decimal | Decimal[] ) Same as iterationEngineerings, but for layers instead of iterations. Default is 1.
+ * @param innerNotation ( Notation ) The notation that the number within the function is itself notated with. DefaultNotation is the default.
+ * @param iterationInnerNotation ( Notation | null ) The notation that the number in an (f^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. Is the same as innerNotation by default.
+ * @param layerInnerNotation ( Notation | null ) The notation that the number in an (e^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. Is the same as iterationInnerNotation by default. This parameter is unused if layerMimics is true.
+ * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal (which happens if it's below 1 and it violates rangeMinimum's lower bound but its reciprocal does not), recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is ["1 / ", ""].
+ */
+declare class IncreasingFunctionNotation extends Notation {
+    func: (value: Decimal) => Decimal;
+    inverseAlready: boolean;
+    layerFunction: (value: Decimal) => Decimal;
+    layerInverseAlready: boolean;
+    layerMimics: boolean;
+    iterationChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    negIterationChars: null | [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    layerChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    private _minIterations;
+    maxnum: Decimal | null;
+    layer_maxnum: Decimal;
+    private _rangeMinimum;
+    private _rangeMaximum;
+    max_iterations_in_a_row: number;
+    max_layers_in_a_row: number;
+    superexpAfter: [
+        boolean,
+        boolean,
+        boolean
+    ];
+    rounding: DecimalSource | ((value: Decimal) => Decimal);
+    private _iterationEngineerings;
+    private _layerEngineerings;
+    innerNotation: Notation;
+    iterationInnerNotation: Notation | null;
+    layerInnerNotation: Notation | null;
+    recipString: [
+        string,
+        string
+    ];
+    constructor(func: (value: Decimal) => Decimal, inverseAlready?: boolean, layerFunction?: (value: Decimal) => Decimal, layerInverseAlready?: boolean, layerMimics?: boolean, iterationChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], negIterationChars?: null | [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], layerChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], minIterations?: DecimalSource, maxnum?: DecimalSource | null, layer_maxnum?: DecimalSource, rangeMinimum?: DecimalSource, rangeMaximum?: DecimalSource, max_iterations_in_a_row?: number, max_layers_in_a_row?: number, superexpAfter?: [
+        boolean,
+        boolean,
+        boolean
+    ], rounding?: DecimalSource | ((value: Decimal) => Decimal), iterationEngineerings?: DecimalSource | DecimalSource[], layerEngineerings?: DecimalSource | DecimalSource[], innerNotation?: Notation, iterationInnerNotation?: Notation | null, layerInnerNotation?: Notation | null, recipString?: [
+        string,
+        string
+    ]);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    get minIterations(): DecimalSource;
+    set minIterations(minIterations: DecimalSource);
+    private setRange;
+    get rangeMinimum(): DecimalSource;
+    set rangeMinimum(minimum: DecimalSource);
+    get rangeMaximum(): DecimalSource;
+    set rangeMaximum(maximum: DecimalSource);
+    get iterationEngineerings(): DecimalSource | DecimalSource[];
+    set iterationEngineerings(engineerings: DecimalSource | DecimalSource[]);
+    get layerEngineerings(): DecimalSource | DecimalSource[];
+    set layerEngineerings(engineerings: DecimalSource | DecimalSource[]);
+}
+/**
+ * Takes an increasing function that takes multiple Decimals as input and returns a Decimal, and uses Decimal.increasingInverse to create a Scientific-style notation using it.
+ * The last argument is considered the highest priority argument to increment, like how the exponent is higher-priority than the mantissa in regular scientific notation.
+ * @param func ( (...values : Decimal[]) => Decimal ! ) The function that is being used. It can have any amount of Decimal arguments, but it must return a Decimal (and it must have a fixed amount of arguments - the arguments can't themselves be an array of Decimals)
+ *
+ * NOTE: Due to how important this function is in determining the rest of the parameters, once an instance of IncreasingFunctionScientificNotation has been constructed,
+ * you cannot change its func to a function with a different amount of arguments than the func it had before. Create a new IncreasingFunctionScientificNotation instance if you want to use a function with a different number of arguments.
+ *
+ * @param limits ( Decimal[] ! ) limits[0] is the minimum value that the first argument is allowed to have; anything less, and the second argument is decreased to bring the first argument back over that limit. Likewise, limits[1] is the minimum for the second argument, limits[2] is the minimum for the third argument, and so on.
+ * The last argument does not have a limit. If this array has less values than (amount of arguments - 1), then all unfilled values will be set equal to the last value that was given.
+ * @param limitsAreMaximums ( boolean ) If this parameter is true, the limits are maximums instead of minimums. Default is false.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed values for each argument: for example, if engineerings[0] is [3], then the second argument will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted values for the third argument are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * The first argument does not have an engineerings array. If engineerings is a single value, then every argument is given that single value as its engineerings entry. If engineerings is an array with less arguments than (amount of arguments - 1), then all unfilled entries will be set equal to the last entry that was given.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The first argument is rounded to the nearest multiple of this value. If this parameter is a function, then the first argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * NOTE: Unlike the rounding parameter in other scientific notations functions, this one does not detect "overflow", so rounding may cause the first argument to go under or over its limit.
+ * @param rangeLimits ( [Decimal, Decimal][] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ * @param revertValues ( (Decimal | boolean)[] ) If an argument would end up with a non-finite value (such as if increasingInverse returned NaN), that argument's revertValue entry determines what it becomes instead.
+ * If the revertValues entry is 'true', then that argument reverts to its limit. If the revertValues entry is a Decimal, then that argument becomes that value. If the revertValues entry is 'false', the non-finite value remains.
+ * @param argumentOrder ( number[] ) This array should contain the numbers from 0 to (amount of arguments - 1), and it decides what order they're added to the notation's output:
+ * for example, if argumentOrder is [0, 2, 1, 3], then the first argument is added first, then the third, then the second, and finally the fourth. This does not change their priority numerically, only their positions in the notation's output.
+ * If the array given does not contain some arguments, those arguments are added at the end. Default is the empty array, which becomes the default of [0, 1, 2, 3, etc.].
+ * @param argumentChars ( [string, string, string, string, string, string][] ) When one of the arguments is added to the notation's output, argumentChars[n][0] is placed before the entire expression thus far before the argument is added, argumentChars[n][1] is placed after the entire expression thus far before the argument is added,
+ * argumentChars[n][2] is placed around the argument itself and [n][3] is placed after the argument itself, and [n][4] and [n][5] are placed before and after the entire expression after the argument is added.
+ * If this parameter is given less entries than (amount of arguments), the remaining entries are filled in with [["", "", "", ", ", "", ""]], except for the entry corresponding to the argument that's last in argumentOrder, which gets [["", "", "", "", "", ""]].
+ * @param argumentToLeft ( boolean[] ) If an argument's corresponding entry in this array is true, that argument is outputted to the left of the expression thus far instead of the right. Default is an array consisting entirely of false, and if this parameter is given less entries than (amount of arguments), the remaining ones default to false.
+ * @param argumentShown ( (value : Decimal, index : number, allArguments : Decimal[]) => boolean ) If an argument's value would return false when run through this function (similar to Array.map()'s callback function, the second argument is the index of that parameter in the array of parameters, the third argument is the entire array of parameters), that argument is not shown in the notation's output. Default is (value) => true, meaning it does nothing by default.
+ * @param innerNotations ( Notation | Notation[] ) Either a Notation or an array of Notations. If this is a single Notation, then every argument is itself written in that notation. If this is an array, then each argument is itself written in its corresponding innerNotations entry. If the array has less entries than (amount of arguments), the remaining entries are written in DefaultNotation.
+ * @param iteration_maxnum ( Decimal ) If the value exceeds this number, then before running it through func, iterations of iterationFunc are applied to bring it back below this value. Default is (e^5)12.
+ * @param iterationFunction ( (value : Decimal) => Decimal ) The function that's applied to numbers over iteration_maxnum to bring them back under iteration_maxnum. Default is value => Decimal.pow(10, value).
+ * @param iterationInverseAlready ( boolean ) If this parameter is false, then "iterationFunction" is the function to take the inverse of. If this parameter is true, then "iterationFunction" is already the inverse function.
+ * For example, if you want iterationFunction to be (v => Decimal.tetrate(2, v)), then if inverseAlready is true,
+ * you'd enter (v => Decimal.slog(v, 2)) as iterationFunction instead. Decimal.increasingInverse can be slow, so doing this is mostly useful for speed purposes.
+ * @param layer_maxnum ( Decimal ) Whenever the number, before applying any function iterations, is above this value, the amount of layers is increased to bring it back below this value. Default is (e^5)12.
+ * @param layerFunction ( (value : Decimal) => Decimal ) For numbers too large to just repeatedly apply iterationFunction, layerFunction is used to determine how many extra "layers" to add on.
+ * The default value of layerFunction is value => Decimal.tetrate(10, value.toNumber(), 1, true), i.e. each layer increases the tetra-exponent by 1, i.e. each layer is a power tower layer.
+ * @param layerInverseAlready ( boolean ) Same as iterationInverseAlready, but for layerFunction instead.
+ * @param layerMimics ( boolean ) If this parameter is false, then layers and iterations are treated as separate. If this parameter is true, then layers act as if they're additional iterations.
+ * You should probably only make this parameter true if your layerFunction is approximating what repeatedly applying iterationFunction would do to large numbers.
+ * @param iterationChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate iterations of iterationFunction. In each pair, the first entry goes before the number, the second entry goes after the number. iterationChars[0] takes the place of the f() in "f(25)", iterationChars[1] takes the place of the first f() in "f(f(654))" (iterationChars[0] is for the innermost iteration, iterationChars[1] is for the outer ones), and iterationChars[2] takes the place of the (f^) in (f^10)4. Default is [["f(", ")"], ["f(", ")"], ["(f^", ")"]].
+ * @param layerChars ( [[string, string], [string, string], [string, string]] ) Same as iterationChars, but for layers instead of iterations. Since each layer is equivalent to an exponent level by default, the default is [["e", ""], ["e", ""], ["(e^", ")"]]. This parameter is unused if layerMimics is true.
+ * @param max_iterations_in_a_row ( number ) If there are more iterations than this, the f()'s are made into an f^n expression. Default is 5.
+ * @param max_layers_in_a_row ( number ) If there are more layers than this, the e's are made into an e^n expression. Default is 3. This parameter is unused if layerMimics is true.
+ * @param superexpAfter ( [boolean, boolean] ) If superexpAfter[0] is true, the f^n expression from iterationChars comes after the number instead of before. superexpAfter[1] is for layerChars. Default is [false, false].
+ * @param iterationEngineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed amounts of iterations: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted amounts of iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param layerEngineerings ( Decimal | Decimal[] ) Same as iterationEngineerings, but for layers instead of iterations. Default is 1.
+ * @param iterationInnerNotation ( Notation ) The notation that the number in an (f^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. DefaultNotation is the default.
+ * @param layerInnerNotation ( Notation ) The notation that the number in an (e^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. Is the same as iterationInnerNotation by default. This parameter is unused if layerMimics is true.
+ * @param minValue ( Decimal ) The minimum value that is allowed to be run through func. Values below this are just written in innerNotations[0] directly, unless they are reciprocals of numbers that are not below minValue. Default is 0.
+ * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal (which happens if it's below 1 and it's below minValue but its reciprocal is not), recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is ["1 / ", ""].
+ */
+declare class IncreasingFunctionScientificNotation extends Notation {
+    private _func;
+    private _limits;
+    limitsAreMaximums: boolean;
+    private _engineerings;
+    rounding: DecimalSource | ((value: Decimal) => Decimal);
+    private _rangeLimits;
+    private _revertValues;
+    private _argumentOrder;
+    private _argumentChars;
+    private _argumentToLeft;
+    argumentShown: (value: Decimal, index: number, allArguments: Decimal[]) => boolean;
+    private _innerNotations;
+    private argamount;
+    iteration_maxnum: Decimal;
+    iterationFunction: (value: Decimal) => Decimal;
+    iterationInverseAlready: boolean;
+    layer_maxnum: Decimal;
+    layerFunction: (value: Decimal) => Decimal;
+    layerInverseAlready: boolean;
+    layerMimics: boolean;
+    iterationChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    layerChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    max_iterations_in_a_row: number;
+    max_layers_in_a_row: number;
+    superexpAfter: [
+        boolean,
+        boolean
+    ];
+    private _iterationEngineerings;
+    private _layerEngineerings;
+    iterationInnerNotation: Notation | null;
+    layerInnerNotation: Notation | null;
+    minValue: Decimal;
+    recipString: [
+        string,
+        string
+    ];
+    constructor(func: (...values: Decimal[]) => Decimal, limits: DecimalSource[], limitsAreMaximums?: boolean, engineerings?: DecimalSource | DecimalSource[][], rounding?: DecimalSource | ((value: Decimal) => Decimal), rangeLimits?: [
+        DecimalSource,
+        DecimalSource
+    ][], revertValues?: (DecimalSource | boolean)[], argumentOrder?: number[], argumentChars?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], argumentToLeft?: boolean[], argumentShown?: (value: Decimal, index: number, allArguments: Decimal[]) => boolean, innerNotations?: (Notation | null) | (Notation | null)[], iteration_maxnum?: DecimalSource, iterationFunction?: (value: Decimal) => Decimal, iterationInverseAlready?: boolean, layer_maxnum?: DecimalSource, layerFunction?: (value: Decimal) => Decimal, layerInverseAlready?: boolean, layerMimics?: boolean, iterationChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], layerChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], max_iterations_in_a_row?: number, max_layers_in_a_row?: number, superexpAfter?: [
+        boolean,
+        boolean
+    ], iterationEngineerings?: DecimalSource | DecimalSource[], layerEngineerings?: DecimalSource | DecimalSource[], iterationInnerNotation?: Notation | null, layerInnerNotation?: Notation | null, minValue?: DecimalSource, recipString?: [
+        string,
+        string
+    ]);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    get func(): (...values: Decimal[]) => Decimal;
+    set func(func: (...values: Decimal[]) => Decimal);
+    get limits(): DecimalSource[];
+    set limits(limits: DecimalSource[]);
+    get engineerings(): DecimalSource | DecimalSource[][];
+    set engineerings(input: DecimalSource | DecimalSource[][]);
+    get rangeLimits(): [
+        DecimalSource,
+        DecimalSource
+    ][];
+    set rangeLimits(rangeLimits: [
+        DecimalSource,
+        DecimalSource
+    ][]);
+    get revertValues(): (DecimalSource | boolean)[];
+    set revertValues(revertValues: (DecimalSource | boolean)[]);
+    get argumentChars(): [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    set argumentChars(argumentChars: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][]);
+    get argumentOrder(): number[];
+    set argumentOrder(argumentOrder: number[]);
+    get argumentToLeft(): boolean[];
+    set argumentToLeft(argumentToLeft: boolean[]);
+    get iterationEngineerings(): DecimalSource | DecimalSource[];
+    set iterationEngineerings(engineerings: DecimalSource | DecimalSource[]);
+    get layerEngineerings(): DecimalSource | DecimalSource[];
+    set layerEngineerings(engineerings: DecimalSource | DecimalSource[]);
+    get innerNotations(): (Notation | null) | (Notation | null)[];
+    set innerNotations(innerNotations: (Notation | null) | (Notation | null)[]);
+}
+/**
+ * Uses three increasing functions to create a Double Factorials-style notation: numbers are expressed as a series of terms, where each term is a whole number run through the first function, then
+ * raised to some power (or whatever the second function does), and the terms are multiplied together (or whatever the third function does).
+ * @param termFunc ( (value : Decimal) => Decimal ! ) The function applied to integers to generate the terms.
+ * @param powerFunc ( (term : Decimal, power : Decimal) => Decimal ) The function used in place of raising a term to a power. Default is (term, power) => Decimal.pow(term, power).
+ * @param betweenFunc ( (leftover : Decimal, term : Decimal) => Decimal ) The function that combines each term. "leftover" is value from the rest of the terms thus far. Default is (leftover, term) => Decimal.mul(leftover, term).
+ * @param termInverseAlready ( boolean ) If this parameter is false, termFunc is the increasing function, so Decimal.increasingInverse is used to figure out what the terms are based on the value given.
+ * If this parameter is true, then termFunc is already the inverse function. Default is false.
+ * @param powerInverseAlready ( boolean ) If this parameter is false, then powerFunc takes the current term and the power and returns their combination's value. If this parameter is true, then
+ * powerFunc is the inverse function: it takes a value and the current term and finds the power that that term would need to be combined with to make that value. Default is false.
+ * @param betweenInverseAlready ( boolean ) If this parameter is false, then betweenFunc takes the remaining number and the current term and returns the total value. If this parameter is true, then
+ * betweenFunc is the inverse function: it takes the total value and the current term and finds the leftover value that that term would need to be combined with to make that value. Default is false.
+ * @param maxTerms ( number ) If there would be too many terms, only the largest few are shown. This parameter controls the maximum amount of terms shown. Default is 8.
+ * @param termChars ( [string, string] ) These two strings are placed around each term's number: termChars[0] goes before the term number, termChars[1] goes after. Default is ["f(", ")"].
+ * @param powerChars ( [string, string, string] ) When the power is large enough to be shown (which, by default, is when it's above 1), powerChars[0] is placed before the power number, powerChars[1] is placed after, and powerChars[2] is placed on the opposite side of the term from the other two. Default is ["^", "", ""].
+ * @param betweenChar ( string ) This string is placed between each term. Default is " * ".
+ * @param powerBefore ( boolean ) If this parameter is false, a term's power is written after the term itself. If this parameter is true, the power is written before the term. Default is false.
+ * @param reverseTerms ( boolean ) If this parameter is false, terms are written largest to smallest. If this parameter is true, terms are written smallest to largest. Default is false.
+ * @param minTerm ( Decimal ) The smallest allowed term number. If the term number would go below this, a constant term (i.e. a term that's just a plain value without using termFunc or powerFunc) is added and the terms stop after that. Default is 1.
+ * @param constantTermChars ( [string, string] ) Same as termChars, but for the constant term instead. Default is ["", ""].
+ * @param edgeChars ( [string, string] ) edgeChars[0] is placed before the whole string of terms, edgeChars[1] is placed after. Default is ["", ""].
+ * @param rangeLimits ( [[Decimal, Decimal], [Decimal, Decimal], [Decimal, Decimal]] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument. rangeLimits[0] is for termFunc, rangeLimits[1] is for powerFunc, rangeLimits[2] is for betweenFunc.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ * @param termEngineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed term numbers: if it's three then the term number will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted term numbers are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param powerEngineerings ( Decimal | Decimal[] ) Same as termEngineerings, but for the power numbers instead of the term numbers. Default is 1.
+ * @param constantInnerNotation ( Notation ) The notation that the constant term is written in. DefaultNotation is the default.
+ * @param termInnerNotation ( Notation | null ) The notation that the term numbers are written in. If this parameter is null, the term numbers are written in this notation yourself (if you're using this option, make sure small numbers reduce back to the constant term!). Is the same as constantInnerNotation by default.
+ * @param powerInnerNotation ( Notation | null ) The notation that the power numbers are written in. If this parameter is null, the power numbers are written in this notation yourself (if you're using this option, make sure small numbers reduce back to the constant term!). Is the same as constantInnerNotation by default.
+ * @param maxChars ( number ) If the result has reached this many characters after a term has been added, it stops there even if the amount of terms hasn't reached maxTerms yet. Default is Infinity, meaning maxChars doesn't apply by default.
+ * @param showConstantTerm ( (value : Decimal) => boolean ) Even if the constant term is reached, it's only actually shown if plugging it into this function would return true. Default is value => true.
+ * @param showTerms ( (term : Decimal, power : Decimal) => boolean ) A term is only shown if plugging the term and power into this function would return true. The term is still evaluated even if this function would return false, it's just not shown in the result. Default is (term, power) => true.
+ * @param irrelevancyFunc ( (currentValue : Decimal, originalValue : Decimal) => boolean ) If, after a term is added to the result, calling this function (with the current remaining value as its first parameter, the original value before any terms were added (but after the iteration and layer functions are applied, if applicable) as its second) returns true, no more terms are added afterwards. Default is a function that always returns false.
+ * @param maxPowersInARow ( number ) If a term's power is equal to or less than this parameter, then that term's power is not written out. Instead, that term is written multiple times in a row, with that amount of times being equal to its power. Default is 1.
+ * @param betweenPowersChar ( string ) When multiple of the same term are written in a row, this string is placed between copies of the same term instead of betweenChar. Default is "".
+ * @param termWrapperChars ( [string, string] ) When some amount of copies of the same term (that amount of copies may be 1) are written out instead of writing the power as a number, termWrapperChars[0] goes before the whole set of copies, termWrapperChars[1] goes after. Default is ["", ""].
+ * @param iteration_maxnum ( Decimal ) If the value exceeds this number, then before running it through func, iterations of iterationFunc are applied to bring it back below this value. Default is (e^5)12.
+ * @param iterationFunction ( (value : Decimal) => Decimal ! ) The function that's applied to numbers over iteration_maxnum to bring them back under iteration_maxnum. Default is value => Decimal.pow(10, value).
+ * @param iterationInverseAlready ( boolean ) If this parameter is false, then "iterationFunction" is the function to take the inverse of. If this parameter is true, then "iterationFunction" is already the inverse function.
+ * For example, if you want iterationFunction to be (v => Decimal.tetrate(2, v)), then if inverseAlready is true,
+ * you'd enter (v => Decimal.slog(v, 2)) as iterationFunction instead. Decimal.increasingInverse can be slow, so doing this is mostly useful for speed purposes.
+ * @param layer_maxnum ( Decimal ) Whenever the number, before applying any function iterations, is above this value, the amount of layers is increased to bring it back below this value. Default is (e^5)12.
+ * @param layerFunction ( (value : Decimal) => Decimal ) For numbers too large to just repeatedly apply iterationFunction, layerFunction is used to determine how many extra "layers" to add on.
+ * The default value of layerFunction is value => Decimal.tetrate(10, value.toNumber(), 1, true), i.e. each layer increases the tetra-exponent by 1, i.e. each layer is a power tower layer.
+ * @param layerInverseAlready ( boolean ) Same as iterationInverseAlready, but for layerFunction instead.
+ * @param layerMimics ( boolean ) If this parameter is false, then layers and iterations are treated as separate. If this parameter is true, then layers act as if they're additional iterations.
+ * You should probably only make this parameter true if your layerFunction is approximating what repeatedly applying iterationFunction would do to large numbers.
+ * @param iterationChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate iterations of iterationFunction. In each pair, the first entry goes before the number, the second entry goes after the number. iterationChars[0] takes the place of the f() in "f(25)", iterationChars[1] takes the place of the first f() in "f(f(654))" (iterationChars[0] is for the innermost iteration, iterationChars[1] is for the outer ones), and iterationChars[2] takes the place of the (f^) in (f^10)4. Default is [["f(", ")"], ["f(", ")"], ["(f^", ")"]].
+ * @param layerChars ( [[string, string], [string, string], [string, string]] ) Same as iterationChars, but for layers instead of iterations. Since each layer is equivalent to an exponent level by default, the default is [["e", ""], ["e", ""], ["(e^", ")"]]. This parameter is unused if layerMimics is true.
+ * @param max_iterations_in_a_row ( number ) If there are more iterations than this, the f()'s are made into an f^n expression. Default is 5.
+ * @param max_layers_in_a_row ( number ) If there are more layers than this, the e's are made into an e^n expression. Default is 3. This parameter is unused if layerMimics is true.
+ * @param superexpAfter ( [boolean, boolean] ) If superexpAfter[0] is true, the f^n expression from iterationChars comes after the number instead of before. superexpAfter[1] is for layerChars. Default is [false, false].
+ * @param iterationEngineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed amounts of iterations: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted amounts of iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param layerEngineerings ( Decimal | Decimal[] ) Same as iterationEngineerings, but for layers instead of iterations. Default is 1.
+ * @param iterationInnerNotation ( Notation | null ) The notation that the number in an (f^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. DefaultNotation is the default.
+ * @param layerInnerNotation ( Notation | null ) The notation that the number in an (e^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. Is the same as iterationInnerNotation by default. This parameter is unused if layerMimics is true.
+ * @param minValue ( Decimal ) The minimum value that is allowed to be run through func. Values below this are just written in innerNotations[0] directly, unless they are reciprocals of numbers that are not below minValue. Default is 0.
+ * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal (which happens if it's below 1 and it's below minValue but its reciprocal is not), recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is ["1 / ", ""].
+ */
+declare class IncreasingFunctionProductNotation extends Notation {
+    termFunc: (value: Decimal) => Decimal;
+    powerFunc: (term: Decimal, power: Decimal) => Decimal;
+    betweenFunc: (leftover: Decimal, term: Decimal) => Decimal;
+    termInverseAlready: boolean;
+    powerInverseAlready: boolean;
+    betweenInverseAlready: boolean;
+    private _maxTerms;
+    termChars: [
+        string,
+        string
+    ];
+    powerChars: [
+        string,
+        string,
+        string
+    ];
+    betweenChar: string;
+    powerBefore: boolean;
+    reverseTerms: boolean;
+    minTerm: Decimal;
+    constantTermChars: [
+        string,
+        string
+    ];
+    edgeChars: [
+        string,
+        string
+    ];
+    rangeLimits: [
+        [
+            Decimal,
+            Decimal
+        ],
+        [
+            Decimal,
+            Decimal
+        ],
+        [
+            Decimal,
+            Decimal
+        ]
+    ];
+    private _termEngineerings;
+    private _powerEngineerings;
+    constantInnerNotation: Notation;
+    termInnerNotation: Notation | null;
+    powerInnerNotation: Notation | null;
+    maxChars: number;
+    showConstantTerm: (value: Decimal) => boolean;
+    showTerms: (term: Decimal, power: Decimal) => boolean;
+    irrelevancyFunc: (currentValue: Decimal, originalValue: Decimal) => boolean;
+    maxPowersInARow: number;
+    betweenPowersChar: string;
+    termWrapperChars: [
+        string,
+        string
+    ];
+    iteration_maxnum: Decimal;
+    iterationFunction: (value: Decimal) => Decimal;
+    iterationInverseAlready: boolean;
+    layer_maxnum: Decimal;
+    layerFunction: (value: Decimal) => Decimal;
+    layerInverseAlready: boolean;
+    layerMimics: boolean;
+    iterationChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    layerChars: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ];
+    max_iterations_in_a_row: number;
+    max_layers_in_a_row: number;
+    superexpAfter: [
+        boolean,
+        boolean
+    ];
+    private _iterationEngineerings;
+    private _layerEngineerings;
+    iterationInnerNotation: Notation | null;
+    layerInnerNotation: Notation | null;
+    minValue: Decimal;
+    recipString: [
+        string,
+        string
+    ];
+    constructor(termFunc: (value: Decimal) => Decimal, powerFunc?: (term: Decimal, power: Decimal) => Decimal, betweenFunc?: (leftover: Decimal, term: Decimal) => Decimal, termInverseAlready?: boolean, powerInverseAlready?: boolean, betweenInverseAlready?: boolean, maxTerms?: number, termChars?: [
+        string,
+        string
+    ], powerChars?: [
+        string,
+        string,
+        string
+    ], betweenChar?: string, powerBefore?: boolean, reverseTerms?: boolean, minTerm?: DecimalSource, constantTermChars?: [
+        string,
+        string
+    ], edgeChars?: [
+        string,
+        string
+    ], rangeLimits?: [
+        [
+            DecimalSource,
+            DecimalSource
+        ],
+        [
+            DecimalSource,
+            DecimalSource
+        ],
+        [
+            DecimalSource,
+            DecimalSource
+        ]
+    ], termEngineerings?: DecimalSource | DecimalSource[], powerEngineerings?: DecimalSource | DecimalSource[], constantInnerNotation?: Notation, termInnerNotation?: Notation, powerInnerNotation?: Notation, maxChars?: number, showConstantTerm?: (value: Decimal) => boolean, showTerms?: (term: Decimal, power: Decimal) => boolean, irrelevancyFunc?: (currentValue: Decimal, originalValue: Decimal) => boolean, maxPowersInARow?: number, betweenPowersChar?: string, termWrapperChars?: [
+        string,
+        string
+    ], iteration_maxnum?: DecimalSource, iterationFunction?: (value: Decimal) => Decimal, iterationInverseAlready?: boolean, layer_maxnum?: DecimalSource, layerFunction?: (value: Decimal) => Decimal, layerInverseAlready?: boolean, layerMimics?: boolean, iterationChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], layerChars?: [
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ],
+        [
+            string,
+            string
+        ]
+    ], max_iterations_in_a_row?: number, max_layers_in_a_row?: number, superexpAfter?: [
+        boolean,
+        boolean
+    ], iterationEngineerings?: DecimalSource | DecimalSource[], layerEngineerings?: DecimalSource | DecimalSource[], iterationInnerNotation?: Notation | null, layerInnerNotation?: Notation | null, minValue?: DecimalSource, recipString?: [
+        string,
+        string
+    ]);
+    name: string;
+    format(value: DecimalSource): string;
+    formatDecimal(value: Decimal): string;
+    get maxTerms(): number;
+    set maxTerms(maxTerms: number);
+    get termEngineerings(): DecimalSource | DecimalSource[];
+    set termEngineerings(engineerings: DecimalSource | DecimalSource[]);
+    get powerEngineerings(): DecimalSource | DecimalSource[];
+    set powerEngineerings(engineerings: DecimalSource | DecimalSource[]);
+    get iterationEngineerings(): DecimalSource | DecimalSource[];
+    set iterationEngineerings(engineerings: DecimalSource | DecimalSource[]);
+    get layerEngineerings(): DecimalSource | DecimalSource[];
+    set layerEngineerings(engineerings: DecimalSource | DecimalSource[]);
+}
+/**
+ * A notation that abbreviates numbers using the Fast-Growing Hierarchy, a simple system of functions: f0(n) = n + 1, f1(n) is f0(f0(f0(f0...(n)))) with n f0's,
+ * f2(n) is f1(f1(f1(f1...(n)))) with n f1's, and so on, with each function being a repeated version of the previous one.
+ * The Fast-Growing Hierarchy functions have a similar growth rate to the hyperoperators: f1 multiplies, f2 is exponential, f3 is tetrational, f4 is pentational, and so on.
+ * This notation only goes up to f4.
+ * @param maximums ( Decimal[] ) If the number given is above maximums[0], another iteration of f0 is applied. Likewise, going above maximums[1] causes an iteration of f1 to be applied, going above maximums[2] causes an iteration of f2 to be applied, and so on.
+ * Later functions are applied before earlier ones. Default is [1, 4, 32, ee41373247578.35493, Infinity], which are the values that cause the argument to stay below 1 and the amount of iterations of each function to stay below 4.
+ * If less than 5 entries are provided, the unfilled entries are set to Infinity, i.e. those later operators don't show up.
+ * @param functionChars ( [string, string][] ) The strings used to show each application of each function. functionChars[n] corresponds to f[n]. For each entry, functionChars[n][0] goes before the argument,
+ * functionChars[n][1] goes after. Default is [["f0(", ")"], ["f1(", ")"], ["f2(", ")"], ["f3(", ")"], ["f4(", ")"]]. If less than 5 entries are provided, the unfilled entries go back to their default values.
+ * @param max_in_a_row ( number[] ) If the amount of iterations of f0 is above max_in_a_row[0], the f0's are concatenated into an (f0^n) expression. Likewise for the rest of the functions and their corresponding entries here.
+ * Default is [4, 4, 4, 4, 4]. If less than 5 entries are provided, the unfilled entries are set to the same value as the last filled one.
+ * @param iterationChars ( [string, string, string][] ) The strings used when the amount of iterations is concatenated. In each entry, iterationChars[n][0] goes before the amount of iterations, iterationChars[n][1] goes after the amount of iterations,
+ * and iterationChars[n][2] goes on the opposite side of the argument from the other two. Default is [["(f0^", ")", ""], ["(f1^", ")", ""], ["(f2^", ")", ""], ["(f3^", ")", ""], ["(f4^", ")", ""]].
+ * If less than 5 entries are provided, the unfilled entries go back to their default values.
+ * @param iterationAfter ( boolean[] ) If iterationAfter[n] is true, then the amount of iterations of that function goes after the argument instead of before. Default is [false, false, false, false, false].
+ * If less than 5 entries are provided, the unfilled entries are set to false.
+ * @param edgeChars ( [string, string, boolean] ) If any of the functions are applied to the value at least once, then edgeChars[0] goes on the left end of the whole expression, edgeChars[1] goes on the right end.
+ * If edgeChars[2] is true, then the other two edgeChars appear even if no other functions are visible. Default is ["", "", false].
+ * @param argumentChars ( [string, string, boolean] ) If any of the functions are applied to the value at least once, then argumentChars[0] goes right before the argument, edgeChars[1] goes right after.
+ * If argumentChars[2] is true, then the other two argumentChars appear even if no other functions are visible. Default is ["", "", false].
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The argument is rounded to the nearest multiple of this value. If this parameter is a function, then the argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param delimiterPermutation ( number ) The order that the functions are shown in when multiple are present (they're always applied from greatest to least; this parameter is only a visual change). The default is 119, which corresponds to [f0, f1, f2, f3, f4]. Each value from 0 to 119 represents a different ordering.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed amount of iterations for each function: for example, if engineerings[0] is [3], then the amount of f0 iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted amounts of f0 iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * If engineerings is a single value, then every argument is given that single value as its engineerings entry. The amount of iterations for f4 may not be a non-integer, though the iterations for the rest may be. If less than 5 entries are provided, then all unfilled entries will be set equal to the last entry that was given.
+ * @param innerNotation ( Notation ) The notation that the argument is itself written in. DefaultNotation is the default.
+ * @param iterationInnerNotations ( Notation | Notation[] ) iterationInnerNotations[0] is the notation that the amount of iterations of f0 is written in, and likewise for the rest of the functions.
+ * If only a single notation is provided, all 5 entries are set to that notation. If less than 5 entries are provided, the unfilled ones are set to be the same as the last given one. Is the same as innerNotation by default.
+ * @param functionShown ( ((value : Decimal) => boolean)[] ) functionShown[0] controls when the f0 iterations are shown: the f0 iterations, whether concatenated or not, are only shown if functionShown[0](amount of f0 iterations) returns true.
+ * Default is (value => value.gt(0)) for all five entries, i.e. the iterations are only shown if there's more than zero of them. If less than 5 entries are provided, the unfilled ones are set to be the same as the last given one.
+ */
+declare class FastGrowingHierarchyNotation extends Notation {
+    private _maximums;
+    private _functionChars;
+    private _max_in_a_row;
+    private _iterationChars;
+    private _iterationAfter;
+    edgeChars: [
+        string,
+        string,
+        boolean
+    ];
+    argumentChars: [
+        string,
+        string,
+        boolean
+    ];
+    rounding: DecimalSource | ((value: Decimal) => Decimal);
+    delimiterPermutation: number;
+    private _engineerings;
+    innerNotation: Notation;
+    private _iterationInnerNotations;
+    private _functionShown;
+    constructor(maximums?: DecimalSource[], functionChars?: [
+        string,
+        string
+    ][], max_in_a_row?: number | number[], iterationChars?: [
+        string,
+        string,
+        string
+    ][], iterationAfter?: boolean[], edgeChars?: [
+        string,
+        string,
+        boolean
+    ], argumentChars?: [
+        string,
+        string,
+        boolean
+    ], rounding?: DecimalSource | ((value: Decimal) => Decimal), delimiterPermutation?: number, engineerings?: DecimalSource | DecimalSource[][], innerNotation?: Notation, iterationInnerNotations?: Notation | Notation[], functionShown?: ((value: Decimal) => boolean)[]);
+    name: string;
+    formatDecimal(value: Decimal): string;
+    private FGHEvaluate;
+    get maximums(): DecimalSource[];
+    set maximums(maximums: DecimalSource[]);
+    get functionChars(): [
+        string,
+        string
+    ][];
+    set functionChars(functionChars: [
+        string,
+        string
+    ][]);
+    get max_in_a_row(): number | number[];
+    set max_in_a_row(max_in_a_row: number | number[]);
+    get iterationChars(): [
+        string,
+        string,
+        string
+    ][];
+    set iterationChars(iterationChars: [
+        string,
+        string,
+        string
+    ][]);
+    get iterationAfter(): boolean[];
+    set iterationAfter(iterationAfter: boolean[]);
+    get engineerings(): DecimalSource | DecimalSource[][];
+    set engineerings(input: DecimalSource | DecimalSource[][]);
+    get iterationInnerNotations(): Notation | Notation[];
+    set iterationInnerNotations(iterationInnerNotations: Notation | Notation[]);
+    get functionShown(): ((value: Decimal) => boolean)[];
+    set functionShown(functionShown: ((value: Decimal) => boolean)[]);
+}
+/**
+ * Writes numbers as the layers seen in VeproGames's "Omega Meta Zero". Sort of like a mixed radix base, but with Greek letters, alchemical planet symbols, exponent-styled towers of symbols, and more instead of digits and exponents.
+ * This notation would be too complicated to explain all at once, so see the info on the parameters to understand each step of the process.
+ * (Unless otherwise stated, whenever a parameter that's an array where each entry corresponds to a set of symbols is given less entries than the amount of sets of symbols, the unfilled entries are set to be the same as the last entry that was provided.)
+ * @param symbols ( string[][] ) These are the digits of the mixed-radix base. Each entry of symbols is an array of strings used for one position in the base.
+ * symbols[n][0] is the digit for 0 in that position, symbols[n][1] is the digit for 1, and so on. Default is
+ * [["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω",
+ * "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"
+ * ], ["ϝ", "ϛ", "ͱ", "ϻ", "ϙ", "ͳ", "ϸ"], ["☿", "♀", "♁", "♂", "♃", "♄", "♅", "♆", "♇"]].
+ * @param towerHeight ( Decimal | Decimal[] ) Rather than immediately incrementing the next set of symbols after reaching the last symbol of a set, this notation repeats that set of symbols but as an "exponent" on top of the last symbol in its set.
+ * This continues until that tower reaches a certain height, and only afterwards does that set of symbols reset and the next set increment. This parameter controls that maximum tower height. If this parameter is a single Decimal,
+ * every symbol set has the same maximum height. If it's an array of Decimals, towerHeight[n] is the tower height limit for symbols[n]. Default is 5.
+ * @param towerChars ( ([string, string] | boolean )[] ) This parameter controls the characters used to indicate the aforementioned towers. If towerChars[n] is a pair of strings, then for each tower level, towerChars[n][0] goes before the symbol from symbols[n], towerChars[n][1] goes afterwards.
+ * If towerChars[n] is a boolean, then a default pair of strings is used: ["s^", ""] for false, ["s<sup>", "</sup>"] for true, where that "s" is replaced with whatever the last symbol of symbols[n] is. Default is false for all entries.
+ * @param visibleTowerMax ( number | number[] ) If a tower is taller than this, the tower's entries are concatenated into a "tower iteration" expression. Like with towerHeight, a single number applies to all symbol sets,
+ * while an array of numbers has each number correspond to one symbol set. Default is 5.
+ * @param toweriterationChars ( [string, string, boolean, Notation][] ) When a tower is tall enough to be concatenated, the entry of this array corresponding to that symbol set is used to express the amount of tower iterations.
+ * towerIterationChars[n][0] goes before the amount of iterations, towerIterationChars[n][1] goes after the amount of iterations, towerIterationChars[n][2] is whether the iterations expression goes before or after the symbol atop the tower (before if false, after if true), and towerIterationChars[n][3] is the Notation that the amount of iterations is written in.
+ * Default is [["((Ω^)^", ")", false, new DefaultNotation()], ["((ϸ^)^", ")", false, new DefaultNotation()], ["((♇^)^", ")", false, new DefaultNotation()]], though since visibleTowerMax isn't less than towerHeight by default, this parameter doesn't come into play unless one of those parameters is changed from its default.
+ * @param symbolAfter ( boolean | boolean[] ) If symbolAfter[n] is true, then the symbol from the next symbol set will go after the current expression instead of before. If a single boolean is provided, all entries are set to that boolean. Default is false.
+ * @param parentheses ( [string, string, string, string, string, string][] ) When the nth symbol set is added to the resulting string, parentheses[n][0] goes around the entire expression thus far and parentheses[n][1] goes after, before the new symbol is added.
+ * parentheses[n][2] and [n][3] go before and after the new symbol, and parentheses[n][4] and [n][5] go before and after the entire expression after the new symbol is added.
+ * The default has ["", "", "", "", "", ""] for parentheses[0] and ["(", ")", "", "", "", ""] for the rest of the entries.
+ * @param symbolShown ( ((value : Decimal, index : number, symbolValues : Decimal[], digitIndex : number, decimalPlaceAmount : number, digitValues : Decimal[]) => boolean) | ((value : Decimal, index : number, symbolValues : Decimal[], digitIndex : number, decimalPlaceAmount : number, digitValues : Decimal[]) => boolean)[] )
+ * The symbol of the nth symbol set is only shown in the resulting expression if calling symbolShown[n] on the value that symbol represents would return true.
+ * If only a single function is provided, all entries are set to that function. The default has (value => true) for symbolShown[0] and (value => value.gt(0)) for the rest of the entries,
+ * i.e. the greek letters are always visible but the higher two sets only show up if they're nonzero.
+ * Like Array.map(), you can include extra arguments in the function: args[1] will be the symbol set's index (so the first symbol set will have index 0, the second symbol set has index 1, etc.), arg[2] is the entire array of symbol values for that digit,
+ * arg[3] is the index of the digit this symbol set is part of (the ones place is index 0, the next larger digit is index 1, etc. If there are decimal places, they have negative index), arg[4] is the amount of decimal digits, and arg[5] is the entire array of digit values.
+ * @param brackets ( [string, string, string, string, string, string][] ) After the last symbol set, this notation starts using multiple "digits", where a single "digit" consists of a run of symbols from each set.
+ * The entries in brackets are placed around each digit (via the same rules as the entries of parentheses) in a cycle: brackets[0] is used for the last digit, brackets[1] for the second-to-last, brackets[2] for the third-to-last, and so on, looping back to brackets[0] after the last entry.
+ * Default is [["", "", "[", "]", "", ""]].
+ * @param firstBrackets ( [string, string, string, string, string, string][] ) If this array has any entries, the first few digits use those entries instead of the entries in brackets.
+ * Default is [["", "", "", "", "", ""]], i.e. the first digit doesn't have the [] around it but the rest do.
+ * @param lastBrackets ( [string, string, string, string, string, string][] ) If this array has any entries, the last few digits use those entries instead of the entries in brackets.
+ * Default is [], i.e. there's no special treatment for the last digits.
+ * @param reverseDigits ( boolean ) Normally, the largest digit is on the left and the smallest digit is on the right, like in a normal number base.
+ * If this parameter is true, the order of the digits is reversed. Default is false.
+ * @param maxVisibleDigits ( number ) The maximum amount of digits before the notation switches to scientific form (in which the amount of unshown digits is written as an exponent like in scientific notation). Default is 3.
+ * @param expChars ( [string, string, string, string, string, string] ) The characters placed around the exponent in scientific form (using the same rules as parentheses and brackets). Default is ["", "", "{", "}", "", ""].
+ * @param expAfter ( boolean ) If this parameter is true, the exponent is written after the digits instead of before. Default is false.
+ * @param maxVisibleDigitsInExp ( number ) The amount of digits shown once the expression is in scientific form. Default is 2.
+ * @param exponentOffset ( boolean ) If this parameter is false, the exponent is the amount of unwritten digits. If this parameter is true, the exponent is increased to one less than the amount of total digits, as if there was a decimal point after the first digit. Default is true.
+ * @param bracketsInExp ( [string, string, string, string, string, string][] ) Same as brackets, but this parameter is used instead once the expression is in scientific form. Is the same as brackets by default.
+ * @param firstBracketsInExp ( [string, string, string, string, string, string][] ) Same as firstBrackets, but this parameter is used instead once the expression is in scientific form. Is the same as firstBrackets by default.
+ * @param lastBracketsInExp ( [string, string, string, string, string, string][] ) Same as lastBrackets, but this parameter is used instead once the expression is in scientific form. Is the same as lastBrackets by default.
+ * @param expInnerNotation ( Notation | null ) If this parameter is null, the exponent is written in this Omega Meta Zero notation itself. If this parameter is a notation, the exponent is written in that notation. Default is null.
+ * @param uncertainChar ( string ) If the exponent is so large that the digits cease to be relevant, this string is placed where the digits would be. Default is "◯".
+ * @param uncertainThreshold ( Decimal ) If the exponent is equal to or greater than this value, uncertainChar is written instead of the digits. Default is 636152238258658, which matches with the point where the original Omega Meta Zero starts using ◯.
+ * @param maxVisibleLayers ( number ) The maximum amount of layers of nested exponents before the notation starts writing the amount of additional layers separately (note that this is a little different from the original Omega Meta Zero, which switches to base-10 hyperscientific at this point). Default is 4.
+ * @param layerChars ( [string, string, string, string, string, string] ) The characters placed around the amount of extra exponent layers (using the same rules as expChars). Default is ["", "", "◖", "◗", "", ""].
+ * @param layerAfter ( boolean ) If this parameter is true, the amount of layers is written after the rest of the expression instead of before. Default is false.
+ * @param maxVisibleLayersPost ( number ) The amount of nested exponent layers shown after the amount of extra layers starts being written separately. Default is 1.
+ * @param layerOffset ( boolean ) If this parameter is false, the layer number is the amount of unwritten layers. If this parameter is true, the layer number is increased to one less than the amount of total layers. Default is false.
+ * @param layerInnerNotation ( Notation | null ) If this parameter is null, the layer number is written in this Omega Meta Zero notation itself. If this parameter is a notation, the layer number is written in that notation. Default is null.
+ * @param layerUncertainChar ( string ) If the layer is so large that the exponent and digits cease to be relevant, this string is placed where the exponent and digits would be. Is the same as uncertainChar by default.
+ * @param layerUncertainThreshold ( Decimal ) If the layer amount is equal to or greater than this value, layerUncertainChair is written instead of the exponent and digits. Default is 9e15.
+ * @param decimalPlaces ( number ) The amount of digits shown after the ones digit. Default is 0.
+ * @param decimalPoint ( [string, string] ) Once all the sub-ones digits are written but before the whole digits are written, decimalPoint[0] goes before the expression, decimalPoint[1] goes after. Default is [";", ""].
+ * @param decimalBrackets ( [string, string, string, string, string, string][] ) Same as brackets, but used for sub-ones digits instead. Default is [["", "", "[", "]", "", ""]].
+ * @param showDecimalZeroes ( number ) If this number is negative, trailing zero sub-ones digits are not shown. If this number is zero, trailing zero sub-ones digits are only shown if at least one sub-ones digit is nonzero. If this number is positive, training zero sub-ones digits are shown. Default is 1.
+ * @param negExpThreshold ( number ) If the amount of leading zero sub-one digits would be at least this, the number is written in scientific form (with a negative exponent) instead. Default is 1.
+ * @param negExpChars ( null | [string, string, string, string, string, string] ) If this parameter is not null, then when the exponent is negative, negExpChars is used instead of expChars (and the exponent is written as its absolute value). Default is null.
+ * @param negExpAfter ( boolean ) If negExpChars is used instead of expChars, negExpAfter is used instead of expAfter. Default is false.
+ * @param recipThreshold ( number ) Numbers too small to write as themselves are written in terms of their reciprocals.
+ * If recipThreshold is 0, anything below 1 is written in terms of its reciprocal. If recipThreshold is 1, then numbers that would be written in negative-exponent scientific are written in terms of their reciprocal.
+ * If recipThreshold is 2, then the threshold for writing in terms of its reciprocal is the negative exponent point where the digits switch to using undefinedChar, or the point where a second exponent layer shows up, whichever is less small.
+ * If recipThreshold is 3, the threshold is the second exponent layer. Any other recipThreshold value acts as 0. Default is 2.
+ * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal, recipString[0] goes before it, recipString[1] goes after. Default is ["/", ""].
+ */
+declare class OmegaMetaZeroNotation extends Notation {
+    private _symbols;
+    private _towerHeight;
+    private _towerChars;
+    private _visibleTowerMax;
+    private _toweriterationChars;
+    private _symbolAfter;
+    private _parentheses;
+    private _symbolShown;
+    private _brackets;
+    firstBrackets: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    lastBrackets: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    reverseDigits: boolean;
+    private _maxVisibleDigits;
+    expChars: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ];
+    expAfter: boolean;
+    private _maxVisibleDigitsInExp;
+    exponentOffset: boolean;
+    private _bracketsInExp;
+    firstBracketsInExp: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    lastBracketsInExp: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    expInnerNotation: Notation | null;
+    uncertainChar: string;
+    uncertainThreshold: Decimal;
+    private _maxVisibleLayers;
+    layerChars: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ];
+    layerAfter: boolean;
+    private _maxVisibleLayersPost;
+    layerOffset: boolean;
+    layerInnerNotation: Notation | null;
+    layerUncertainChar: string;
+    layerUncertainThreshold: Decimal;
+    private _decimalPlaces;
+    decimalPoint: [
+        string,
+        string
+    ];
+    private _decimalBrackets;
+    showDecimalZeroes: number;
+    private _negExpThreshold;
+    negExpChars: null | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ];
+    negExpAfter: boolean;
+    recipThreshold: number;
+    recipString: [
+        string,
+        string
+    ];
+    constructor(symbols?: string[][], towerHeight?: DecimalSource | DecimalSource[], towerChars?: ([
+        string,
+        string
+    ] | boolean)[], visibleTowerMax?: number | number[], toweriterationChars?: [
+        string,
+        string,
+        boolean,
+        Notation
+    ][], symbolAfter?: boolean | boolean[], parentheses?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], symbolShown?: ((value: Decimal, index: number, symbolValues: Decimal[], digitIndex: number, decimalPlaceAmount: number, digitValues: Decimal[]) => boolean) | ((value: Decimal, index: number, symbolValues: Decimal[], digitIndex: number, decimalPlaceAmount: number, digitValues: Decimal[]) => boolean)[], brackets?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], firstBrackets?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], lastBrackets?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], reverseDigits?: boolean, maxVisibleDigits?: number, expChars?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ], expAfter?: boolean, maxVisibleDigitsInExp?: number, exponentOffset?: boolean, bracketsInExp?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], firstBracketsInExp?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], lastBracketsInExp?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], expInnerNotation?: Notation | null, uncertainChar?: string, uncertainThreshold?: DecimalSource, maxVisibleLayers?: number, layerChars?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ], layerAfter?: boolean, maxVisibleLayersPost?: number, layerOffset?: boolean, layerInnerNotation?: Notation | null, layerUncertainChar?: string, layerUncertainThreshold?: DecimalSource, decimalPlaces?: number, decimalPoint?: [
+        string,
+        string
+    ], decimalBrackets?: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][], showDecimalZeroes?: number, negExpThreshold?: number, negExpChars?: null | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ], negExpAfter?: boolean, recipThreshold?: number, recipString?: [
+        string,
+        string
+    ]);
+    name: string;
+    private formatSingleDigit;
+    formatDecimal(value: Decimal): string;
+    private setSymbolsAndOthers;
+    get symbols(): string[][];
+    set symbols(symbols: string[][]);
+    get towerHeight(): DecimalSource | DecimalSource[];
+    set towerHeight(towerHeight: DecimalSource | DecimalSource[]);
+    get towerChars(): ([
+        string,
+        string
+    ] | boolean)[];
+    set towerChars(towerChars: ([
+        string,
+        string
+    ] | boolean)[]);
+    get visibleTowerMax(): number | number[];
+    set visibleTowerMax(visibleTowerMax: number | number[]);
+    get towerIterationChars(): [
+        string,
+        string,
+        boolean,
+        Notation
+    ][];
+    set towerIterationChars(towerIterationChars: [
+        string,
+        string,
+        boolean,
+        Notation
+    ][]);
+    get symbolAfter(): boolean | boolean[];
+    set symbolAfter(symbolAfter: boolean | boolean[]);
+    get parentheses(): [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    set parentheses(parentheses: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][]);
+    get symbolShown(): ((value: Decimal, index: number, symbolValues: Decimal[], digitIndex: number, decimalPlaceAmount: number, digitValues: Decimal[]) => boolean) | ((value: Decimal, index: number, symbolValues: Decimal[], digitIndex: number, decimalPlaceAmount: number, digitValues: Decimal[]) => boolean)[];
+    set symbolShown(symbolShown: ((value: Decimal, index: number, symbolValues: Decimal[], digitIndex: number, decimalPlaceAmount: number, digitValues: Decimal[]) => boolean) | ((value: Decimal, index: number, symbolValues: Decimal[], digitIndex: number, decimalPlaceAmount: number, digitValues: Decimal[]) => boolean)[]);
+    get brackets(): [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    set brackets(brackets: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][]);
+    get bracketsInExp(): [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    set bracketsInExp(brackets: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][]);
+    get maxVisibleDigits(): number;
+    set maxVisibleDigits(maxVisibleDigits: number);
+    get maxVisibleDigitsInExp(): number;
+    set maxVisibleDigitsInExp(maxVisibleDigits: number);
+    get maxVisibleLayers(): number;
+    set maxVisibleLayers(maxVisibleLayers: number);
+    get maxVisibleLayersPost(): number;
+    set maxVisibleLayersPost(maxVisibleLayers: number);
+    get decimalPlaces(): number;
+    set decimalPlaces(decimalPlaces: number);
+    get decimalBrackets(): [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][];
+    set decimalBrackets(decimalBrackets: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string
+    ][]);
+    get negExpThreshold(): number;
+    set negExpThreshold(negExpThreshold: number);
+}
 /** This object is where all of the notation presets are stored. Use Presets when outputting to plain text. */
 declare let Presets: {
     Default: Notation;
@@ -4945,6 +7275,7 @@ declare let Presets: {
     DoubleLogarithm: Notation;
     AlternateBase: (value: number) => Notation;
     Binary: Notation;
+    BinaryIL: Notation;
     Ternary: Notation;
     Quaternary: Notation;
     Seximal: Notation;
@@ -4981,6 +7312,7 @@ declare let Presets: {
     Septecoman: Notation;
     SI: Notation;
     SIWritten: Notation;
+    MixedSI: Notation;
     BinarySI: Notation;
     BinarySIWritten: Notation;
     CombinedD: Notation;
@@ -4988,6 +7320,7 @@ declare let Presets: {
     HyperSIWritten: Notation;
     SandcastleBuilder: Notation;
     SandcastleBuilderWritten: Notation;
+    CookieFonsterExtendedSI: Notation;
     LooseFraction: Notation;
     MediumFraction: Notation;
     PreciseFraction: Notation;
@@ -5001,6 +7334,7 @@ declare let Presets: {
     AarexMyriad: Notation;
     DoubleBinaryNames: Notation;
     DoubleBinaryPrefixes: Notation;
+    Alphaquint: Notation;
     Hypersplit: Notation;
     HypersplitBase3: Notation;
     HyperE: Notation;
@@ -5025,11 +7359,20 @@ declare let Presets: {
     Tritetrated: Notation;
     SuperRoot: (base: DecimalSource) => Notation;
     IncreasingSuperRoot: Notation;
+    PentaSquareRoot: Notation;
+    Tripentated: Notation;
+    PentaRoot: (base: DecimalSource) => Notation;
+    WeakHyperscientific: Notation;
+    SuperSquareScientific: Notation;
+    ExponentTower: Notation;
+    ExponentTowerK: Notation;
     Prime: Notation;
     PsiLetters: Notation;
     PsiDash: Notation;
     PsiLettersBinary: Notation;
     PsiDashBinary: Notation;
+    FastGrowingHierarchy: Notation;
+    HardyHierarchy: Notation;
     OmegaLayers: Notation;
     OmegaLayersRamped: Notation;
     OmegaLayerNumber: Notation;
@@ -5042,6 +7385,7 @@ declare let Presets: {
     Triangular: Notation;
     Square: Notation;
     DoubleFactorials: Notation;
+    TritetratedProduct: Notation;
     Grid: Notation;
     TetrationFloat: Notation;
     Polynomial: (base: DecimalSource) => Notation;
@@ -5050,6 +7394,10 @@ declare let Presets: {
     BasePhi: Notation;
     BaseE: Notation;
     BasePi: Notation;
+    Parentheses: Notation;
+    OmegaMetaZero: Notation;
+    OmegaMetaZeroAlphaAmount: Notation;
+    FillingFractions: Notation;
     Blind: Notation;
     PowersOfOne: Notation;
 };
@@ -5073,6 +7421,7 @@ declare let HTMLPresets: {
     DoubleLogarithm: Notation;
     AlternateBase: (value: number) => Notation;
     Binary: Notation;
+    BinaryIL: Notation;
     Ternary: Notation;
     Quaternary: Notation;
     Seximal: Notation;
@@ -5109,6 +7458,7 @@ declare let HTMLPresets: {
     Septecoman: Notation;
     SI: Notation;
     SIWritten: Notation;
+    MixedSI: Notation;
     BinarySI: Notation;
     BinarySIWritten: Notation;
     CombinedD: Notation;
@@ -5116,6 +7466,7 @@ declare let HTMLPresets: {
     HyperSIWritten: Notation;
     SandcastleBuilder: Notation;
     SandcastleBuilderWritten: Notation;
+    CookieFonsterExtendedSI: Notation;
     LooseFraction: Notation;
     MediumFraction: Notation;
     PreciseFraction: Notation;
@@ -5129,6 +7480,7 @@ declare let HTMLPresets: {
     AarexMyriad: Notation;
     DoubleBinaryNames: Notation;
     DoubleBinaryPrefixes: Notation;
+    Alphaquint: Notation;
     Hypersplit: Notation;
     HypersplitBase3: Notation;
     HyperE: Notation;
@@ -5154,11 +7506,20 @@ declare let HTMLPresets: {
     Tritetrated: Notation;
     SuperRoot: (base: DecimalSource) => Notation;
     IncreasingSuperRoot: Notation;
+    PentaSquareRoot: Notation;
+    Tripentated: Notation;
+    PentaRoot: (base: DecimalSource) => Notation;
+    WeakHyperscientific: Notation;
+    SuperSquareScientific: Notation;
+    ExponentTower: Notation;
+    ExponentTowerK: Notation;
     Prime: Notation;
     PsiLetters: Notation;
     PsiDash: Notation;
     PsiLettersBinary: Notation;
     PsiDashBinary: Notation;
+    FastGrowingHierarchy: Notation;
+    HardyHierarchy: Notation;
     OmegaLayers: Notation;
     OmegaLayersRamped: Notation;
     OmegaLayerNumber: Notation;
@@ -5171,6 +7532,7 @@ declare let HTMLPresets: {
     Triangular: Notation;
     Square: Notation;
     DoubleFactorials: Notation;
+    TritetratedProduct: Notation;
     Grid: Notation;
     TetrationFloat: Notation;
     Polynomial: (base: DecimalSource) => Notation;
@@ -5179,7 +7541,11 @@ declare let HTMLPresets: {
     BasePhi: Notation;
     BaseE: Notation;
     BasePi: Notation;
+    Parentheses: Notation;
+    OmegaMetaZero: Notation;
+    OmegaMetaZeroAlphaAmount: Notation;
+    FillingFractions: Notation;
     Blind: Notation;
     PowersOfOne: Notation;
 };
-export { toDecimal, multabs, commasAndDecimals, fractionApproximation, fractionApproximationD, primeFactorize, primeFactorizeFraction, scientifify, hyperscientifify, hypersplit, iteratedfactorial, inverse_factorial, factorial_slog, factorial_scientifify, factorial_hyperscientifify, polygon, polygonRoot, polygonLog, biPolygon, iteratedPolygonRoot, biPolygonRoot, triPolygon, iteratedBiPolygonRoot, triPolygonRoot, Notation, DefaultNotation, BaseConvert, AlternateBaseNotation, PredeterminedNotation, ConditionalNotation, AppliedFunctionNotation, SignValueNotation, NestedSignValueNotation, FractionNotation, CustomNotation, ScientificNotation, ScientificIterationsNotation, LogarithmNotation, MultiLogarithmNotation, StandardNotation, LettersNotation, HyperscientificNotation, HyperscientificIterationsNotation, SuperLogarithmNotation, MultiSuperLogarithmNotation, ExpandedDefaultNotation, SINotation, NestedSINotation, HyperSINotation, NestedHyperSINotation, MyriadNotation, HypersplitNotation, FactorialNotation, MultiFactorialNotation, FactorialScientificNotation, FactorialScientificIterationsNotation, FactorialHyperscientificNotation, FactorialHyperscientificIterationsNotation, FactorialAmountNotation, MultiFactorialAmountNotation, FactoradicConvert, FactoradicNotation, RootNotation, IncreasingRootNotation, MultiRootNotation, SuperRootNotation, MultiSuperRootNotation, IncreasingSuperRootNotation, PrimeNotation, PsiDashNotation, PrestigeLayerNotation, IncreasingOperatorNotation, PolygonalNotation, DoubleFactorialsNotation, GridNotation, PolynomialNotation, LetterDigitsNotation, physicalScale, Presets, HTMLPresets };
+export { toDecimal, multabs, commasAndDecimals, fractionApproximation, fractionApproximationD, primeFactorize, primeFactorizeFraction, multibaseLogarithm, scientifify, hyperscientifify, pentascientifify, weak_tetrate, weak_slog, weak_hyperscientifify, increasingFunctionScientifify, increasingScientififyFunction, hypersplit, iteratedfactorial, inverse_factorial, factorial_slog, factorial_scientifify, factorial_hyperscientifify, polygon, polygonRoot, polygonLog, biPolygon, iteratedPolygonRoot, biPolygonRoot, triPolygon, iteratedBiPolygonRoot, triPolygonRoot, FGH0, FGH0inverse, iteratedFGH0, iteratedFGH0inverse, FGH1, FGH1inverse, iteratedFGH1, iteratedFGH1log, FGH2, FGH2inverse, iteratedFGH2, iteratedFGH2log, FGH3, FGH3inverse, iteratedFGH3, iteratedFGH3log, FGH4, FGH4inverse, Notation, DefaultNotation, BaseConvert, AlternateBaseNotation, PredeterminedNotation, ConditionalNotation, AppliedFunctionNotation, SignValueNotation, NestedSignValueNotation, FractionNotation, CustomNotation, ScientificNotation, ScientificIterationsNotation, LogarithmNotation, MultiLogarithmNotation, StandardNotation, LettersNotation, HyperscientificNotation, HyperscientificIterationsNotation, SuperLogarithmNotation, MultiSuperLogarithmNotation, ExpandedDefaultNotation, SINotation, NestedSINotation, HyperSINotation, NestedHyperSINotation, MyriadNotation, HypersplitNotation, FactorialNotation, MultiFactorialNotation, FactorialScientificNotation, FactorialScientificIterationsNotation, FactorialHyperscientificNotation, FactorialHyperscientificIterationsNotation, FactorialAmountNotation, MultiFactorialAmountNotation, FactoradicConvert, FactoradicNotation, RootNotation, IncreasingRootNotation, MultiRootNotation, SuperRootNotation, MultiSuperRootNotation, IncreasingSuperRootNotation, PrimeNotation, PsiDashNotation, PrestigeLayerNotation, IncreasingOperatorNotation, PolygonalNotation, DoubleFactorialsNotation, GridNotation, PolynomialNotation, LetterDigitsNotation, physicalScale, MultibaseLogarithmNotation, MultibaseMultiLogarithmNotation, WeakHyperscientificNotation, WeakHyperscientificIterationsNotation, PentaScientificNotation, PentaScientificIterationsNotation, PentaLogarithmNotation, MultiPentaLogarithmNotation, PentaRootNotation, MultiPentaRootNotation, IncreasingPentaRootNotation, IncreasingFunctionNotation, IncreasingFunctionScientificNotation, IncreasingFunctionProductNotation, FastGrowingHierarchyNotation, OmegaMetaZeroNotation, Presets, HTMLPresets };

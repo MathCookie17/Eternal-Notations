@@ -2,12 +2,14 @@ importScripts("../break_eternity stuff/break_eternity.min.js", "../dist/eternal_
 
 onmessage = function(e) {
     let testedDecimal = e.data;
-    formatAll(testedDecimal);
+    formatAll(testedDecimal, false);
     this.postMessage("");
 }
 
-function formatAll(num) {
+function formatAll(num, exclude_slow = false) {
     for (k in EternalNotations.HTMLPresets) {
+        // Fast-Growing Hierarchy, Polygonal, and Prestige Layer notations run a little too slowly for my tastes. Excluding them should make this run much faster.
+        if (exclude_slow && (k == "FastGrowingHierarchy" || k == "HardyHierarchy" || k == "Triangular" || k == "Square" || k == "OmegaLayers" || k == "OmegaLayersRamped" || k == "OmegaMetaZeroAlphaAmount")) continue;
         formatOne(k, num);
     }
     EternalNotations.physicalScale(num);
