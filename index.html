@@ -192,6 +192,7 @@
                 <div id="group_hypersplit" class="notation_group">
                     <p id="display_Hypersplit" class="notation_display">Hypersplit:</p>
                     <p id="display_HypersplitBase3" class="notation_display">Hypersplit (Base 3):</p>
+                    <p id="display_HypersplitBase2" class="notation_display">Hypersplit (Base 2):</p>
                 </div>
                 <div id="group_hyperE" class="notation_group">
                     <p id="display_HyperE" class="notation_display">Hyper-E:</p>
@@ -1550,9 +1551,9 @@
                     for example, (10^^)^3 (10^)^2 1 would mean 10^^10^^10^^(10^10^1), though in practice the penta-exponent
                     will never go above 1 because break_eternity doesn't support numbers large enough for it to go above one.
                     In addition to the 10-based variant, there's also a 3-based variant where the base of the exponent, tetra-exponent,
-                    and penta-exponent is 3 instead of 10 (the numbers are still written in decimal, though, not ternary); 3 was
-                    chosen here because it's the smallest integer where Hypersplit makes sense (it doesn't make sense for 2 because
-                    2^2, 2^^2, and 2^^^2 are all equal to 4).
+                    and penta-exponent is 3 instead of 10 (the numbers are still written in decimal, though, not ternary). A 2-based variant
+                    is also provided, though because 2^2 = 2^^2 = 2^^^2 = 4, the limits for e and t are increased to 4 instead of 2 for
+                    this variant.
                 </p>
             </div>
             <div id="explanation_hyperE" class="explanation_box">

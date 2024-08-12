@@ -581,8 +581,8 @@ PresetAssembly.Hypersplit = new HypersplitNotation(...[,,,,,,,], defaultRound).s
 HTMLPresetAssembly.Hypersplit = new HypersplitNotation(...[,,,,,,,], defaultRound).setName("Hypersplit");
 PresetAssembly.HypersplitBase3 = new HypersplitNotation([["", ""], ["*3^", ""], ["((3^)^", ") "], ["((3^^)^", ") "]], 3, [3, 3, 3], ...[,,,,], defaultRound).setName("Hypersplit (Base 3)");
 HTMLPresetAssembly.HypersplitBase3 = new HypersplitNotation([["", ""], ["*3^", ""], ["((3^)^", ") "], ["((3^^)^", ") "]], 3, [3, 3, 3], ...[,,,,], defaultRound).setName("Hypersplit (Base 3)");
-PresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [4, 4, 4], ...[,,,,], defaultRound).setName("Hypersplit (Base 2)");
-HTMLPresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [4, 4, 4], ...[,,,,], defaultRound).setName("Hypersplit (Base 2)");
+PresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [2, 4, 4], ...[,,,,], defaultRound).setName("Hypersplit (Base 2)");
+HTMLPresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [2, 4, 4], ...[,,,,], defaultRound).setName("Hypersplit (Base 2)");
 
 PresetAssembly.HyperE = new ConditionalNotation(false,
     [
