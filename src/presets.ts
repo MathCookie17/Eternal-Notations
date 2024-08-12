@@ -581,6 +581,8 @@ PresetAssembly.Hypersplit = new HypersplitNotation(...[,,,,,,,], defaultRound).s
 HTMLPresetAssembly.Hypersplit = new HypersplitNotation(...[,,,,,,,], defaultRound).setName("Hypersplit");
 PresetAssembly.HypersplitBase3 = new HypersplitNotation([["", ""], ["*3^", ""], ["((3^)^", ") "], ["((3^^)^", ") "]], 3, [3, 3, 3], ...[,,,,], defaultRound).setName("Hypersplit (Base 3)");
 HTMLPresetAssembly.HypersplitBase3 = new HypersplitNotation([["", ""], ["*3^", ""], ["((3^)^", ") "], ["((3^^)^", ") "]], 3, [3, 3, 3], ...[,,,,], defaultRound).setName("Hypersplit (Base 3)");
+PresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [4, 4, 4], ...[,,,,], defaultRound).setName("Hypersplit (Base 2)");
+HTMLPresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [4, 4, 4], ...[,,,,], defaultRound).setName("Hypersplit (Base 2)");
 
 PresetAssembly.HyperE = new ConditionalNotation(false,
     [
@@ -1255,6 +1257,7 @@ let Presets = {
     Alphaquint: PresetAssembly.Alphaquint,
     Hypersplit: PresetAssembly.Hypersplit,
     HypersplitBase3: PresetAssembly.HypersplitBase3,
+    HypersplitBase2: PresetAssembly.HypersplitBase2,
     HyperE: PresetAssembly.HyperE,
     Infinity: PresetAssembly.Infinity,
     Eternity: PresetAssembly.Eternity,
@@ -1401,6 +1404,7 @@ let HTMLPresets = {
     Alphaquint: PresetAssembly.Alphaquint,
     Hypersplit: HTMLPresetAssembly.Hypersplit,
     HypersplitBase3: HTMLPresetAssembly.HypersplitBase3,
+    HypersplitBase2: HTMLPresetAssembly.HypersplitBase2,
     HyperE: HTMLPresetAssembly.HyperE,
     Infinity: HTMLPresetAssembly.Infinity,
     Eternity: HTMLPresetAssembly.Eternity,
