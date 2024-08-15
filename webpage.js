@@ -68,12 +68,17 @@ function formatOne(key, num) {
                 for (let i = 6; i < 21; i += 3) {
                     document.getElementById("display_ColoredDominoes" + i).innerHTML = notation(i).name + ": " + notation(i).format(num);
                 }
+                let endTime = performance.now();
+                if (consoleLogging) console.log("All colored Dominoes: (" + (endTime - startTime).toString() + " ms)")
                 return;
             }
             else if (key == "Polynomial" || key == "RationalFunction") {
                 document.getElementById("display_" + key + 10).innerHTML = notation(10).name + ": " + notation(10).format(num);
                 document.getElementById("display_" + key + 2).innerHTML = notation(2).name + ": " + notation(2).format(num);
                 document.getElementById("display_" + key + 3).innerHTML = notation(3).name + ": " + notation(3).format(num);
+                let endTime = performance.now();
+                if (consoleLogging && key == "Polynomial") console.log("All three Polynomials: (" + (endTime - startTime).toString() + " ms)");
+                if (consoleLogging && key == "RationalFunction") console.log("All three Rational Functions: (" + (endTime - startTime).toString() + " ms)");
                 return;
             }
             else return;

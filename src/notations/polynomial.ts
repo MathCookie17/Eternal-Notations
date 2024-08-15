@@ -163,7 +163,7 @@ export class PolynomialNotation extends Notation {
             return result;
         }
         let baseString = this.variableStr;
-        let bottomExps = value.slog(this._value, 100, true).sub(this.maxSingleTerm.slog(this._value, 100, true)).plus(1).floor().max(0);
+        let bottomExps = (value.gte(this.maxSingleTerm)) ? value.slog(this._value, 100, true).sub(this.maxSingleTerm.slog(this._value, 100, true)).plus(1).floor().max(0) : Decimal.dZero;
         if (bottomExps.lt(9e15)) {
             value = value.iteratedlog(this._value, bottomExps.toNumber(), true);
         let currentValue = value;

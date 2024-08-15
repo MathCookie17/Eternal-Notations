@@ -173,6 +173,7 @@ var test_hyperscientifify_mantissaPower = function() {
     for (var i = 0; i < 1000; ++i) {
         let base = Math.pow(10, Math.random() * 10) + 1.5;
         let value = Decimal.randomDecimalForTesting(1e6).abs();
+        if (value.eq(0)) continue;
         let mantissaPower = Math.floor(Math.random() * 20) - 1;
         let [b, e] = EternalNotations.hyperscientifify(value, base, 0, mantissaPower);
         if (b.lt(Decimal.tetrate(base, mantissaPower, 1, true)) || b.gte(Decimal.tetrate(base, mantissaPower + 1, 1, true))) {
@@ -243,6 +244,139 @@ var test_triPolygonRoot = function() {
     }
 }
 
+var test_weak_slog = function() {
+    console.log("test_weak_slog");
+    for (var i = 0; i < 1000; ++i) {
+        let base = Math.random()*10 + 2;
+        let iterations = Math.random()*10;
+        let round_trip = EternalNotations.weak_slog(EternalNotations.weak_tetrate(base, iterations), base);
+        assert_eq_tolerance(base + ", " + iterations, iterations, round_trip);
+    }
+}
+
+var test_weak_hyperscienfifify = function() {
+    console.log("test_weak_hyperscientifify");
+    for (var i = 0; i < 1000; ++i) {
+        let base = Math.pow(10, Math.random() * 10);
+        let value = Decimal.randomDecimalForTesting(Math.round(Math.random()*4));
+        value = EternalNotations.multabs(value.abs());
+        if (value.eq(0) || value.eq(1)) continue;
+        let [b, e] = EternalNotations.weak_hyperscientifify(value, base);
+        if (b.abs().lt(1) || b.abs().gte(base)) {
+            console.log(value + " in base " + base + " has b = " + b + " and e = " + e);
+            continue;
+        }
+        let product = EternalNotations.weak_tetrate(base, e).pow(b);
+        assert_eq_tolerance(value + " in base " + base + ": " + product, value, product);
+    }
+}
+
+var test_weak_hyperscientifify_mantissaPower = function() {
+    console.log("test_weak_hyperscientifify_mantissaPower");
+    for (var i = 0; i < 1000; ++i) {
+        let power = Math.random() * 10;
+        let base = Math.pow(10, power);
+        let value = Decimal.randomDecimalForTesting(Math.round(Math.random()*4));
+        let mpLimit = 9 / power; // If the mantissa power is too high weak tetration converges to 1
+        let mantissaPower = Math.floor(Math.random() * mpLimit * 2) - mpLimit;
+        value = EternalNotations.multabs(value.abs());
+        if (value.eq(0) || value.eq(1)) continue;
+        let [b, e] = EternalNotations.weak_hyperscientifify(value, base, 0, mantissaPower);
+        if (b.abs().lt(Decimal.pow(base, mantissaPower)) || b.abs().gte(Decimal.pow(base, mantissaPower + 1))) {
+            console.log(value + " in base " + base + " with mantissaPower " + mantissaPower + " has b = " + b + " and e = " + e);
+            continue;
+        }
+        let product = EternalNotations.weak_tetrate(base, e).pow(b);
+        assert_eq_tolerance(value + " in base " + base + " with mantissaPower " + mantissaPower + ": " + b + ", " + e + " -> " + product, value, product);
+    }
+}
+
+var test_pentascientifify = function() {
+    console.log("test_pentascientifify");
+    for (var i = 0; i < 1000; ++i) {
+        let base = Math.pow(10, Math.random() * 10) + 1.5;
+        let value = EternalNotations.multabs(Decimal.randomDecimalForTesting(1e6).abs());
+        if (value.eq(0) || value.eq(1)) continue;
+        let [b, e] = EternalNotations.pentascientifify(value, base);
+        if (b.lt(1) || b.gte(base)) {
+            console.log(value + " in base " + base + " has b = " + b + " and e = " + e);
+            continue;
+        }
+        let tower = Decimal.pentate(base, e, b, true);
+        assert_eq_tolerance(value + " in base " + base + ": " + tower, value.slog(), tower.slog());
+    }
+}
+
+var test_pentascientifify_mantissaPower = function() {
+    console.log("test_pentascientifify_mantissaPower");
+    for (var i = 0; i < 1000; ++i) {
+        let base = Math.pow(10, Math.random() * 10) + 1.5;
+        let value = EternalNotations.multabs(Decimal.randomDecimalForTesting(1e6).abs());
+        if (value.eq(0) || value.eq(1)) continue;
+        let mantissaPower = Math.floor(Math.random() * 3);
+        if (!Decimal.pentate(base, mantissaPower + 1, 1, true).isFinite()) mantissaPower = Math.floor(Math.random() * 2);
+        if (!Decimal.pentate(base, mantissaPower + 1, 1, true).isFinite()) mantissaPower = Math.floor(Math.random() * 1);
+        let [b, e] = EternalNotations.pentascientifify(value, base, 0, mantissaPower);
+        if (b.lt(Decimal.pentate(base, mantissaPower, 1, true)) || b.gte(Decimal.pentate(base, mantissaPower + 1, 1, true))) {
+            console.log(value + " in base " + base + " with mantissaPower " + mantissaPower + " has b = " + b + " and e = " + e);
+            continue;
+        }
+        let tower = Decimal.pentate(base, e, b, true);
+        assert_eq_tolerance(value + " in base " + base + " with mantissaPower " + mantissaPower + ": " + tower, value.slog(), tower.slog());
+    }
+}
+
+var test_FGH2inverse = function() {
+    console.log("test_FGH2inverse");
+    for (var i = 0; i < 1000; ++i) {
+        let value = EternalNotations.multabs(Decimal.randomDecimalForTesting(5).abs());
+        let round_trip = EternalNotations.FGH2inverse(EternalNotations.FGH2(value));
+        assert_eq_tolerance(value + " -> " + round_trip, value, round_trip);
+    }
+}
+
+var test_iteratedFGH2log = function() {
+    console.log("test_iteratedFGH2log");
+    for (var i = 0; i < 1000; ++i) {
+        let payload = EternalNotations.multabs(Decimal.randomDecimalForTesting(5).abs());
+        if (payload.eq(0)) continue;
+        let iterations = Math.random()*100;
+        let round_trip = EternalNotations.iteratedFGH2log(EternalNotations.iteratedFGH2(payload, iterations), payload);
+        assert_eq_tolerance(payload + ", " + iterations + " -> " + round_trip, iterations, round_trip);
+    }
+}
+
+var test_FGH3inverse = function() {
+    console.log("test_FGH3inverse");
+    for (var i = 0; i < 1000; ++i) {
+        let value = Math.pow(10, Math.random() * 100);
+        let round_trip = EternalNotations.FGH3inverse(EternalNotations.FGH3(value));
+        assert_eq_tolerance(value + " -> " + round_trip, value, round_trip);
+    }
+}
+
+var test_iteratedFGH3log = function() {
+    console.log("test_iteratedFGH3log");
+    for (var i = 0; i < 1000; ++i) {
+        let payload = EternalNotations.multabs(Decimal.randomDecimalForTesting(5).abs());
+        if (payload.eq(0)) continue
+        let iterations = Math.random()*10;;
+        let round_trip = EternalNotations.iteratedFGH3log(EternalNotations.iteratedFGH3(payload, iterations), payload);
+        if (!round_trip.isFinite()) continue;
+        assert_eq_tolerance(payload + ", " + iterations + " -> " + round_trip, iterations, round_trip);
+    }
+}
+
+// var test_FGH4inverse = function() {
+//     console.log("test_FGH4inverse");
+//     for (var i = 0; i < 1000; ++i) {
+//         let value = Math.random()*1.1 + 1;
+//         console.log(value);
+//         let round_trip = EternalNotations.FGH4inverse(EternalNotations.FGH4(value));
+//         assert_eq_tolerance(value + " -> " + round_trip, value, round_trip);
+//     }
+// }
+
 var all_tests = function() {
     test_factorial_round_trip();
     test_factorial_slog();
@@ -259,4 +393,13 @@ var all_tests = function() {
     test_biPolygonRoot();
     test_iteratedBiPolygonRoot();
     test_triPolygonRoot();
+    test_weak_slog();
+    test_weak_hyperscienfifify();
+    test_pentascientifify();
+    test_pentascientifify_mantissaPower();
+    test_FGH2inverse();
+    test_iteratedFGH2log();
+    test_FGH3inverse();
+    test_iteratedFGH3log();
+    // test_FGH4inverse();
 }

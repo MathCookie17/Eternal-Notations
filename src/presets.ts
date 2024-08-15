@@ -37,6 +37,14 @@ import { DoubleFactorialsNotation } from "./notations/doubleFactorials";
 import { GridNotation } from "./notations/grid";
 import { PolynomialNotation } from "./notations/polynomial.js";
 import { LetterDigitsNotation } from "./notations/letterDigits";
+import { MultibaseLogarithmNotation, MultibaseMultiLogarithmNotation } from "./notations/multibaseLogarithm";
+import { WeakHyperscientificNotation, WeakHyperscientificIterationsNotation } from "./notations/weakHyperscientific";
+import { PentaScientificNotation, PentaScientificIterationsNotation } from "./notations/pentaScientific";
+import { PentaLogarithmNotation, MultiPentaLogarithmNotation } from "./notations/pentaLogarithm";
+import { PentaRootNotation, IncreasingPentaRootNotation, MultiPentaRootNotation } from "./notations/pentaRoot";
+import { IncreasingFunctionNotation, IncreasingFunctionScientificNotation, IncreasingFunctionProductNotation } from "./notations/increasingFunction";
+import { FastGrowingHierarchyNotation } from "./notations/fastGrowingHierarchy";
+import { OmegaMetaZeroNotation } from "./notations/omegaMetaZero";
 import { multabs } from "./baseline/utils";
 
 // To make TypeScript happy, we assemble all the presets separately, then put them together into collection objects at the end.
@@ -79,65 +87,34 @@ PresetAssembly.Logarithm = new MultiLogarithmNotation(...[,,,,,,,,,,,], new Defa
 PresetAssembly.Hyperscientific = new HyperscientificNotation(...[,,], defaultRound).setName("Hyperscientific");
 PresetAssembly.SuperLogarithm = recipBelow(new MultiSuperLogarithmNotation(...[,,,,,,,,,,,,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm");
 PresetAssembly.PowerTower = recipBelow(new MultiLogarithmNotation(1e10, -1, 0, 10, 1, false, [["", ""], ["", ""], [" PT ", ""]], null, true), 1e-10).setName("Power Tower") //Objectively this should be made with Hyperscientific, but I found it easier to do it this way
-PresetAssembly.PentaScientific = recipBelow(new HypersplitNotation(
-    [["", ""], ["", ""], ["", ""], ["G", ""]],
-    10, [10, 1, 1], [1, -1, -1, 1], 23
-), 1, undefined, "0").setName("Penta-Scientific");
-PresetAssembly.PentaLogarithm = recipBelow(new HypersplitNotation(
-    [["", ""], ["", ""], ["", ""], ["G", ""]],
-    10, [0, 1, 1], [-1, -1, -1, 1], 23, ...[,,,], new DefaultNotation(-6, 5, 0, 1e12, 0)
-), 1, undefined, "0").setName("Penta-Logarithm");
+PresetAssembly.PentaScientific = recipBelow(new PentaScientificNotation(...[,,], defaultRound), 1, undefined, "0").setName("Penta-Scientific");
+PresetAssembly.PentaLogarithm = recipBelow(new MultiPentaLogarithmNotation(...[,,,,,,,,,,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Penta-Logarithm");
 PresetAssembly.NaturalLogarithm = new MultiLogarithmNotation(...[,,,], Math.E, undefined, true, [["e^", ""], ["e^", ""], ["((e^)^", ")"]], ...[,,,,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Natural Logarithm");
 PresetAssembly.NaturalSuperLogarithm = recipBelow(new MultiSuperLogarithmNotation(...[,,,], Math.E, undefined, [["e↑↑", ""], ["e↑↑", ""], ["(e↑↑^", ")"]], ...[,,,,,,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Natural Super Logarithm");
-PresetAssembly.NaturalPentaLogarithm = recipBelow(new HypersplitNotation(
-    [["", ""], ["", ""], ["", ""], ["e↑↑↑", ""]],
-    Math.E, [0, 1, 1], [-1, -1, -1, 1], 23, ...[,,,], new DefaultNotation(-6, 5, 0, 1e12, 0)
-), 1, undefined, "0").setName("Natural Penta-Logarithm");
+PresetAssembly.NaturalPentaLogarithm = recipBelow(new MultiPentaLogarithmNotation(...[,,,], Math.E, undefined, [["e↑↑↑", ""], ["e↑↑↑", ""], ["(e↑↑↑^", ")"]], ...[,,,,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Natural Penta-Logarithm");
 PresetAssembly.LogarithmBase = (base : DecimalSource) => new MultiLogarithmNotation(...[,,,], base, undefined, true, [["↑", ""], ["↑", ""], ["(↑^", ")"]], null, false, 1, 1, new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Logarithm (base " + new DefaultNotation().format(base) + ")");
 PresetAssembly.SuperLogarithmBase = (base : DecimalSource) => recipBelow(new MultiSuperLogarithmNotation(...[,,,], base, undefined, [["↑↑", ""], ["↑↑", ""], ["(↑↑^", ")"]], null, false, 1, ...[,,,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm (base " + new DefaultNotation().format(base) + ")");
-PresetAssembly.PentaLogarithmBase = (base : DecimalSource) => recipBelow(new AppliedFunctionNotation(
-    (value) => value,
-    new HypersplitNotation(
-        [["", ""], ["", ""], ["", ""], ["↑↑↑", ""]],
-        base, [0, 1, 1], [-1, -1, -1, 1], 23, ...[,,,], new DefaultNotation(-6, 5, 0, 1e12, 0)
-    ),
-    (str) => new DefaultNotation().format(base) + str
-    ), 1, undefined, "0").setName("Penta-Logarithm (base " + new DefaultNotation().format(base) + ")")
+PresetAssembly.PentaLogarithmBase = (base : DecimalSource) => recipBelow(new MultiPentaLogarithmNotation(...[,,,], base, undefined, [["↑↑↑", ""], ["↑↑↑", ""], ["(↑↑↑^", ")"]], null, false, 1, ...[,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Penta-Logarithm (base " + new DefaultNotation().format(base) + ")");
 PresetAssembly.DoubleLogarithm = new MultiLogarithmNotation(undefined, undefined, 2, undefined, 2, ...[,,,,,,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Double Logarithm");
 HTMLPresetAssembly.Scientific = new ScientificNotation(...[,,], defaultRound).setName("Scientific");
 HTMLPresetAssembly.Engineering = new ScientificNotation(...[,,], defaultRound, 3).setName("Engineering");
 HTMLPresetAssembly.Logarithm = new MultiLogarithmNotation(...[,,,,,,,,,,,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Logarithm");
 HTMLPresetAssembly.Hyperscientific = new HyperscientificNotation(...[,,], defaultRound).setName("Hyperscientific");
-HTMLPresetAssembly.SuperLogarithm =  recipBelow(new MultiSuperLogarithmNotation(...[,,,,,,,,,,,,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm");
+HTMLPresetAssembly.SuperLogarithm = recipBelow(new MultiSuperLogarithmNotation(...[,,,,,,,,,,,,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm");
 HTMLPresetAssembly.PowerTower = recipBelow(new MultiLogarithmNotation(1e10, -1, 0, 10, 1, false, [["", ""], ["", ""], [" PT ", ""]], null, true), 1e-10).setName("Power Tower") //Objectively this should be made with Hyperscientific, but I found it easier to do it this way
-HTMLPresetAssembly.PentaScientific = recipBelow(new HypersplitNotation(
-    [["", ""], ["", ""], ["", ""], ["G", ""]],
-    10, [10, 1, 1], [1, -1, -1, 1], 23
-), 1, undefined, "0").setName("Penta-Scientific");
-HTMLPresetAssembly.PentaLogarithm = recipBelow(new HypersplitNotation(
-    [["", ""], ["", ""], ["", ""], ["G", ""]],
-    10, [0, 1, 1], [-1, -1, -1, 1], 23, ...[,,,], new DefaultNotation(-6, 5, 0, 1e12, 0)
-), 1, undefined, "0").setName("Penta-Logarithm");
+HTMLPresetAssembly.PentaScientific = recipBelow(new PentaScientificNotation(...[,,], defaultRound), 1, undefined, "0").setName("Penta-Scientific");
+HTMLPresetAssembly.PentaLogarithm = recipBelow(new MultiPentaLogarithmNotation(...[,,,,,,,,,,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Penta-Logarithm");
 HTMLPresetAssembly.NaturalLogarithm = new MultiLogarithmNotation(...[,,,], Math.E, undefined, true, [["e^", ""], ["e^", ""], ["((e^)^", ")"]], ...[,,,,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Natural Logarithm");
 HTMLPresetAssembly.NaturalSuperLogarithm = recipBelow(new MultiSuperLogarithmNotation(...[,,,], Math.E, undefined, [["e&#8593;&#8593;", ""], ["e&#8593;&#8593;", ""], ["(e&#8593;&#8593;^", ")"]], ...[,,,,,,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Natural Super Logarithm");
-HTMLPresetAssembly.NaturalPentaLogarithm = recipBelow(new HypersplitNotation(
-    [["", ""], ["", ""], ["", ""], ["e↑↑↑", ""]],
-    Math.E, [0, 1, 1], [-1, -1, -1, 1], 23, ...[,,,], new DefaultNotation(-6, 5, 0, 1e12, 0)
-), 1, undefined, "0").setName("Natural Penta-Logarithm");
+HTMLPresetAssembly.NaturalPentaLogarithm = recipBelow(new MultiPentaLogarithmNotation(...[,,,], Math.E, undefined, [["e&#8593;&#8593;&#8593;", ""], ["e&#8593;&#8593;&#8593;", ""], ["(e&#8593;&#8593;&#8593;^", ")"]], ...[,,,,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Natural Penta-Logarithm");
 HTMLPresetAssembly.LogarithmBase = (base : DecimalSource) => new MultiLogarithmNotation(...[,,,], base, undefined, true, [["&#8593;", ""], ["&#8593;", ""], ["(&#8593;^", ")"]], null, false, 1, 1, new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Logarithm (base " + new DefaultNotation().format(base) + ")");
 HTMLPresetAssembly.SuperLogarithmBase = (base : DecimalSource) => recipBelow(new MultiSuperLogarithmNotation(...[,,,], base, undefined, [["&#8593;&#8593;", ""], ["&#8593;&#8593;", ""], ["(&#8593;&#8593;^", ")"]], null, false, 1, ...[,,,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm (base " + new DefaultNotation().format(base) + ")");
-HTMLPresetAssembly.PentaLogarithmBase = (base : DecimalSource) => recipBelow(new AppliedFunctionNotation(
-    (value) => value,
-    new HypersplitNotation(
-        [["", ""], ["", ""], ["", ""], ["&#8593;&#8593;&#8593;", ""]],
-        base, [0, 1, 1], [-1, -1, -1, 1], 23, ...[,,,], new DefaultNotation(-6, 5, 0, 1e12, 0)
-    ),
-    (str) => new DefaultNotation().format(base) + str
-    ), 1, undefined, "0").setName("Penta-Logarithm (base " + new DefaultNotation().format(base) + ")")
+HTMLPresetAssembly.PentaLogarithmBase = (base : DecimalSource) => recipBelow(new MultiPentaLogarithmNotation(...[,,,], base, undefined, [["&#8593;&#8593;&#8593;", ""], ["&#8593;&#8593;&#8593;", ""], ["(&#8593;&#8593;&#8593;^", ")"]], null, false, 1, ...[,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Penta-Logarithm (base " + new DefaultNotation().format(base) + ")");
 HTMLPresetAssembly.DoubleLogarithm = new MultiLogarithmNotation(undefined, undefined, 2, undefined, 2, ...[,,,,,,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Double Logarithm");
 
 PresetAssembly.AlternateBase = (base : number) => new AlternateBaseNotation(base).setName("Base " + new DefaultNotation().format(base));
 PresetAssembly.Binary = new AlternateBaseNotation(2, 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary");
+PresetAssembly.BinaryIL = new AlternateBaseNotation(["ı", "l"], 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary (ı, l)");
 PresetAssembly.Ternary = new AlternateBaseNotation(3, 0, -7, -7, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Ternary");
 PresetAssembly.Quaternary = new AlternateBaseNotation(4, 0, -6, -6, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Quaternary");
 PresetAssembly.Seximal = new AlternateBaseNotation(6, 0, -5, -5, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Seximal");
@@ -150,6 +127,7 @@ PresetAssembly.BalancedTernary = new AlternateBaseNotation(["-", "0", "+"], 1, -
 PresetAssembly.BijectiveDecimal = recipBelow(new AlternateBaseNotation(["1", "2", "3", "4", "5", "6", "7", "8", "9", "A"], -1, 0, 0, ...[,,,,], 3, 1, ...[,,,,,], [["e", ""], ["e", ""], ["#", ""], ["#", ""]]), 1).setName("Bijective Decimal");
 HTMLPresetAssembly.AlternateBase = (base : number) => new AlternateBaseNotation(base).setName("Base " + new DefaultNotation().format(base));
 HTMLPresetAssembly.Binary = new AlternateBaseNotation(2, 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary");
+HTMLPresetAssembly.BinaryIL = new AlternateBaseNotation(["&#305;", "l"], 0, -8, -8, 0, 65536, 1/256, ...[,,,,,], 4, ...[,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary (ı, l)");
 HTMLPresetAssembly.Ternary = new AlternateBaseNotation(3, 0, -7, -7, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Ternary");
 HTMLPresetAssembly.Quaternary = new AlternateBaseNotation(4, 0, -6, -6, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Quaternary");
 HTMLPresetAssembly.Seximal = new AlternateBaseNotation(6, 0, -5, -5, ...[,,,,,,,,,,,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Seximal");
@@ -374,6 +352,7 @@ PresetAssembly.SIWritten = new NestedSINotation(
     [["quecto", 30], ["ronto", 27], ["yocto", 24], ["zepto", 21], ["atto", 18], ["femto", 15], ["pico", 12], ["nano", 9], ["micro", 6], ["milli", 3]],
     true, defaultRound, 2, 3, 0, 0, " ", "", [["^(", ")"], ["^^(", ")"]]
 ).setName("SI (Written)");
+PresetAssembly.MixedSI = new ScientificNotation(1e33, ...[,,,,], true, ...[,,,,,,], new ConditionalNotation(false, [new NestedSINotation(...[,,,,], defaultRound), (value) => value.lt(1e33)], [new ScientificNotation(), (value) => true])).setName("Mixed SI");
 PresetAssembly.BinarySI = new NestedSINotation(
     2,
     [["Yi", 80], ["Zi", 70], ["Ei", 60], ["Pi", 50], ["Ti", 40], ["Gi", 30], ["Mi", 20], ["Ki", 10]],
@@ -407,6 +386,37 @@ PresetAssembly.SandcastleBuilderWritten = new NestedSINotation(
     [["Quita", 210], ["Wololo", 42], ["Lotta", 39], ["Ferro", 36], ["Helo", 33], ["Squilli", 30], ["Umpty", 27], ["Yotta", 24], ["Zetta", 21], ["Exa", 18], ["Peta", 15], ["Tera", 12], ["Giga", 9], ["Mega", 6], ["Kilo", 3]],
     "/ ", true, defaultRound, 4, 3, 0, 0, " ", " ", [["^(", ")"], ["^^(", ")"]]
 ).setNotationGlobals(undefined, undefined, undefined, "Mustard", undefined).setName("Sandcastle Builder (Written)");
+PresetAssembly.CookieFonsterExtendedSI = recipBelow(new MultibaseMultiLogarithmNotation([1000, 1000], "1000^^3", 3, 0, undefined, [["Ω^", ""], ["Ω^", ""], ["((Ω^)^", ") "]], ...[,,,],
+    new ConditionalNotation(false, [new DefaultNotation(), value => ((value.gte(1) && value.lt(1000)) || value.eq(0))],
+        [new ScientificIterationsNotation(1, undefined, 0, ...[,,], 1000, [[" ", ""], ["", ""], ["", ""]], null, ...[,,,,],
+            new ConditionalNotation(true,
+                [
+                    new ExpandedDefaultNotation(1e9, ...[,,], 1000, 0, 1, ...[,,,], [["Ω^", ""], ["Ω^", ""], ["Ω^^", ""], ["Ω^^", ""]], null, ...[,,,,],
+                        new NestedSignValueNotation(
+                            [
+                                ["Ω", 1000], ["Σ", 900], ["Λ", 800], ["κ", 700], ["Ι", 600], ["Θ", 500], ["Δ", 400], ["Γ", 300], ["β", 200], ["α", 100],
+                                ["X", 90], ["N", 80], ["C", 70], ["S", 60], ["J", 50], ["Y", 40], ["R", 30], ["A", 20], ["O", 10],
+                                ["B", 9], ["Y", 8], ["Z", 7], ["E", 6], ["P", 5], ["T", 4], ["G", 3], ["M", 2], ["K", 1]
+                            ], 0, ...[,,], 1, ...[,,], 1, ...[,,], [["", ""], ["^", ""], ["^^", ""]], 16
+                        ), new DefaultNotation()
+                    ), value => value.gte(0)
+                ],
+                [
+                    new AppliedFunctionNotation(value => value.abs(),
+                        new ExpandedDefaultNotation(1e9, ...[,,], 1000, 0, 1, ...[,,,], [["ψ^", ""], ["ψ^", ""], ["ψ^^", ""], ["ψ^^", ""]], null, ...[,,,,],
+                            new NestedSignValueNotation(
+                                [
+                                    ["ψ", 1000], ["χ", 900], ["φ", 800], ["υ", 700], ["τ", 600], ["π", 500], ["ο", 400], ["ξ", 300], ["ν", 200], ["ε", 100],
+                                    ["x", 90], ["e", 80], ["c", 70], ["s", 60], ["j", 50], ["k", 40], ["h", 30], ["i", 20], ["g", 10],
+                                    ["b", 9], ["y", 8], ["z", 7], ["a", 6], ["f", 5], ["p", 4], ["n", 3], ["μ", 2], ["m", 1]
+                                ], 0, ...[,,], 1, ...[,,], 1, ...[,,], [["", ""], ["^", ""], ["^^", ""]], 16
+                            ), new DefaultNotation()
+                        )
+                    ), value => value.lt(0)
+                ]
+            )
+        ), value => true])
+), Decimal.recip("1000^^3")).setName("Cookie Fonster's Extended SI");
 HTMLPresetAssembly.SI = new NestedSINotation(...[,,,,], defaultRound).setName("SI");
 HTMLPresetAssembly.SIWritten = new NestedSINotation(
     10,
@@ -414,6 +424,7 @@ HTMLPresetAssembly.SIWritten = new NestedSINotation(
     [["quecto", 30], ["ronto", 27], ["yocto", 24], ["zepto", 21], ["atto", 18], ["femto", 15], ["pico", 12], ["nano", 9], ["micro", 6], ["milli", 3]],
     true, defaultRound, 2, 3, 0, 0, " ", "", [["^(", ")"], ["^^(", ")"]]
 ).setName("SI (Written)");
+HTMLPresetAssembly.MixedSI = new ScientificNotation(1e33, ...[,,,,], true, ...[,,,,,,], new ConditionalNotation(false, [new NestedSINotation(...[,,,,], defaultRound), (value) => value.lt(1e33)], [new ScientificNotation(), (value) => true])).setName("Mixed SI");
 HTMLPresetAssembly.BinarySI = new NestedSINotation(
     2,
     [["Yi", 80], ["Zi", 70], ["Ei", 60], ["Pi", 50], ["Ti", 40], ["Gi", 30], ["Mi", 20], ["Ki", 10]],
@@ -447,6 +458,37 @@ HTMLPresetAssembly.SandcastleBuilderWritten = new NestedSINotation(
     [["Quita", 210], ["Wololo", 42], ["Lotta", 39], ["Ferro", 36], ["Helo", 33], ["Squilli", 30], ["Umpty", 27], ["Yotta", 24], ["Zetta", 21], ["Exa", 18], ["Peta", 15], ["Tera", 12], ["Giga", 9], ["Mega", 6], ["Kilo", 3]],
     "/ ", true, defaultRound, 4, 3, 0, 0, " ", " ", [["^(", ")"], ["^^(", ")"]]
 ).setNotationGlobals(undefined, undefined, undefined, "Mustard", undefined).setName("Sandcastle Builder (Written)");
+HTMLPresetAssembly.CookieFonsterExtendedSI = recipBelow(new MultibaseMultiLogarithmNotation([1000, 1000], "1000^^3", 3, 0, undefined, [["Ω^", ""], ["Ω^", ""], ["((Ω^)^", ") "]], ...[,,,],
+    new ConditionalNotation(false, [new DefaultNotation(), value => ((value.gte(1) && value.lt(1000)) || value.eq(0))],
+        [new ScientificIterationsNotation(1, undefined, 0, ...[,,], 1000, [[" ", ""], ["", ""], ["", ""]], null, ...[,,,,],
+            new ConditionalNotation(true,
+                [
+                    new ExpandedDefaultNotation(1e9, ...[,,], 1000, 0, 1, ...[,,,], [["&#x3A9;^", ""], ["&#x3A9;^", ""], ["&#x3A9;^^", ""], ["&#x3A9;^^", ""]], null, ...[,,,,],
+                        new NestedSignValueNotation(
+                            [
+                                ["&#x3A9;", 1000], ["&#x3A3;", 900], ["&#x39B;", 800], ["&#x3BA;", 700], ["&#x399;", 600], ["&#x398;", 500], ["&#x394;", 400], ["&#x393;", 300], ["&#x3B2;", 200], ["&#x3B1;", 100],
+                                ["X", 90], ["N", 80], ["C", 70], ["S", 60], ["J", 50], ["Y", 40], ["R", 30], ["A", 20], ["O", 10],
+                                ["B", 9], ["Y", 8], ["Z", 7], ["E", 6], ["P", 5], ["T", 4], ["G", 3], ["M", 2], ["K", 1]
+                            ], 0, ...[,,], 1, ...[,,], 1, ...[,,], [["", ""], ["^", ""], ["^^", ""]], 16
+                        ), new DefaultNotation()
+                    ), value => value.gte(0)
+                ],
+                [
+                    new AppliedFunctionNotation(value => value.abs(),
+                        new ExpandedDefaultNotation(1e9, ...[,,], 1000, 0, 1, ...[,,,], [["&#x3C8;^", ""], ["&#x3C8;^", ""], ["&#x3C8;^^", ""], ["&#x3C8;^^", ""]], null, ...[,,,,],
+                            new NestedSignValueNotation(
+                                [
+                                    ["&#x3C8;", 1000], ["&#x3C7;", 900], ["&#x3C6;", 800], ["&#x3C5;", 700], ["&#x3C4;", 600], ["&#x3C0;", 500], ["&#x3BF;", 400], ["&#x3BE;", 300], ["&#x3BD;", 200], ["&#x3B5;", 100],
+                                    ["x", 90], ["e", 80], ["c", 70], ["s", 60], ["j", 50], ["k", 40], ["h", 30], ["i", 20], ["g", 10],
+                                    ["b", 9], ["y", 8], ["z", 7], ["a", 6], ["f", 5], ["p", 4], ["n", 3], ["μ", 2], ["m", 1]
+                                ], 0, ...[,,], 1, ...[,,], 1, ...[,,], [["", ""], ["^", ""], ["^^", ""]], 16
+                            ), new DefaultNotation()
+                        )
+                    ), value => value.lt(0)
+                ]
+            )
+        ), value => true])
+), Decimal.recip("1000^^3")).setName("Cookie Fonster's Extended SI");
 
 PresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0").setName("Fraction (Loose)");
 PresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0").setName("Fraction (Medium)");
@@ -522,10 +564,25 @@ HTMLPresetAssembly.DoubleBinaryPrefixes = new NestedSINotation(2,
     ], "/", true, defaultRound, 1, ...[,,,,,], [["^(", ")"], [" # (", ")"]], 5
 ).setName("Double Binary Prefixes");
 
+PresetAssembly.Alphaquint = new AppliedFunctionNotation(value => value.mul(1 + 1e-14), new IncreasingFunctionProductNotation(
+    value => Decimal.pow(5, value).round(), (term, power) => Decimal.div(term, power), (leftover, term) => Decimal.sub(leftover, term).round(), false, true, true, 15, ["", ""], ["", "", ""], "", false, false, 0, ["", ""], ["", ""], ...[,,,], undefined,
+    new AppliedFunctionNotation(value => value.plus(1), new LetterDigitsNotation(), function(str){
+        return str[0].toUpperCase() + str.slice(1);
+    }), undefined, 100, value => false, value => true, (current : Decimal, total : Decimal) => Decimal.div(total, current).gte(5**19), 5, "", ["", ""], Decimal.pow(5, 8353082582), value => Decimal.pow(5, value), false, "eee16", value => Decimal.tetrate(5, value.toNumber(), 1, true), false, true, [["B^", ""], ["B^", ""], ["[", "] "]], undefined, 0, ...[,,,,], null, undefined, 1, ["/", ""]
+)).setName("Alphaquint"); // The multiplication by 1 + 1e-14 is to combat imprecision
+PresetAssembly.Alphaquint = new AppliedFunctionNotation(value => value.mul(1 + 1e-14), new IncreasingFunctionProductNotation(
+    value => Decimal.pow(5, value).round(), (term, power) => Decimal.div(term, power), (leftover, term) => Decimal.sub(leftover, term).round(), false, true, true, 15, ["", ""], ["", "", ""], "", false, false, 0, ["", ""], ["", ""], ...[,,,], undefined,
+    new AppliedFunctionNotation(value => value.plus(1), new LetterDigitsNotation(), function(str){
+        return str[0].toUpperCase() + str.slice(1);
+    }), undefined, 100, value => false, value => true, (current : Decimal, total : Decimal) => Decimal.div(total, current).gte(5**19), 5, "", ["", ""], Decimal.pow(5, 8353082582), value => Decimal.pow(5, value), false, "eee16", value => Decimal.tetrate(5, value.toNumber(), 1, true), false, true, [["B^", ""], ["B^", ""], ["[", "] "]], undefined, 0, ...[,,,,], null, undefined, 1, ["/", ""]
+)).setName("Alphaquint");
+
 PresetAssembly.Hypersplit = new HypersplitNotation(...[,,,,,,,], defaultRound).setName("Hypersplit");
 HTMLPresetAssembly.Hypersplit = new HypersplitNotation(...[,,,,,,,], defaultRound).setName("Hypersplit");
 PresetAssembly.HypersplitBase3 = new HypersplitNotation([["", ""], ["*3^", ""], ["((3^)^", ") "], ["((3^^)^", ") "]], 3, [3, 3, 3], ...[,,,,], defaultRound).setName("Hypersplit (Base 3)");
 HTMLPresetAssembly.HypersplitBase3 = new HypersplitNotation([["", ""], ["*3^", ""], ["((3^)^", ") "], ["((3^^)^", ") "]], 3, [3, 3, 3], ...[,,,,], defaultRound).setName("Hypersplit (Base 3)");
+PresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [2, 4, 4], ...[,,,,], defaultRound).setName("Hypersplit (Base 2)");
+HTMLPresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [2, 4, 4], ...[,,,,], defaultRound).setName("Hypersplit (Base 2)");
 
 PresetAssembly.HyperE = new ConditionalNotation(false,
     [
@@ -708,6 +765,9 @@ PresetAssembly.SuperSquareRoot = recipBelow(new MultiSuperRootNotation(2), 1, un
 PresetAssembly.Tritetrated = recipBelow(new MultiSuperRootNotation(3), 1, undefined, "0").setName("Tritetrated");
 PresetAssembly.SuperRoot = (degree : number) => recipBelow(new MultiSuperRootNotation(degree), 1, undefined, "0").setName("Super Root (Degree " + new DefaultNotation().format(degree) + ")");
 PresetAssembly.IncreasingSuperRoot = recipBelow(new IncreasingSuperRootNotation(), 1, undefined, "0").setName("Increasing Super Root");
+PresetAssembly.PentaSquareRoot = recipBelow(new MultiPentaRootNotation(2), 1, undefined, "0").setName("Penta Square Root");
+PresetAssembly.Tripentated = recipBelow(new MultiPentaRootNotation(3), 1, undefined, "0").setName("Tripentated");
+PresetAssembly.PentaRoot = (degree : number) => recipBelow(new MultiPentaRootNotation(degree), 1, undefined, "0").setName("Penta-Root (Degree " + new DefaultNotation().format(degree) + ")");
 HTMLPresetAssembly.SquareRoot = new MultiRootNotation(2).setName("Square Root");
 HTMLPresetAssembly.CubeRoot = new MultiRootNotation(3).setName("Cube Root");
 HTMLPresetAssembly.Root = (degree : DecimalSource) => new MultiRootNotation(degree).setName("Root (Degree " + new DefaultNotation().format(degree) + ")");
@@ -716,14 +776,51 @@ HTMLPresetAssembly.SuperSquareRoot = recipBelow(new MultiSuperRootNotation(2), 1
 HTMLPresetAssembly.Tritetrated = recipBelow(new MultiSuperRootNotation(3), 1, undefined, "0").setName("Tritetrated");
 HTMLPresetAssembly.SuperRoot = (degree : number) => recipBelow(new MultiSuperRootNotation(degree), 1, undefined, "0").setName("Super Root (Degree " + new DefaultNotation().format(degree) + ")");
 HTMLPresetAssembly.IncreasingSuperRoot = recipBelow(new IncreasingSuperRootNotation(), 1, undefined, "0").setName("Increasing Super Root");
+HTMLPresetAssembly.PentaSquareRoot = recipBelow(new MultiPentaRootNotation(2), 1, undefined, "0").setName("Penta Square Root");
+HTMLPresetAssembly.Tripentated = recipBelow(new MultiPentaRootNotation(3), 1, undefined, "0").setName("Tripentated");
+HTMLPresetAssembly.PentaRoot = (degree : number) => recipBelow(new MultiPentaRootNotation(degree), 1, undefined, "0").setName("Penta-Root (Degree " + new DefaultNotation().format(degree) + ")");
+
+PresetAssembly.WeakHyperscientific = new WeakHyperscientificNotation(...[,,], defaultRound).setName("Weak Hyperscientific");
+HTMLPresetAssembly.WeakHyperscientific = new WeakHyperscientificNotation(...[,,], defaultRound).setName("Weak Hyperscientific");
+PresetAssembly.SuperSquareScientific = new IncreasingFunctionScientificNotation(
+    (m, e) => Decimal.mul(m, Decimal.tetrate(e, 2)), [1], ...[,,,], [[-Infinity, Infinity], [1, Infinity]], [1, false], [0, 1], [["", "", "", "", "", ""], ["", "", " * ", "↑↑2", "", ""]], ...[,,,], Decimal.tetrate(1e9, 2), value => value.tetrate(2), false, "eee16", value => Decimal.tetrate(10, value.toNumber(), 1, true), false, true, [["(", ")↑↑2"], ["(", ")↑↑2"], [" ((↑↑2)^(", "))"]], undefined, 4, undefined, [true, true], ...[,,], null, null, 1, ["1 / (", ")"]
+).setName("Super Square Scientific");
+HTMLPresetAssembly.SuperSquareScientific = new IncreasingFunctionScientificNotation(
+    (m, e) => Decimal.mul(m, Decimal.tetrate(e, 2)), [1], ...[,,,], [[-Infinity, Infinity], [1, Infinity]], [1, false], [0, 1], [["", "", "", "", "", ""], ["", "", " * ", "↑↑2", "", ""]], ...[,,,], Decimal.tetrate(1e9, 2), value => value.tetrate(2), false, "eee16", value => Decimal.tetrate(10, value.toNumber(), 1, true), false, true, [["(", ")↑↑2"], ["(", ")↑↑2"], [" ((↑↑2)^(", "))"]], undefined, 4, undefined, [true, true], ...[,,], null, null, 1, ["1 / (", ")"]
+).setName("Super Square Scientific");
+PresetAssembly.ExponentTower = new IncreasingFunctionScientificNotation(
+    (a, b, c, d) => Decimal.pow(a, Decimal.pow(b, Decimal.pow(c, d))), [10, 10, 10], true, ...[,,], [[1, Infinity]], [1, 1, 1, 1], [0, 1, 2, 3], [["", "", "", "", "", ""], ["", "^", "", "", "", ""], ["", "^", "", "", "", ""], ["", "^", "", "", "", ""]], [false, false, false, false], value => value.gt(1),
+    new DefaultNotation(), Decimal.pow(10, Decimal.pow(9, Decimal.pow(6, 2))), value => Decimal.log(value, 10), true, "10^^5", value => Decimal.tetrate(10, value.toNumber(), 1, true), false, true, [["10^", ""], ["10^", ""], ["((10^)^(", ")) "]], undefined, 2, undefined, [false, false], ...[,,], null, null, 1 + 1.2e-16, ["1 / ", ""]
+).setName("Exponent Tower");
+PresetAssembly.ExponentTowerK = new IncreasingFunctionScientificNotation(
+    (a, b, c, d) => Decimal.pow(a, Decimal.pow(b, Decimal.pow(c, d))), [1000, 1000, 1000], true, ...[,,], [[1, Infinity]], [1, 1, 1, 1], [0, 1, 2, 3], [["", "", "", "", "", ""], ["", "^", "", "", "", ""], ["", "^", "", "", "", ""], ["", "^", "", "", "", ""]], [false, false, false, false], value => value.gt(1),
+    new DefaultNotation(), Decimal.pow(1000, Decimal.pow(999, Decimal.pow(92, 2))), value => Decimal.log(value, 1000), true, "1000^^4", value => Decimal.tetrate(1000, value.toNumber(), 1, true), false, true, [["1,000^", ""], ["1,000^", ""], ["((1,000^)^(", ")) "]], undefined, 2, undefined, [false, false], ...[,,], null, null, 1 + 1.2e-16, ["1 / ", ""]
+).setName("Exponent Tower K");
+HTMLPresetAssembly.ExponentTower = new IncreasingFunctionScientificNotation(
+    (a, b, c, d) => Decimal.pow(a, Decimal.pow(b, Decimal.pow(c, d))), [10, 10, 10], true, ...[,,], [[1, Infinity]], [1, 1, 1, 1], [3, 2, 1, 0], [["<sup>", "</sup>", "", "", "", ""], ["<sup>", "</sup>", "", "", "", ""], ["<sup>", "</sup>", "", "", "", ""], ["", "", "", "", "", ""]], [true, true, true, true], value => value.gt(1),
+    new DefaultNotation(), Decimal.pow(10, Decimal.pow(9, Decimal.pow(6, 2))), value => Decimal.log(value, 10), true, "10^^5", value => Decimal.tetrate(10, value.toNumber(), 1, true), false, true, [["10<sup>", "</sup>"], ["10<sup>", "</sup>"], ["((10^)^", ") "]], undefined, 2, undefined, [false, false], ...[,,], null, null, 1 + 1.2e-16, ["1 / ", ""]
+).setName("Exponent Tower");
+HTMLPresetAssembly.ExponentTowerK = new IncreasingFunctionScientificNotation(
+    (a, b, c, d) => Decimal.pow(a, Decimal.pow(b, Decimal.pow(c, d))), [1000, 1000, 1000], true, ...[,,], [[1, Infinity]], [1, 1, 1, 1], [3, 2, 1, 0], [["<sup>", "</sup>", "", "", "", ""], ["<sup>", "</sup>", "", "", "", ""], ["<sup>", "</sup>", "", "", "", ""], ["", "", "", "", "", ""]], [true, true, true, true], value => value.gt(1),
+    new DefaultNotation(), Decimal.pow(1000, Decimal.pow(999, Decimal.pow(92, 2))), value => Decimal.log(value, 1000), true, "1000^^4", value => Decimal.tetrate(1000, value.toNumber(), 1, true), false, true, [["1,000<sup>", "</sup>"], ["1,000<sup>", "</sup>"], ["((1,000^)^", ") "]], undefined, 2, undefined, [false, false], ...[,,], null, null, 1 + 1.2e-16, ["1 / ", ""]
+).setName("Exponent Tower K");
 
 PresetAssembly.Prime = new PrimeNotation().setName("Prime");
 HTMLPresetAssembly.Prime = new PrimeNotation(...[,,,,,,,], ["<sup>", "</sup>"]).setName("Prime");
 
 PresetAssembly.PsiLetters = new PsiDashNotation(1).setName("Psi Letters");
 PresetAssembly.PsiDash = new PsiDashNotation().setName("Psi Dash");
+PresetAssembly.PsiLettersBinary = new PsiDashNotation(1,16,2).setName("Binary Psi Letters");
+PresetAssembly.PsiDashBinary = new PsiDashNotation([2, 5, 12, 24],16,2).setName("Binary Psi Dash");
 HTMLPresetAssembly.PsiLetters = new PsiDashNotation(1).setName("Psi Letters");
 HTMLPresetAssembly.PsiDash = new PsiDashNotation().setName("Psi Dash");
+HTMLPresetAssembly.PsiLettersBinary = new PsiDashNotation(1,16,2).setName("Binary Psi Letters");
+HTMLPresetAssembly.PsiDashBinary = new PsiDashNotation([2, 5, 12, 24],16,2).setName("Binary Psi Dash");
+
+PresetAssembly.FastGrowingHierarchy = recipBelow(new FastGrowingHierarchyNotation(...[,,,,,,,], 1e-4), 1).setName("Fast-Growing Hierarchy");
+PresetAssembly.HardyHierarchy = recipBelow(new FastGrowingHierarchyNotation([1, 10, 5120, "(e^9)1544.461457532905"], [["", ""], ["ω + ", ""], ["ω^2 + ", ""], ["ω^3 + ", ""]], 1, [["", "", ""], ["ω*", " + ", ""], ["ω^2*", " + ", ""], ["ω^3*", " + ", ""]], [false], ["H[", "", false], ["](", ")", false], 1e-4, ...[,,,], [new DefaultNotation(), new DefaultNotation()], [value => true, value => value.gt(0)]), 1).setName("Hardy Hierarchy");
+HTMLPresetAssembly.FastGrowingHierarchy = recipBelow(new FastGrowingHierarchyNotation(undefined, [["f<sub>0</sub>(", ")"], ["f<sub>1</sub>(", ")"], ["f<sub>2</sub>(", ")"], ["f<sub>3</sub>(", ")"], ["f<sub>4</sub>(", ")"]], ...[,,,,,], 1e-4), 1).setName("Fast-Growing Hierarchy");
+HTMLPresetAssembly.HardyHierarchy = recipBelow(new FastGrowingHierarchyNotation([1, 10, 5120, "(e^9)1544.461457532905"], undefined, -1, [["", "", ""], ["ω", "+", ""], ["ω<sup>2</sup>", "+", ""], ["ω<sup>3</sup>", "+", ""]], [false], ["H<sub>", "", false], ["</sub>(", ")", false], 1e-4, ...[,,,], [new DefaultNotation(), new ConditionalNotation(true, [new PredeterminedNotation(""), value => value.lte(1)], [new DefaultNotation(), value => true])], [value => true, value => value.gt(0)]), 1).setName("Hardy Hierarchy")
 
 // This preset has been removed for now because it's too laggy
 // Presets.PrestigeLayer = (root : Decimal, requirement : Decimal) => new PrestigeLayerNotation(root, requirement, true).setName("Prestige Layer (Root " + new DefaultNotation().format(root) + ", Requirement" + new DefaultNotation().format(requirement) + ")");
@@ -985,6 +1082,8 @@ HTMLPresetAssembly.Square = new PolygonalNotation(4, [["□", ""], ["□(", ")"]
 
 PresetAssembly.DoubleFactorials = new DoubleFactorialsNotation().setName("Double Factorials");
 HTMLPresetAssembly.DoubleFactorials = new DoubleFactorialsNotation().setName("Double Factorials");
+PresetAssembly.TritetratedProduct = new IncreasingFunctionProductNotation(value => value.tetrate(3), ...[,,,,,], 8, ["", "↑↑3"], [")^", "", "("], ...[,,,], 2, ...[,,,,,,,,,,,], (CV, OV) => (OV.log10().log10().div(CV.log10().log10()).gte(1000)), ...[,,,], Decimal.tetrate(16**8, 3), value => value.tetrate(3), false, "eeee20", value => Decimal.tetrate(10, value.toNumber() * 2, 1, true), false, true, [["( ", " )↑↑3"], ["(", ")↑↑3"], [" ((↑↑3)^(", "))"]], undefined, 3, undefined, [true, true], ...[,,], null, undefined, 16, ["1 / (", ")"]).setName("Tritetrated Product");
+HTMLPresetAssembly.TritetratedProduct = new IncreasingFunctionProductNotation(value => value.tetrate(3), ...[,,,,,], 8, ["", "&#8593;&#8593;3"], [")^", "", "("], ...[,,,], 2, ...[,,,,,,,,,,,], (CV, OV) => (OV.log10().log10().div(CV.log10().log10()).gte(1000)), ...[,,,], Decimal.tetrate(16**8, 3), value => value.tetrate(3), false, "eeee20", value => Decimal.tetrate(10, value.toNumber() * 2, 1, true), false, true, [["( ", " )&#8593;&#8593;3"], ["(", ")&#8593;&#8593;3"], [" ((&#8593;&#8593;3)^(", "))"]], undefined, 3, undefined, [true, true], ...[,,], null, undefined, 16, ["1 / (", ")"]).setName("Tritetrated Product");
 
 PresetAssembly.Grid = new GridNotation(...[,,,,,,,,], " || ").setName("Grid");
 HTMLPresetAssembly.Grid = new GridNotation(...[,,], ["&#x25A1;", "&#x25A0;"], ["", "&nbsp;&nbsp;&nbsp;", "&#x25C7;"], undefined, "<br>", "", "<br>", "<br><br>").setName("Grid");
@@ -1026,6 +1125,50 @@ HTMLPresetAssembly.BaseThreeHalves = new ExpandedDefaultNotation(1.5**39, 1, 5, 
 HTMLPresetAssembly.BasePhi = new ExpandedDefaultNotation(1.618033988749895**30, 1, 5, 1.618033988749895, ...[,,,,,,,,,,,], new PolynomialNotation(1.618033988749895, 0, -Infinity, false, 39, "", 1.618033988749895**30, 1.618033988749895**30, 5, 1, undefined, "", "", "", "", ...[,,,,], [true, true], ...[,,,], "-", ["", "."])).setName("Base phi");
 HTMLPresetAssembly.BaseE = new ExpandedDefaultNotation(2.718281828459045**21, 1, 5, 2.718281828459045, ...[,,,,,,,,,,,], new PolynomialNotation(2.718281828459045, 0, -Infinity, false, 39, "", 2.718281828459045**21, 2.718281828459045**21, 5, 1, undefined, "", "", "", "", ...[,,,,], [true, true], ...[,,,], "-", ["", "."])).setName("Base e");
 HTMLPresetAssembly.BasePi = new ExpandedDefaultNotation(3.141592653589793**20, 1, 5, 3.141592653589793, ...[,,,,,,,,,,,], new PolynomialNotation(3.141592653589793, 0, -Infinity, false, 39, "", 3.141592653589793**20, 3.141592653589793**20, 5, 1, undefined, "", "", "", "", ...[,,,,], [true, true], ...[,,,], "-", ["", "."])).setName("Base pi");
+PresetAssembly.Parentheses = recipBelow(new PolynomialNotation(2, 1, 0, true, 10, "", "2^^5", "2^^5", 2, -1, new SignValueNotation([["(())", 2], ["()", 1]], 1e-12), "", "", "", "", true, ["(", ")"], ...[,,], [false, false], true, [["(", ")"], ["(", ")"], ["[", "]"], ["[", "]"]], ...[,,,,], 1), 1, ["{", "}"], ")").setNotationGlobals([")", ""], "{}", undefined, "][").setName("Parentheses");
+HTMLPresetAssembly.Parentheses = recipBelow(new PolynomialNotation(2, 1, 0, true, 10, "", "2^^5", "2^^5", 2, -1, new SignValueNotation([["(())", 2], ["()", 1]], 1e-12), "", "", "", "", true, ["(", ")"], ...[,,], [false, false], true, [["(", ")"], ["(", ")"], ["[", "]"], ["[", "]"]], ...[,,,,], 1), 1, ["{", "}"], ")").setNotationGlobals([")", ""], "{}", undefined, "][").setName("Parentheses");
+
+let OMZPlain = new OmegaMetaZeroNotation(
+    [
+      [
+        "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω",
+        "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"
+      ], ["ϝ", "ϛ", "ͱ", "ϻ", "ϙ", "ͳ", "ϸ"], ["☿", "♀", "♁", "♂", "♃", "♄", "♅", "♆", "♇"]
+    ],
+    5, [false], 5, [["((Ω^)^", ")", false, new DefaultNotation()], ["((ϸ^)^", ")", false, new DefaultNotation()], ["((♇^)^", ")", false, new DefaultNotation()]],
+)
+let OMZHTML = new OmegaMetaZeroNotation(
+    [
+        [
+            "&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;",
+            "&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"
+          ], ["&#x3DD;", "&#x3DB;", "&#x371;", "&#x3FB;", "&#x3D9;", "&#x373;", "&#x3F8;"], ["&#x263F;", "&#x2640;", "&#x2641;", "&#x2642;", "&#x2643;", "&#x2644;", "&#x2645;", "&#x2646;", "&#x2647;"]
+    ],
+    5, [true], 5, [["(&#x3A9;<sup>", "</sup>)", false, new DefaultNotation()], ["(&#x3F8;<sup>", "</sup>)", false, new DefaultNotation()], ["(&#x2647;<sup>", "</sup>)", false, new DefaultNotation()]],
+    ...[,,,,], [["<sub>", "</sub>", "", "", "", ""]], ...[,,,],  ["", "", "<sub>{", "}</sub>", "", ""], ...[,,,,,,,], "&#x25EF;"
+)
+let OMZPlain2 = new ConditionalNotation(
+    false, [OMZPlain, value => value.lte("eeee9e15")], [new HyperscientificNotation(Infinity, ...[,,,], Decimal.slog("9e15", 10, true).sub(1), ...[,,], [["<|", "|>:"], ["<|", "|>:"], ["<<", ">>"]], undefined, true, false, false, ...[,,], OMZPlain), value => true]
+).setName("Omega Meta Zero")
+let OMZHTML2 = new ConditionalNotation(
+    false, [OMZHTML, value => value.lte("eeee9e15")], [new HyperscientificNotation(Infinity, ...[,,,], Decimal.slog("9e15", 10, true).sub(1), ...[,,], [["<|", "|>:"], ["<|", "|>:"], ["<<", ">>"]], undefined, true, false, false, ...[,,], OMZHTML), value => true]
+).setName("Omega Meta Zero")
+PresetAssembly.OmegaMetaZero = recipBelow(OMZPlain2, 1, ["/", ""]).setName("Omega Meta Zero");
+HTMLPresetAssembly.OmegaMetaZero = recipBelow(OMZHTML2, 1, ["/", ""]).setName("Omega Meta Zero");
+PresetAssembly.OmegaMetaZeroAlphaAmount = new PrestigeLayerNotation(Decimal.log(Decimal.pow(2, 1024), 10), Decimal.pow(2, 1024), false, [], [" ", ""], false, true, new ConditionalNotation(false, [new SINotation(10, [["Dc", 33], ["No", 30], ["Oc", 27], ["Sp", 24], ["Sx", 21], ["Qi", 18], ["Qa", 15], ["T", 12], ["B", 9]], ...[,,,,,], ""), value => (value.gte(1e9) && value.lt(1e36))], [new DefaultNotation(), value => true]), OMZPlain2).setName("Omega Meta Zero (Alpha Amount)");
+HTMLPresetAssembly.OmegaMetaZeroAlphaAmount = new PrestigeLayerNotation(Decimal.log(Decimal.pow(2, 1024), 10), Decimal.pow(2, 1024), false, [], [" ", ""], false, true, new ConditionalNotation(false, [new SINotation(10, [["Dc", 33], ["No", 30], ["Oc", 27], ["Sp", 24], ["Sx", 21], ["Qi", 18], ["Qa", 15], ["T", 12], ["B", 9]], ...[,,,,,], ""), value => (value.gte(1e9) && value.lt(1e36))], [new DefaultNotation(), value => true]), OMZHTML2).setName("Omega Meta Zero (Alpha Amount)");
+PresetAssembly.FillingFractions = new OmegaMetaZeroNotation(
+    [
+        ["0", "½", "1"], ["0", "⅓", "⅔", "1"], ["0", "¼", "½", "¾", "1"], ["0", "⅕", "⅖", "⅗", "⅘", "1"],
+        ["0", "⅙", "⅓", "½", "⅔", "⅚", "1"], ["0", "⅛", "¼", "⅜", "½", "⅝", "¾", "⅞", "1"]
+    ], 1, ...[,,,,], [["", "", "", "", "", ""]], [(value, index, symbolValues, digitIndex, DPA, digitValues) => (digitIndex < 0 || (digitIndex == 0 && index == 0) || digitIndex + DPA < digitValues.length - 1 || symbolValues.map(s => !!s.toNumber()).lastIndexOf(true) >= index)], [["/", "", "", "", "", ""]], [], [["", "", "", "", "", ""]], false, 3, [" // ", "", "", "", "", ""], false, 3, false, ...[,,,], null, "½", 11666192832000, 1, [" // ", "", "", "", "", ""], false, 1, false, null, "½ // ½", 9e15, 1, ["\\", ""], [["", "", "", "", "", ""]], -1, 1, null, undefined, 1, ["⅟(", ")"]
+).setName("Filling Fractions");
+HTMLPresetAssembly.FillingFractions = new OmegaMetaZeroNotation(
+    [
+        ["0", "&#xBD;", "1"], ["0", "&#x2153;", "&#x2154;", "1"], ["0", "&#xBC;", "&#xBD;", "&#xBE;", "1"], ["0", "&#x2155;", "&#x2156;", "&#x2157;", "&#x2158;", "1"],
+        ["0", "&#x2159;", "&#x2153;", "&#xBD;", "&#x2154;", "&#x215A;", "1"], ["0", "&#x215B;", "&#xBC;", "&#x215C;", "&#xBD;", "&#x215D;", "&#xBE;", "&#x215E;", "1"]
+    ], 1, ...[,,,,], [["", "", "", "", "", ""]], [(value, index, symbolValues, digitIndex, DPA, digitValues) => (digitIndex < 0 || (digitIndex == 0 && index == 0) || digitIndex + DPA < digitValues.length - 1 || symbolValues.map(s => !!s.toNumber()).lastIndexOf(true) >= index)], [["/", "", "", "", "", ""]], [], [["", "", "", "", "", ""]], false, 3, [" // ", "", "", "", "", ""], false, 3, false, ...[,,,], null, "½", 11666192832000, 1, [" // ", "", "", "", "", ""], false, 1, false, null, "½ // ½", 9e15, 1, ["&#x5C;", ""], [["", "", "", "", "", ""]], -1, 1, null, undefined, 1, ["&#x215F;(", ")"]
+).setName("Filling Fractions");
 
 PresetAssembly.Blind = new PredeterminedNotation("").setName("Blind");
 PresetAssembly.PowersOfOne = new AppliedFunctionNotation((value) => Decimal.pow(1, value), new DefaultNotation(), (str) => str).setName("Powers of One");
@@ -1052,6 +1195,7 @@ let Presets = {
     DoubleLogarithm: PresetAssembly.DoubleLogarithm,
     AlternateBase: PresetAssembly.AlternateBase,
     Binary: PresetAssembly.Binary,
+    BinaryIL: PresetAssembly.BinaryIL,
     Ternary: PresetAssembly.Ternary,
     Quaternary: PresetAssembly.Quaternary,
     Seximal: PresetAssembly.Seximal,
@@ -1088,6 +1232,7 @@ let Presets = {
     Septecoman: PresetAssembly.Septecoman,
     SI: PresetAssembly.SI,
     SIWritten: PresetAssembly.SIWritten,
+    MixedSI: PresetAssembly.MixedSI,
     BinarySI: PresetAssembly.BinarySI,
     BinarySIWritten: PresetAssembly.BinarySIWritten,
     CombinedD: PresetAssembly.CombinedD,
@@ -1095,6 +1240,7 @@ let Presets = {
     HyperSIWritten: PresetAssembly.HyperSIWritten,
     SandcastleBuilder: PresetAssembly.SandcastleBuilder,
     SandcastleBuilderWritten: PresetAssembly.SandcastleBuilderWritten,
+    CookieFonsterExtendedSI : PresetAssembly.CookieFonsterExtendedSI,
     LooseFraction: PresetAssembly.LooseFraction,
     MediumFraction: PresetAssembly.MediumFraction,
     PreciseFraction: PresetAssembly.PreciseFraction,
@@ -1108,8 +1254,10 @@ let Presets = {
     AarexMyriad: PresetAssembly.AarexMyriad,
     DoubleBinaryNames: PresetAssembly.DoubleBinaryNames,
     DoubleBinaryPrefixes: PresetAssembly.DoubleBinaryPrefixes,
+    Alphaquint: PresetAssembly.Alphaquint,
     Hypersplit: PresetAssembly.Hypersplit,
     HypersplitBase3: PresetAssembly.HypersplitBase3,
+    HypersplitBase2: PresetAssembly.HypersplitBase2,
     HyperE: PresetAssembly.HyperE,
     Infinity: PresetAssembly.Infinity,
     Eternity: PresetAssembly.Eternity,
@@ -1132,9 +1280,20 @@ let Presets = {
     Tritetrated: PresetAssembly.Tritetrated,
     SuperRoot: PresetAssembly.SuperRoot as (base: DecimalSource) => Notation,
     IncreasingSuperRoot: PresetAssembly.IncreasingSuperRoot,
+    PentaSquareRoot: PresetAssembly.PentaSquareRoot,
+    Tripentated: PresetAssembly.Tripentated,
+    PentaRoot: PresetAssembly.PentaRoot as (base: DecimalSource) => Notation,
+    WeakHyperscientific: PresetAssembly.WeakHyperscientific,
+    SuperSquareScientific: PresetAssembly.SuperSquareScientific,
+    ExponentTower: PresetAssembly.ExponentTower,
+    ExponentTowerK: PresetAssembly.ExponentTowerK,
     Prime: PresetAssembly.Prime,
     PsiLetters: PresetAssembly.PsiLetters,
     PsiDash: PresetAssembly.PsiDash,
+    PsiLettersBinary: PresetAssembly.PsiLettersBinary,
+    PsiDashBinary: PresetAssembly.PsiDashBinary,
+    FastGrowingHierarchy: PresetAssembly.FastGrowingHierarchy,
+    HardyHierarchy: PresetAssembly.HardyHierarchy,
     OmegaLayers: PresetAssembly.OmegaLayers,
     OmegaLayersRamped: PresetAssembly.OmegaLayersRamped,
     OmegaLayerNumber: PresetAssembly.OmegaLayerNumber,
@@ -1147,6 +1306,7 @@ let Presets = {
     Triangular: PresetAssembly.Triangular,
     Square: PresetAssembly.Square,
     DoubleFactorials: PresetAssembly.DoubleFactorials,
+    TritetratedProduct : PresetAssembly.TritetratedProduct,
     Grid: PresetAssembly.Grid,
     TetrationFloat: PresetAssembly.TetrationFloat,
     Polynomial: PresetAssembly.Polynomial as (base: DecimalSource) => Notation,
@@ -1155,6 +1315,10 @@ let Presets = {
     BasePhi: PresetAssembly.BasePhi,
     BaseE: PresetAssembly.BaseE,
     BasePi: PresetAssembly.BasePi,
+    Parentheses: PresetAssembly.Parentheses,
+    OmegaMetaZero : PresetAssembly.OmegaMetaZero,
+    OmegaMetaZeroAlphaAmount : PresetAssembly.OmegaMetaZeroAlphaAmount,
+    FillingFractions : PresetAssembly.FillingFractions,
     Blind: PresetAssembly.Blind,
     PowersOfOne: PresetAssembly.PowersOfOne
 }
@@ -1178,6 +1342,7 @@ let HTMLPresets = {
     DoubleLogarithm: HTMLPresetAssembly.DoubleLogarithm,
     AlternateBase: HTMLPresetAssembly.AlternateBase,
     Binary: HTMLPresetAssembly.Binary,
+    BinaryIL: HTMLPresetAssembly.BinaryIL,
     Ternary: HTMLPresetAssembly.Ternary,
     Quaternary: HTMLPresetAssembly.Quaternary,
     Seximal: HTMLPresetAssembly.Seximal,
@@ -1214,6 +1379,7 @@ let HTMLPresets = {
     Septecoman: HTMLPresetAssembly.Septecoman,
     SI: HTMLPresetAssembly.SI,
     SIWritten: HTMLPresetAssembly.SIWritten,
+    MixedSI: HTMLPresetAssembly.MixedSI,
     BinarySI: HTMLPresetAssembly.BinarySI,
     BinarySIWritten: HTMLPresetAssembly.BinarySIWritten,
     CombinedD: HTMLPresetAssembly.CombinedD,
@@ -1221,6 +1387,7 @@ let HTMLPresets = {
     HyperSIWritten: HTMLPresetAssembly.HyperSIWritten,
     SandcastleBuilder: HTMLPresetAssembly.SandcastleBuilder,
     SandcastleBuilderWritten: HTMLPresetAssembly.SandcastleBuilderWritten,
+    CookieFonsterExtendedSI : HTMLPresetAssembly.CookieFonsterExtendedSI,
     LooseFraction: HTMLPresetAssembly.LooseFraction,
     MediumFraction: HTMLPresetAssembly.MediumFraction,
     PreciseFraction: HTMLPresetAssembly.PreciseFraction,
@@ -1234,8 +1401,10 @@ let HTMLPresets = {
     AarexMyriad: HTMLPresetAssembly.AarexMyriad,
     DoubleBinaryNames: HTMLPresetAssembly.DoubleBinaryNames,
     DoubleBinaryPrefixes: HTMLPresetAssembly.DoubleBinaryPrefixes,
+    Alphaquint: PresetAssembly.Alphaquint,
     Hypersplit: HTMLPresetAssembly.Hypersplit,
     HypersplitBase3: HTMLPresetAssembly.HypersplitBase3,
+    HypersplitBase2: HTMLPresetAssembly.HypersplitBase2,
     HyperE: HTMLPresetAssembly.HyperE,
     Infinity: HTMLPresetAssembly.Infinity,
     Eternity: HTMLPresetAssembly.Eternity,
@@ -1259,9 +1428,20 @@ let HTMLPresets = {
     Tritetrated: HTMLPresetAssembly.Tritetrated,
     SuperRoot: HTMLPresetAssembly.SuperRoot as (base: DecimalSource) => Notation,
     IncreasingSuperRoot: HTMLPresetAssembly.IncreasingSuperRoot,
+    PentaSquareRoot: HTMLPresetAssembly.PentaSquareRoot,
+    Tripentated: HTMLPresetAssembly.Tripentated,
+    PentaRoot: HTMLPresetAssembly.PentaRoot as (base: DecimalSource) => Notation,
+    WeakHyperscientific: HTMLPresetAssembly.WeakHyperscientific,
+    SuperSquareScientific: HTMLPresetAssembly.SuperSquareScientific,
+    ExponentTower: HTMLPresetAssembly.ExponentTower,
+    ExponentTowerK: HTMLPresetAssembly.ExponentTowerK,
     Prime: HTMLPresetAssembly.Prime,
     PsiLetters: HTMLPresetAssembly.PsiLetters,
     PsiDash: HTMLPresetAssembly.PsiDash,
+    PsiLettersBinary: HTMLPresetAssembly.PsiLettersBinary,
+    PsiDashBinary: HTMLPresetAssembly.PsiDashBinary,
+    FastGrowingHierarchy: HTMLPresetAssembly.FastGrowingHierarchy,
+    HardyHierarchy: HTMLPresetAssembly.HardyHierarchy,
     OmegaLayers: HTMLPresetAssembly.OmegaLayers,
     OmegaLayersRamped: HTMLPresetAssembly.OmegaLayersRamped,
     OmegaLayerNumber: HTMLPresetAssembly.OmegaLayerNumber,
@@ -1274,6 +1454,7 @@ let HTMLPresets = {
     Triangular: HTMLPresetAssembly.Triangular,
     Square: HTMLPresetAssembly.Square,
     DoubleFactorials: HTMLPresetAssembly.DoubleFactorials,
+    TritetratedProduct : HTMLPresetAssembly.TritetratedProduct,
     Grid: HTMLPresetAssembly.Grid,
     TetrationFloat: HTMLPresetAssembly.TetrationFloat,
     Polynomial: HTMLPresetAssembly.Polynomial as (base: DecimalSource) => Notation,
@@ -1282,6 +1463,10 @@ let HTMLPresets = {
     BasePhi: HTMLPresetAssembly.BasePhi,
     BaseE: HTMLPresetAssembly.BaseE,
     BasePi: HTMLPresetAssembly.BasePi,
+    Parentheses: HTMLPresetAssembly.Parentheses,
+    OmegaMetaZero : HTMLPresetAssembly.OmegaMetaZero,
+    OmegaMetaZeroAlphaAmount : HTMLPresetAssembly.OmegaMetaZeroAlphaAmount,
+    FillingFractions : HTMLPresetAssembly.FillingFractions,
     Blind: HTMLPresetAssembly.Blind,
     PowersOfOne: HTMLPresetAssembly.PowersOfOne
 }

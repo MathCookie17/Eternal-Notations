@@ -1,7 +1,7 @@
 import Decimal from 'break_eternity.js';
 
 /**
- * For reasons unbeknownst to me, break_eternity's Decimal.fromValue does not seem to work on values that are already Decimals, so this function is a version of Decimal.fromValue that does.1
+ * For reasons unbeknownst to me, break_eternity's Decimal.fromValue does not seem to work on values that are already Decimals, so this function is a version of Decimal.fromValue that does.
  * Unlike Decimal.fromValue, this function uses the linear approximation of tetration to convert strings that involve tetration.
  * @param value ( Decimal ! ) The DecimalSource to be converted.
  */
@@ -673,6 +673,73 @@ function multslog(value, base, mult) {
     return valueD.slog(baseD.pow(multD.recip()), 100, true);
 }
 /**
+ * Same as iteratedmultlog, except it takes an array of bases and multipliers instead of a single base and multiplier,
+ * and each iteration consists of taking logarithms of each of those bases (with its corresponding multiplier) in order.
+ * For example, multibaseLogarithm(x, [10, 2], 1) = x.log(10).log(2), and multibaseLogarithm(x, [10, 2], 2) = x.log(10).log(2).log(10).log(2)
+ */
+function multibaseLogarithmmult(value, bases, times = 1, mults = []) {
+    let valueD = toDecimal(value);
+    if (valueD.eq(Decimal.dInf))
+        return new Decimal(Infinity);
+    if (valueD.isNan())
+        return new Decimal(NaN);
+    let basesD = bases.map(toDecimal);
+    let multsD = mults.map(toDecimal);
+    if (times == 0)
+        return new Decimal(valueD);
+    if (times % 1 != 0)
+        throw new RangeError("multibaseLogarithm does not support non-integer times");
+    while (multsD.length < basesD.length)
+        multsD.push(Decimal.dOne);
+    let highestBase = Decimal.dOne;
+    for (let b = 0; b < basesD.length; b++)
+        highestBase = Decimal.max(highestBase, basesD[b].pow(multsD[b].recip()));
+    let result = new Decimal(valueD);
+    if (times > 0) {
+        if (result.layer - 3 > highestBase.layer) {
+            let layerloss = Math.min(times * basesD.length, valueD.layer - highestBase.layer - 3);
+            layerloss -= (layerloss % basesD.length);
+            times -= (layerloss / basesD.length);
+            result = result.iteratedlog(10, layerloss, true);
+        }
+        while (times > 0) {
+            for (let b = 0; b < basesD.length; b++) {
+                result = iteratedmultlog(result, basesD[b], 1, multsD[b]);
+                // Bail if we're NaN
+                if (result.isNan())
+                    return new Decimal(result);
+            }
+            times--;
+        }
+        return result;
+    }
+    else {
+        while (times < 0) {
+            for (let b = basesD.length - 1; b >= 0; b--) {
+                result = iteratedexpmult(basesD[b], result, 1, multsD[b]);
+            }
+            times++;
+            if (valueD.layer - 3 > highestBase.layer) {
+                result = Decimal.iteratedexp(10, -times * basesD.length, result, true);
+                return result;
+            }
+        }
+        return result;
+    }
+}
+/**
+ * Same as Decimal's iteratedlog, except it takes an array of bases instead of a single base,
+ * and each iteration consists of taking logarithms of each of those bases in order.
+ * Unlike iteratedlog, fractional 'times' is not supported here.
+ * For example, multibaseLogarithm(x, [10, 2], 1) = x.log(10).log(2), and multibaseLogarithm(x, [10, 2], 2) = x.log(10).log(2).log(10).log(2)
+ * @param value ( Decimal ! ) The value to take the multi-base logarithm of.
+ * @param bases ( Decimal[] ! ) The array of bases that the logarithms are taken in.
+ * @param times ( number ) The amount of iterations. Each iteration, the entire array of bases is cycled through once. Default is 1.
+ */
+function multibaseLogarithm(value, bases, times = 1) {
+    return multibaseLogarithmmult(value, bases, times);
+}
+/**
  * Converts a Decimal into a list of two Decimals, [b, e], such that b * (base)^e equals the original value.
  * @param value ( Decimal ! ) The value we want to turn into scientific notation.
  * @param base ( Decimal ) The base of the scientific notation we're using (default is 10)
@@ -865,6 +932,302 @@ function hyperscientifify(value, base = Decimal.dTen, rounding = Decimal.dZero, 
     }
     e = e.mul(hyperexpMultiplierD);
     return [b, e];
+}
+/**
+ * "Weak tetration" is, like regular tetration, repeated exponentiation, but evaluated from bottom to top instead of from top to bottom.
+ * For example, 10↓↓5 is (((10^10)^10)^10)^10. It turns out that a↓↓b is equal to a^(a^(b - 1)).
+ * @param value ( Decimal ! ) The value to repeatedly exponentiate.
+ * @param height ( Decimal ! ) The amount of layers in the power tower.
+ * @param lowest ( Decimal ) The number at the bottom of the power tower. Is equal to 'value' by default.
+ */
+function weak_tetrate(value, height, lowest = value) {
+    return Decimal.pow(lowest, Decimal.pow(value, Decimal.sub(height, 1)));
+}
+/**
+ * One of weak tetration's inverses: given that base↓↓x = value, what is x?
+ * This turns out to just be log(log(value)) + 1, with 'base' as the base of the logarithms.
+ * @param value ( Decimal ! ) The value to find the weak super-logarithm of.
+ * @param base ( Decimal ) The base of the weak super-logarithm. Default is 10.
+ */
+function weak_slog(value, base = 10) {
+    return new Decimal(value).log(base).log(base).plus(1);
+}
+/**
+ * Converts a Decimal into a list of two Decimals, [b, e], such that ((base)↓↓e)^b equals the original value, where x↓↓y is "weak tetration", x↓↓y = x^x^(y - 1).
+ * @param value ( Decimal ! ) The value we want to turn into weak hyperscientific notation.
+ * @param base ( Decimal ) The base of the weak hyperscientific notation we're using (default is 10).
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in weak hyperscientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^2, if mantissaPower is 2 then the bounds are base^2 and base^3, and so on. For example, 1e350 in base 10, which normally returns [3.5, 3], would become [35, 2] with 1 mantissaPower and [350, 1] with 2 mantissaPower.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param expMultiplier ( Decimal ) In the returned pair, e is multiplied by this value. Default is 1.
+ */
+function weak_hyperscientifify(value, base = Decimal.dTen, rounding = Decimal.dZero, mantissaPower = Decimal.dZero, engineerings = Decimal.dOne, expMultiplier = Decimal.dOne) {
+    let valueD = toDecimal(value);
+    let baseD = toDecimal(base);
+    let mantissaPowerD = toDecimal(mantissaPower);
+    let expMultiplierD = toDecimal(expMultiplier);
+    if (!Array.isArray(engineerings))
+        engineerings = [engineerings];
+    let engineeringsD = engineerings.map(toDecimal);
+    engineeringsD = engineeringsD.sort(function (a, b) {
+        if (a.lt(b))
+            return -1;
+        else if (a.eq(b))
+            return 0;
+        else
+            return 1;
+    }).reverse();
+    if (valueD.eq(1))
+        return [new Decimal(1), new Decimal(-Infinity)];
+    if (valueD.eq(Decimal.dInf))
+        return [new Decimal(Infinity), new Decimal(Infinity)];
+    if (valueD.lt(1) || !valueD.isFinite())
+        return [new Decimal(NaN), new Decimal(NaN)];
+    if (baseD.lte(1)) {
+        console.log("Base <= 1 in weak_hyperscientifify");
+        return [baseD, new Decimal(NaN)];
+    }
+    let b = weak_slog(valueD, baseD);
+    let e = currentEngineeringValue(b.sub(mantissaPowerD), engineeringsD);
+    if (e.lt(0) && e.neq(b.sub(mantissaPowerD)))
+        e = previousEngineeringValue(b.sub(mantissaPowerD), engineeringsD);
+    b = Decimal.pow(base, b.sub(e));
+    let unroundedB = b;
+    b = round(b, rounding);
+    if (e.abs().gte(9e15))
+        b = Decimal.pow(baseD, mantissaPowerD);
+    else {
+        let oldB = Decimal.dZero;
+        let checkComplete = false;
+        let loopWatch = false;
+        do {
+            oldB = unroundedB;
+            let upperLimit = baseD.pow(nextEngineeringValue(e, engineeringsD).sub(currentEngineeringValue(e, engineeringsD)).plus(mantissaPower));
+            let lowerLimit = baseD.pow(mantissaPowerD);
+            if (b.gte(upperLimit)) {
+                b = unroundedB.mul(baseD.pow(e)).root(baseD.pow(nextEngineeringValue(e, engineeringsD)));
+                e = nextEngineeringValue(e, engineeringsD);
+                unroundedB = b;
+                if (loopWatch)
+                    b = lowerLimit; //If we've gone both up and down, the mantissa is too close to the boundary, so just set it to the boundary value
+                b = round(b, rounding);
+                if (loopWatch)
+                    break;
+            }
+            else if (b.lt(lowerLimit)) {
+                b = unroundedB.pow(baseD.pow(e)).root(baseD.pow(previousEngineeringValue(e, engineeringsD)));
+                e = previousEngineeringValue(e, engineeringsD);
+                unroundedB = b;
+                b = round(b, rounding);
+                loopWatch = true;
+            }
+            else
+                checkComplete = true;
+        } while (!checkComplete && oldB.neq(unroundedB));
+    }
+    e = e.mul(expMultiplierD);
+    return [b, e];
+}
+/**
+ * Converts a Decimal into a list of two Decimals, [b, e], such that Decimal.pentate(base, e, b, true) equals the original value.
+ * @param value ( Decimal ! ) The value we want to turn into penta-scientific notation.
+ * @param base ( Decimal ) The base of the penta-scientific notation we're using (default is 10).
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param hypermantissaPower ( Decimal ) Normally, the mantissa in penta-scientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^^^2, if mantissaPower is 2 then the bounds are base^^^2 and base^^^3, and so on. For example, 10^^10 in base 10, which normally returns [1, 2], would become [10, 1] with 1 mantissaPower and [10^^10, 0] with 2 mantissaPower.
+ * @param engineerings ( Decimal | DecimalSource[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ */
+function pentascientifify(value, base = Decimal.dTen, rounding = Decimal.dZero, hypermantissaPower = Decimal.dZero, engineerings = Decimal.dOne) {
+    let valueD = toDecimal(value);
+    let baseD = toDecimal(base);
+    let hypermantissaPowerD = toDecimal(hypermantissaPower);
+    if (!Array.isArray(engineerings))
+        engineerings = [engineerings];
+    let engineeringsD = engineerings.map(toDecimal);
+    engineeringsD = engineeringsD.sort(function (a, b) {
+        if (a.lt(b))
+            return -1;
+        else if (a.eq(b))
+            return 0;
+        else
+            return 1;
+    }).reverse();
+    if (baseD.lte(1))
+        return [baseD, new Decimal(NaN)];
+    if (valueD.eq(Decimal.dInf))
+        return [new Decimal(Infinity), new Decimal(Infinity)];
+    if (valueD.eq(baseD.tetrate(valueD.toNumber(), 1, true)))
+        return [new Decimal(1), new Decimal(-Infinity)];
+    if (!valueD.isFinite() || valueD.lte(-2) || valueD.gt(baseD.tetrate(valueD.toNumber(), 1, true)))
+        return [new Decimal(NaN), new Decimal(NaN)];
+    if (baseD.pentate(Infinity, 1, true).isFinite() && valueD.gte(baseD.pentate(Infinity, 1, true)))
+        return [valueD.div(baseD.pentate(Infinity, 1, true)), new Decimal(Infinity)];
+    let e, b;
+    // lowerLoopLimit stuff is to avoid calling slog on negatives
+    let lowerLoopLimit = -1;
+    if (engineeringsD[engineeringsD.length - 1].lt(0.1))
+        lowerLoopLimit = 0;
+    if (engineeringsD[engineeringsD.length - 1].lt(0.05))
+        lowerLoopLimit = 1;
+    if (valueD.lt(Decimal.pentate(baseD, engineeringsD[engineeringsD.length - 1].mul(10).toNumber(), 1, true)) && (valueD.gt(lowerLoopLimit))) {
+        // We really want to avoid calling penta_log on small numbers, so just let the "oldB" loop below handle it. The loop limit of 10 was chosen arbitrarily.
+        e = new Decimal(0);
+        b = valueD;
+    }
+    else {
+        e = currentEngineeringValue(Decimal.penta_log(valueD, baseD, true).sub(hypermantissaPowerD), engineeringsD);
+        if (e.lt(0) && e.neq(Decimal.penta_log(valueD, baseD, true).sub(hypermantissaPowerD)))
+            e = previousEngineeringValue(Decimal.penta_log(valueD, baseD, true).sub(hypermantissaPowerD), engineeringsD);
+        b = Decimal.increasingInverse((v) => Decimal.pentate(baseD, e.toNumber(), v, true))(valueD);
+    }
+    let unroundedB = b;
+    b = round(b, rounding);
+    if (e.abs().gte(9e15))
+        b = baseD.pentate(hypermantissaPowerD.toNumber(), Decimal.dOne, true); //iteratedslog isn't a thing, so here's the best solution I've got
+    else {
+        let oldB = Decimal.dZero;
+        let checkComplete = false;
+        let loopWatch = false;
+        do {
+            oldB = unroundedB;
+            let upperLimit = Decimal.pentate(baseD, nextEngineeringValue(e, engineeringsD).sub(currentEngineeringValue(e, engineeringsD)).plus(hypermantissaPowerD).toNumber(), Decimal.dOne, true);
+            let lowerLimit = Decimal.pentate(baseD, hypermantissaPowerD.toNumber(), Decimal.dOne, true);
+            if (b.gte(upperLimit)) {
+                e = nextEngineeringValue(e, engineeringsD);
+                b = Decimal.increasingInverse((v) => Decimal.pentate(baseD, e.toNumber(), v, true))(valueD);
+                unroundedB = b;
+                if (loopWatch)
+                    b = lowerLimit; //If we've gone both up and down, the mantissa is too close to the boundary, so just set it to the boundary value
+                b = round(b, rounding);
+                if (loopWatch)
+                    break;
+            }
+            else if (b.lt(lowerLimit)) {
+                e = previousEngineeringValue(e, engineeringsD);
+                b = Decimal.increasingInverse((v) => Decimal.pentate(baseD, e.toNumber(), v, true))(valueD);
+                unroundedB = b;
+                b = round(b, rounding);
+                loopWatch = true;
+            }
+            else
+                checkComplete = true;
+        } while (!checkComplete && oldB.neq(unroundedB));
+    }
+    return [b, e];
+}
+/**
+ * An advanced version of scientifify that takes any strictly increasing function with any amount of Decimal arguments and uses Decimal.increasingInverse to turn it into a scientific notation-like expression.
+ * The last argument is considered the highest priority argument to increment, like how the exponent is higher-priority than the mantissa in regular scientifify.
+ * Returns an array of Decimals containing the values of each parameter that, when plugged into the function, will give the original value.
+ * @param value ( Decimal ! ) The value being inputted into the function.
+ * @param func ( (...values : Decimal[]) => Decimal ! ) The function that is being used. It can have any amount of Decimal arguments, but it must return a Decimal (and it must have a fixed amount of arguments - the arguments can't themselves be an array of Decimals)
+ * @param limits ( Decimal[] ! ) limits[0] is the minimum value that the first argument is allowed to have; anything less, and the second argument is decreased to bring the first argument back over that limit. Likewise, limits[1] is the minimum for the second argument, limits[2] is the minimum for the third argument, and so on.
+ * The last argument does not have a limit. If this array has less values than (amount of arguments - 1), then all unfilled values will be set equal to the last value that was given.
+ * @param limitsAreMaximums ( boolean ) If this parameter is true, the limits are maximums instead of minimums. Default is false.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed values for each argument: for example, if engineerings[0] is [3], then the second argument will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted values for the third argument are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * The first argument does not have an engineerings array. If engineerings is a single value, then every argument is given that single value as its engineerings entry. If engineerings is an array with less arguments than (amount of arguments - 1), then all unfilled entries will be set equal to the last entry that was given.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The first argument is rounded to the nearest multiple of this value. If this parameter is a function, then the first argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * NOTE: Unlike the rounding parameter in other scientifify functions, this one does not detect "overflow", so rounding may cause the first argument to go under or over its limit.
+ * @param rangeLimits ( [Decimal, Decimal][] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ * @param revertValues ( (Decimal | boolean)[] ) If an argument would end up with a non-finite value (such as if increasingInverse returned NaN), that argument's revertValue entry determines what it becomes instead.
+ * If the revertValues entry is 'true', then that argument reverts to its limit. If the revertValues entry is a Decimal, then that argument becomes that value. If the revertValues entry is 'false', the non-finite value remains.
+ */
+function increasingFunctionScientifify(value, func, limits, limitsAreMaximums = false, engineerings = 1, rounding = Decimal.dZero, rangeLimits = [[-Infinity, Infinity]], revertValues = [false]) {
+    let argamount = func.length;
+    if (argamount < 1)
+        throw new Error("increasingFunctionScientifify does not work with an empty function");
+    let currentValue = toDecimal(value);
+    let limitsD = limits.map(toDecimal);
+    if (limitsD.length == 0)
+        throw new Error("increasingFunctionScientifify does not work with an empty limits array");
+    if (!Array.isArray(engineerings))
+        engineerings = [[engineerings]];
+    let engineeringsD = engineerings.map(value => value.map(toDecimal));
+    engineeringsD = engineeringsD.map(value => value.sort(function (a, b) {
+        if (a.lt(b))
+            return -1;
+        else if (a.eq(b))
+            return 0;
+        else
+            return 1;
+    }).reverse());
+    if (engineeringsD.length == 0)
+        engineeringsD.push([Decimal.dOne]);
+    let revertValuesD = revertValues.map(value => ((typeof value == "boolean") ? value : toDecimal(value)));
+    if (revertValuesD.length == 0)
+        revertValuesD.push(false);
+    let rangeLimitsD = rangeLimits.map(value => value.map(toDecimal));
+    if (rangeLimitsD.length == 0)
+        rangeLimitsD.push([Decimal.dNegInf, Decimal.dInf]);
+    while (limitsD.length < argamount - 1)
+        limitsD.push(limitsD[limitsD.length - 1]);
+    limitsD[argamount - 1] = (limitsAreMaximums) ? Decimal.dInf : Decimal.dNegInf;
+    while (engineeringsD.length < argamount - 1)
+        engineeringsD.push(engineeringsD[engineeringsD.length - 1]);
+    while (rangeLimitsD.length < argamount)
+        rangeLimitsD.push(rangeLimitsD[rangeLimitsD.length - 1]);
+    while (revertValuesD.length < argamount)
+        revertValuesD.push(revertValuesD[revertValuesD.length - 1]);
+    // This loop avoids engineerings putting arguments past their limits. I unfortunately don't know how to do the same for rounding here
+    for (let b = 1; b < argamount - 1; b++) {
+        if (limitsAreMaximums) {
+            let engineeredLimit = currentEngineeringValue(limitsD[b], engineeringsD[b - 1]);
+            while (engineeredLimit.gte(limitsD[b]))
+                engineeredLimit = previousEngineeringValue(engineeredLimit, engineeringsD[b - 1]);
+            limitsD[b] = engineeredLimit;
+            if (limitsD[b].gt(rangeLimitsD[b][1]))
+                throw new Error("In increasingFunctionScientifify, a limit maximum cannot be greater than the corresponding range maximum");
+        }
+        else {
+            let engineeredLimit = upperCurrentEngineeringValue(limitsD[b], engineeringsD[b - 1]);
+            while (engineeredLimit.lt(limitsD[b]))
+                engineeredLimit = nextEngineeringValue(engineeredLimit, engineeringsD[b - 1]);
+            limitsD[b] = engineeredLimit;
+            if (limitsD[b].lt(rangeLimitsD[b][0]))
+                throw new Error("In increasingFunctionScientifify, a limit minimum cannot be less than the corresponding range minimum");
+        }
+    }
+    let result = [];
+    for (let a = argamount - 1; a >= 0; a--) {
+        let leftargs = limitsD.slice(0, a);
+        let rightargs = result;
+        let newargument = Decimal.increasingInverse((value) => func(...leftargs, value, ...rightargs), false, undefined, rangeLimitsD[a][0], rangeLimitsD[a][1])(currentValue);
+        if (!newargument.isFinite()) {
+            let revert = revertValuesD[a]; // Declaring this as a new variable makes TypeScript accept what comes next
+            if (revert === true)
+                newargument = limitsD[a];
+            else if (revert !== false)
+                newargument = revert;
+        }
+        else if (a > 0) {
+            if (limitsAreMaximums)
+                newargument = upperCurrentEngineeringValue(newargument, engineeringsD[a - 1]);
+            else
+                newargument = currentEngineeringValue(newargument, engineeringsD[a - 1]);
+        }
+        else
+            newargument = round(newargument, rounding);
+        result.unshift(newargument);
+    }
+    return result;
+}
+/**
+ * Returns a function that, when a Decimal value is plugged into it, runs increasingFunctionScientifify on that value with the arguments given here.
+ * @param func ( (...values : Decimal[]) => Decimal ! ) The function that is being used. It can have any amount of Decimal arguments, but it must return a Decimal (and it must have a fixed amount of arguments - the arguments can't themselves be an array of Decimals)
+ * @param limits ( Decimal[] ! ) limits[0] is the minimum value that the first argument is allowed to have; anything less, and the second argument is decreased to bring the first argument back over that limit. Likewise, limits[1] is the minimum for the second argument, limits[2] is the minimum for the third argument, and so on.
+ * The last argument does not have a limit. If this array has less values than (amount of arguments - 1), then all unfilled values will be set equal to the last value that was given.
+ * @param limitsAreMaximums ( boolean ) If this parameter is true, the limits are maximums instead of minimums. Default is false.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed values for each argument: for example, if engineerings[0] is [3], then the second argument will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted values for the third argument are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * The first argument does not have an engineerings array. If engineerings is a single value, then every argument is given that single value as its engineerings entry. If engineerings is an array with less arguments than (amount of arguments - 1), then all unfilled entries will be set equal to the last entry that was given
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The first argument is rounded to the nearest multiple of this value. If this parameter is a function, then the first argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * NOTE: Unlike the rounding parameter in other scientifify functions, this one does not detect "overflow", so rounding may cause the first argument to go under or over its limit.
+ * @param rangeLimits ( [Decimal, Decimal][] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ */
+function increasingScientififyFunction(func, limits, limitsAreMaximums = false, engineerings = 1, rounding = Decimal.dZero, rangeLimits = [[-Infinity, Infinity]]) {
+    return ((value) => increasingFunctionScientifify(value, func, limits, limitsAreMaximums, engineerings, rounding, rangeLimits));
 }
 /**
  * Splits a Decimal into an array of four decimals, [M, E, T, P], such that if b is the base, b^^b^^b^^...^^(b^b^b^b...^(m * b^e))) = the original Decimal, where there are T b^'s and P b^^'s.
@@ -1957,6 +2320,468 @@ function triPolygonRoot(value, sides, base = 2, zeroValue = 2) {
     }
     return new Decimal(result);
 }
+/**
+ * f0(n) in the Fast-Growing Hierarchy. This is the successor function, f0(n) = n + 1.
+ * @param value ( Decimal ) The input to f0.
+ */
+function FGH0(value) {
+    return Decimal.plus(value, 1);
+}
+/**
+ * The inverse of f0(n) in the Fast-Growing Hierarchy. Equal to n - 1.
+ * @param value ( Decimal ) The value that FGH0 will return when given the result of this function.
+ */
+function FGH0inverse(value) {
+    return Decimal.sub(value, 1);
+}
+/**
+ * Applies FGH0 to 'value' 'times' times. Equivalent to value + times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH0 to.
+ * @param times ( Decimal ) The amount of times FGH0 is applied to value.
+ */
+function iteratedFGH0(value, times) {
+    return Decimal.plus(value, times);
+}
+/**
+ * Applies FGH0inverse to 'value' 'times' times. Equivalent to value - times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH0inverse to.
+ * @param times ( Decimal ) The amount of times FGH0inverse is applied to value.
+ */
+function iteratedFGH0inverse(value, times) {
+    return Decimal.sub(value, times);
+}
+/**
+ * f1(n) in the Fast-Growing Hierarchy. f1(n) = f0(f0(f0(f0...(n)))) with n f0's. Since f0() is just adding 1, f1(n) equals n * 2.
+ * @param value ( Decimal ) The input to f1.
+ */
+function FGH1(value) {
+    return Decimal.mul(value, 2);
+}
+/**
+ * The inverse of f1(n) in the Fast-Growing Hierarchy. Equal to n / 2.
+ * @param value ( Decimal ) The value that FGH1 will return when given the result of this function.
+ */
+function FGH1inverse(value) {
+    return Decimal.div(value, 2);
+}
+/**
+ * Applies FGH1 to 'value' 'times' times. Equivalent to value * 2^times.
+ * @param value ( Decimal ) The value to repeatedly apply FGH1 to.
+ * @param times ( Decimal ) The amount of times FGH1 is applied to value.
+ */
+function iteratedFGH1(value, times) {
+    return Decimal.mul(value, Decimal.pow(2, times));
+}
+/**
+ * One of the inverses of iteratedFGH1: given iteratedFGH1(base, x) = value and knowing what the base and value are, finds x.
+ * Equivalent to the base-2 logarithm of (value / base).
+ * @param value ( Decimal ) The answer given by iteratedFGH1 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH1 is called on with the result this inverse outputs to return the given value.
+ */
+function iteratedFGH1log(value, base) {
+    return Decimal.log2(Decimal.div(value, base));
+}
+/**
+ * f2(n) in the Fast-Growing Hierarchy. f2(n) = f1(f1(f1(f1...(n)))) with n f1's. f2(n) = n * 2^n.
+ * @param value ( Decimal ) The input to f2.
+ */
+function FGH2(value) {
+    let valueD = toDecimal(value);
+    if (valueD.eq(-Infinity))
+        return new Decimal(0);
+    if (valueD.isNan())
+        return new Decimal(NaN);
+    return Decimal.mul(value, Decimal.pow(2, value));
+}
+/**
+ * The inverse of f2(n) in the Fast-Growing Hierarchy. Similar to the base-2 logarithm for larger numbers.
+ * This is basically the Lambert W function, just with a base of 2 instead of e.
+ * @param value ( Decimal ) The value that FGH2 will output when given the result of this function.
+ */
+function FGH2inverse(value) {
+    let valueD = toDecimal(value);
+    if (valueD.lt(-1 / (Math.E * Math.LN2)) || valueD.isNan())
+        return new Decimal(NaN);
+    if (valueD.eq(0))
+        return new Decimal(0);
+    if (valueD.gt("ee18"))
+        return valueD.log2();
+    return Decimal.increasingInverse((value) => FGH2(value), false, undefined, undefined, undefined, -1 / (Math.E * Math.LN2))(value);
+    //     let has_changed_directions_once = false;
+    //     let previously_rose = false;
+    //     let result = (valueD.gt(1)) ? valueD.log2().toNumber() : 0;
+    //     let step_size = Math.max(0.001, result * 0.001);
+    //     for (var i = 1; i < 100; ++i)
+    //     {
+    //       let new_decimal = FGH2(result);
+    //       let currently_rose = new_decimal.gt(valueD);
+    //       if (i > 1)
+    //       {
+    //         if (previously_rose != currently_rose)
+    //         {
+    //           has_changed_directions_once = true;
+    //         }
+    //       }
+    //       previously_rose = currently_rose;
+    //       if (has_changed_directions_once)
+    //       {
+    //         step_size /= 2;
+    //       }
+    //       else
+    //       {
+    //         step_size *= 2;
+    //       }
+    //       step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+    //       result += step_size;
+    //       if (step_size === 0) { break; }
+    //     }
+    //     return Decimal.fromNumber(result);
+}
+/**
+ * Applies FGH2 to 'value' 'times' times. Similar in growth rate to base 2 iteratedexp.
+ * @param value ( Decimal ) The value to repeatedly apply FGH2 to.
+ * @param times ( number ) The amount of times FGH2 is applied to value.
+ */
+function iteratedFGH2(value, times) {
+    let valueD = toDecimal(value);
+    if (valueD.eq(0) || times == 0)
+        return valueD;
+    if (valueD.gt(0) && valueD.lt(0.01) && times > 0) {
+        let coveredDistance = iteratedFGH2log(valueD, 1).toNumber();
+        return iteratedFGH2(1, coveredDistance + times);
+    }
+    if (valueD.eq(Infinity))
+        return new Decimal(Infinity);
+    if (valueD.isNan())
+        return new Decimal(NaN);
+    let wholetimes = Math.floor(times);
+    let fractimes = times - wholetimes;
+    if (fractimes != 0) {
+        /* I really want the property of "f2^[n](x) = f2^[n - 1](f2(x))" to always hold: for example, regardless of what n is,
+        f2^n(2) = f2^[n - 1](8). Therefore, rather than a straightforward linear approximation,
+        I'm using a base of 1 as the base case and going from there. */
+        if (valueD.eq(1))
+            valueD = Decimal.pow(2, fractimes);
+        else
+            return iteratedFGH2(1, iteratedFGH2log(valueD, 1).plus(times).toNumber());
+        // valueD = valueD.mul(Decimal.pow(2, fractimes))
+    }
+    if (wholetimes < 0) {
+        if (valueD.lt(0)) {
+            // Starts decreasing, then goes NaN. I'm not bothering with this one, as it serves no use for Eternal Notations.
+            return new Decimal(NaN);
+        }
+        else {
+            if (times == Infinity)
+                return new Decimal(0);
+            if (valueD.gt("eee20")) {
+                let safeIterations = Decimal.slog(valueD, 2, true).sub(Decimal.slog("eee20", 2, true)).floor().min(Math.abs(wholetimes)).toNumber();
+                valueD = Decimal.iteratedlog(valueD, 2, safeIterations, true);
+                wholetimes += safeIterations;
+            }
+            // Approaches 0 at a reciprocal rate, but offset by a factor of ln(2): for example, it takes 1,000/ln(2) iterations to go from 1 to 0.001
+            while (wholetimes < 0) {
+                valueD = FGH2inverse(valueD);
+                wholetimes++;
+                if (!valueD.isFinite)
+                    return new Decimal(valueD);
+                if (valueD.lt(0.01)) {
+                    let totaliterations = valueD.recip().mul(Math.LOG2E).sub(wholetimes);
+                    return totaliterations.mul(Math.LN2).recip();
+                }
+            }
+        }
+    }
+    else {
+        if (valueD.lt(0)) {
+            // Approaches 0 at a reciprocal rate, but offset by a factor of ln(2): for example, it takes 1,000/ln(2) iterations to go from -1 to -0.001
+            if (times == Infinity)
+                return new Decimal(0);
+            while (wholetimes > 0) {
+                valueD = FGH2(valueD);
+                wholetimes--;
+                if (valueD.gt(-0.01)) {
+                    let totaliterations = valueD.recip().abs().mul(Math.LOG2E).plus(wholetimes);
+                    return totaliterations.mul(Math.LN2).recip().neg();
+                }
+            }
+        }
+        else {
+            // Tetrational growth
+            if (times == Infinity)
+                return new Decimal(Infinity);
+            while (wholetimes > 0) {
+                valueD = FGH2(valueD);
+                wholetimes--;
+                if (valueD.gt("1e20"))
+                    return Decimal.iteratedexp(2, wholetimes, valueD, true);
+            }
+        }
+    }
+    return valueD;
+}
+/**
+ * One of the inverses of iteratedFGH2: given iteratedFGH2(base, x) = value and knowing what the base and value are, finds x.
+ * Similar to base 2 slog.
+ * @param value ( Decimal ) The answer given by iteratedFGH2 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH2 is called on with the result this inverse outputs to return the given value.
+ */
+function iteratedFGH2log(value, base) {
+    let valueD = toDecimal(value);
+    let baseD = toDecimal(base);
+    if (valueD.lt(0) || baseD.lte(0) || !baseD.isFinite())
+        return new Decimal(NaN);
+    if (valueD.eq(0))
+        return new Decimal(-Infinity);
+    if (valueD.lt(1e-20))
+        return valueD.recip().neg().mul(Math.LOG2E);
+    if (valueD.eq(Infinity))
+        return new Decimal(Infinity);
+    if (valueD.isNan())
+        return new Decimal(NaN);
+    if (baseD.neq(1))
+        return iteratedFGH2log(valueD, 1).sub(iteratedFGH2log(baseD, 1));
+    // For some reason calling Decimal.increasingInverse here is faster than just running the loop
+    if (valueD.gte(baseD))
+        return Decimal.increasingInverse((value) => iteratedFGH2(base, value.toNumber()))(valueD);
+    let has_changed_directions_once = false;
+    let previously_rose = false;
+    let result = (valueD.gte(1)) ? valueD.slog(2, undefined, true).sub(baseD.slog(2, undefined, true)).toNumber() : valueD.recip().neg().mul(Math.LOG2E).toNumber();
+    let step_size = Math.abs(Math.max(0.001, result * 0.001));
+    for (var i = 1; i < 100; ++i) {
+        let new_decimal = iteratedFGH2(base, result);
+        let currently_rose = new_decimal.gt(valueD);
+        if (i > 1) {
+            if (previously_rose != currently_rose) {
+                has_changed_directions_once = true;
+            }
+        }
+        previously_rose = currently_rose;
+        if (has_changed_directions_once) {
+            step_size /= 2;
+        }
+        else {
+            step_size *= 2;
+        }
+        step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+        result += step_size;
+        if (result + step_size == result) {
+            break;
+        }
+    }
+    return Decimal.fromNumber(result);
+}
+/**
+ * f3(n) in the Fast-Growing Hierarchy. f3(n) = f2(f2(f2(f2...(n)))) with n f2's. Grows tetrationally.
+ * @param value ( Decimal ) The input to f3.
+ */
+function FGH3(value) {
+    let valueD = toDecimal(value);
+    if (valueD.lt(0) || valueD.isNan())
+        return new Decimal(NaN);
+    if (valueD.lt(1e-17))
+        return valueD;
+    if (valueD.eq(Infinity))
+        return new Decimal(Infinity);
+    return iteratedFGH2(valueD, valueD.toNumber());
+}
+/**
+ * The inverse of f3(n) in the Fast-Growing Hierarchy. Similar to super-logarithm.
+ * @param value ( Decimal ) The value that FGH3 will output when given the result of this function.
+ */
+function FGH3inverse(value) {
+    let valueD = toDecimal(value);
+    if (valueD.lt(0) || valueD.isNan())
+        return new Decimal(NaN);
+    if (valueD.lt(1e-17))
+        return valueD;
+    if (valueD.eq(Infinity))
+        return new Decimal(Infinity);
+    return Decimal.increasingInverse((value) => FGH3(value))(valueD);
+    // let has_changed_directions_once = false;
+    // let previously_rose = false;
+    // let result = (valueD.gte(2)) ? valueD.slog(2, undefined, true).toNumber() : valueD.toNumber();
+    // let step_size = Math.abs(Math.max(0.001, result * 0.001));
+    // for (var i = 1; i < 100; ++i)
+    // {
+    //   let new_decimal = FGH3(result);
+    //   let currently_rose = new_decimal.gt(valueD);
+    //   if (i > 1)
+    //   {
+    //     if (previously_rose != currently_rose)
+    //     {
+    //       has_changed_directions_once = true;
+    //     }
+    //   }
+    //   previously_rose = currently_rose;
+    //   if (has_changed_directions_once)
+    //   {
+    //     step_size /= 2;
+    //   }
+    //   else
+    //   {
+    //     step_size *= 2;
+    //   }
+    //   step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+    //   result += step_size;
+    //   if (result + step_size == result) { break; }
+    // }
+    // return Decimal.fromNumber(result);
+}
+/**
+ * Applies FGH3 to 'value' 'times' times. Grows pentationally with respect to 'times'.
+ * @param value ( Decimal ) The value to repeatedly apply FGH3 to.
+ * @param times ( number ) The amount of times FGH3 is applied to value.
+ */
+function iteratedFGH3(value, times) {
+    let valueD = toDecimal(value);
+    if (valueD.eq(0) || times == 0)
+        return valueD;
+    if (valueD.eq(Infinity))
+        return new Decimal(Infinity);
+    if (valueD.isNan() || Number.isNaN(times))
+        return new Decimal(NaN);
+    let wholetimes = Math.floor(times);
+    let fractimes = times - wholetimes;
+    if (fractimes != 0) {
+        if (valueD.eq(1))
+            valueD = Decimal.pow(2, fractimes);
+        else
+            return iteratedFGH3(1, iteratedFGH3log(valueD, 1).plus(times).toNumber());
+        // let iteration1 = Decimal.slog(FGH3(valueD), 2, true).toNumber();
+        // let iteration0 = Decimal.slog(valueD, 2, true).toNumber();
+        // valueD = Decimal.tetrate(2, iteration0 * (1 - fractimes) + iteration1 * fractimes, 1, true);
+    }
+    if (wholetimes < 0) {
+        let oldValue = Decimal.dZero;
+        for (let i = 0; i < Math.abs(wholetimes); i++) {
+            oldValue = valueD;
+            valueD = FGH3inverse(valueD);
+            if (valueD.eq(oldValue) || !valueD.isFinite())
+                return valueD;
+        }
+    }
+    else {
+        let oldValue = Decimal.dZero;
+        for (let i = 0; i < wholetimes; i++) {
+            oldValue = valueD;
+            valueD = FGH3(valueD);
+            if (valueD.eq(oldValue) || !valueD.isFinite())
+                return valueD;
+        }
+    }
+    return valueD;
+}
+/**
+ * One of the inverses of iteratedFGH3: given iteratedFGH3(base, x) = value and knowing what the base and value are, finds x.
+ * Similar to penta_log.
+ * @param value ( Decimal ) The answer given by iteratedFGH3 when called on the result this inverse outputs.
+ * @param base ( Decimal ) The base that iteratedFGH3 is called on with the result this inverse outputs to return the given value.
+ */
+function iteratedFGH3log(value, base) {
+    let valueD = toDecimal(value);
+    let baseD = toDecimal(base);
+    if (valueD.lt(0) || baseD.lte(0))
+        return new Decimal(NaN);
+    if (valueD.eq(0))
+        return new Decimal(-Infinity);
+    if (valueD.eq(Infinity))
+        return new Decimal(Infinity);
+    if (valueD.isNan() || Number.isNaN(base))
+        return new Decimal(NaN);
+    // return Decimal.increasingInverse((value : Decimal) => iteratedFGH3(base, value.toNumber()))(valueD);
+    if (baseD.neq(1))
+        return iteratedFGH3log(valueD, 1).sub(iteratedFGH3log(baseD, 1));
+    let result = 0;
+    if (valueD.gt(baseD)) {
+        let currentValue = baseD;
+        while (currentValue.lt(valueD)) {
+            currentValue = FGH3(currentValue);
+            result += 1;
+        }
+    }
+    else {
+        let currentValue = baseD;
+        while (currentValue.gt(valueD)) {
+            currentValue = FGH3inverse(currentValue);
+            result -= 1;
+        }
+    }
+    let has_changed_directions_once = false;
+    let previously_rose = false;
+    let step_size = 1;
+    for (var i = 1; i < 100; ++i) {
+        let new_decimal = iteratedFGH3(base, result);
+        let currently_rose = new_decimal.gt(valueD);
+        if (i > 1) {
+            if (previously_rose != currently_rose) {
+                has_changed_directions_once = true;
+            }
+        }
+        previously_rose = currently_rose;
+        if (has_changed_directions_once) {
+            step_size /= 2;
+        }
+        else {
+            step_size *= 2;
+        }
+        step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+        result += step_size;
+        if (result + step_size == result) {
+            break;
+        }
+    }
+    return Decimal.fromNumber(result);
+}
+// /**
+//  * f4(n) in the Fast-Growing Hierarchy. f4(n) = f3(f3(f3(f3...(n)))) with n f3's. Grows pentationally.
+//  * @param value ( Decimal ) The input to f4.
+//  */
+// export function FGH4(value : DecimalSource) : Decimal {
+//     let valueD = toDecimal(value);
+//     if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
+//     if (valueD.eq(Infinity)) return new Decimal(Infinity);
+//     return iteratedFGH3(valueD, valueD.toNumber());
+// }
+// /**
+//  * The inverse of f4(n) in the Fast-Growing Hierarchy. Similar to penta-logarithm.
+//  * @param value ( Decimal ) The value that FGH4 will output when given the result of this function.
+//  */
+// export function FGH4inverse(value : DecimalSource) : Decimal {
+//     let valueD = toDecimal(value);
+//     if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
+//     if (valueD.eq(Infinity)) return new Decimal(Infinity);
+//     // return Decimal.increasingInverse((value : Decimal) => FGH4(value))(valueD);
+//     let has_changed_directions_once = false;
+//     let previously_rose = false;
+//     let result = 0;
+//     let step_size = 0.001;
+//     for (var i = 1; i < 100; ++i)
+//     {
+//       let new_decimal = FGH4(result);
+//       let currently_rose = new_decimal.gt(valueD);
+//       if (i > 1)
+//       {
+//         if (previously_rose != currently_rose)
+//         {
+//           has_changed_directions_once = true;
+//         }
+//       }
+//       previously_rose = currently_rose;
+//       if (has_changed_directions_once)
+//       {
+//         step_size /= 2;
+//       }
+//       else
+//       {
+//         step_size *= 2;
+//       }
+//       step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+//       result += step_size;
+//       if (result + step_size == result) { break; }
+//     }
+//     return Decimal.fromNumber(result);
+// }
 
 class Notation {
     constructor() {
@@ -3103,7 +3928,7 @@ class NestedSignValueNotation extends Notation {
  * @param numeratorInnerNotation ( Notation ) The notation that the numerator, and by default the rest of the fraction as well, is abbreviated in. DefaultNotation is the default.
  * @param wholeInnerNotation ( Notation ) The notation that the whole number in the mixed number fraction is abbreviated with. Is the same as numeratorInnerNotation by default.
  * @param denominatorInnerNotation ( Notation ) The notation that the denominator in the fraction is abbreviated with. Is the same as numeratorInnerNotation by default.
- * @param showUnitDenominator ( boolean ) Controls whether the denominator is displayed even if it's 1. Default is false. This does not apply to mixed numbers, since there the fractional part is always hidden if it's zero.
+ * @param showUnitDenominator ( boolean ) Controls whether the denominator is displayed even if it's 1. Default is false. For mixed numbers, if this parameter is false, then whole numbers are just abbreviated using wholeInnerNotation directly.
  */
 class FractionNotation extends Notation {
     constructor(precision, mixedNumber = false, maxIterations = Infinity, maxDenominator = Decimal.dInf, strictMaxDenominator = false, maxNumerator = Decimal.dInf, strictMaxNumerator = false, delimiters = [["", ""], ["/", ""], ["", " "]], delimiterPermutation = 1, numeratorInnerNotation = new DefaultNotation(), wholeInnerNotation = numeratorInnerNotation, denominatorInnerNotation = numeratorInnerNotation, showUnitDenominator = false) {
@@ -3141,6 +3966,8 @@ class FractionNotation extends Notation {
             fraction.unshift(Decimal.dZero);
         if (fraction[0].eq(0) && fraction[1].eq(0))
             return this.wholeInnerNotation.format(0);
+        if (this.mixedNumber && !this.showUnitDenominator && fraction[1].eq(0) && fraction[2].eq(1))
+            return this.wholeInnerNotation.format(fraction[0]);
         let orderArray = [1];
         orderArray.splice(this.delimiterPermutation % 2, 0, 2);
         orderArray.splice(Math.floor(this.delimiterPermutation / 2) % 3, 0, 3);
@@ -3465,14 +4292,18 @@ class ScientificIterationsNotation extends Notation {
             sciArray.pop();
             sciArray.push(mantissa, exponent);
         }
+        let negMantissa = false;
+        if (sciArray.length == 1 && negExp) {
+            sciArray[0] = sciArray[0].neg();
+            negMantissa = true;
+        }
         let endings = sciArray.length - 1;
         let beforeChar = this._expChars[0][0];
         let afterChar = this._expChars[0][1];
-        console.log(structuredClone(sciArray));
         while (sciArray.length > 0) {
             let numStr = "";
             let toFormat = sciArray[0];
-            if (this.negExpChars !== null && typeof this.negExpChars[0] !== "boolean" && toFormat.lt(0)) {
+            if (this.negExpChars !== null && typeof this.negExpChars[0] !== "boolean" && toFormat.lt(0) && !negMantissa) {
                 toFormat = toFormat.neg();
                 beforeChar = this.negExpChars[0][0];
                 afterChar = this.negExpChars[0][1];
@@ -3497,10 +4328,6 @@ class ScientificIterationsNotation extends Notation {
             }
             beforeChar = this._expChars[0][0];
             afterChar = this._expChars[0][1];
-        }
-        if (negExp && added_es > 0) {
-            result = this.negativeString[0] + result + this.negativeString[1];
-            negExp = false;
         }
         for (let e = 0; e < endings; e++) {
             if (this.expBefore)
@@ -7027,13 +7854,18 @@ class FactorialScientificIterationsNotation extends Notation {
             sciArray.pop();
             sciArray.push(mantissa, exponent);
         }
+        let negMantissa = false;
+        if (sciArray.length == 1 && negExp) {
+            sciArray[0] = sciArray[0].neg();
+            negMantissa = true;
+        }
         let endings = sciArray.length - 1;
         let beforeChar = this._expChars[0][0];
         let afterChar = this._expChars[0][1];
         while (sciArray.length > 0) {
             let numStr = "";
             let toFormat = sciArray[0];
-            if (this.negExpChars !== null && typeof this.negExpChars[0] !== "boolean" && toFormat.lt(0)) {
+            if (this.negExpChars !== null && typeof this.negExpChars[0] !== "boolean" && toFormat.lt(0) && !negMantissa) {
                 toFormat = toFormat.neg();
                 beforeChar = this.negExpChars[0][0];
                 afterChar = this.negExpChars[0][1];
@@ -9010,22 +9842,23 @@ class PsiDashNotation extends Notation {
         let startLetter = -1;
         let [E, F, G, H] = [0, 0, 0, 0];
         let dashArray = [];
-        if (!baseNumD.tetrate(2).isFinite() || value.lt(baseNumD.tetrate(2))) {
+        let nextLetter = baseNum == 2 ? 3 : 2;
+        if (!baseNumD.tetrate(nextLetter).isFinite() || value.lt(baseNumD.tetrate(nextLetter))) {
             E = 1;
             currentValue = value.log(baseNum);
             startLetter = 0;
         }
-        else if (!baseNumD.pentate(2).isFinite() || value.lt(baseNumD.pentate(2))) {
+        else if (!baseNumD.pentate(nextLetter).isFinite() || value.lt(baseNumD.pentate(nextLetter))) {
             F = 1;
             currentValue = value.slog(baseNum, 100, true);
             startLetter = 1;
         }
-        else if (!baseNumD.pentate(baseNum).isFinite() || value.lt(baseNumD.pentate(baseNum))) {
+        else if (!baseNumD.pentate(baseNum == 2 ? 4 : baseNum).isFinite() || value.lt(baseNumD.pentate(baseNum == 2 ? 4 : baseNum))) {
             G = 1;
             currentValue = hypersplit(value, baseNum, [0, 1, 1])[3];
             startLetter = 2;
         }
-        else { //H is only needed in base 3, but it's still here
+        else { //H is only needed in base 2 and 3, but it's still here
             H = 1;
             let hexaValue = Decimal.dZero;
             while (currentValue.gte(baseNum)) {
@@ -9044,7 +9877,7 @@ class PsiDashNotation extends Notation {
         }
         while ((E > 0 || F > 0 || G > 0 || H > 0) && dashArray.length < maxEntries - 1 && currentValue.lte(Decimal.pow(baseNum, this._maxPrecision)) && currentValue.lte(Number.MAX_VALUE)) {
             let sciPair = scientifify(currentValue, baseNum, baseNum ** (1 - this._maxPrecision));
-            dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1])).floor().div(baseNumD.pow(sciPair[1])));
+            dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1])));
             if (E > 0) {
                 E--;
                 currentValue = Decimal.pow(baseNum, currentValue);
@@ -9066,7 +9899,7 @@ class PsiDashNotation extends Notation {
             }
         }
         let sciPair = scientifify(currentValue, baseNum, baseNum ** (1 - this._maxPrecision));
-        dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1])).floor().div(baseNumD.pow(sciPair[1])));
+        dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1])));
         while (dashArray.length > 1 && scientifify(dashArray[dashArray.length - 1], baseNum, baseNum ** (-this._maxPrecision + 1))[0].eq(1))
             dashArray.pop();
         let innerNotation = new AlternateBaseNotation(this._base, 0, this._maxPrecision - 1, this._maxPrecision - 1, -1, Decimal.dInf, undefined, undefined, undefined, undefined, -Infinity, undefined, undefined, undefined, "", undefined, undefined, undefined, undefined, this._maxPrecision);
@@ -9092,8 +9925,8 @@ class PsiDashNotation extends Notation {
         }
         if (base.length == 0)
             throw new RangeError("There is no such thing as base 0");
-        if (base.length < 3)
-            throw new RangeError("Psi Dash Notation doesn't work with base 1 or 2");
+        if (base.length < 2)
+            throw new RangeError("Psi Dash Notation doesn't work with base 1");
         this._base = base;
     }
     get maxEntries() {
@@ -10796,7 +11629,7 @@ class PolynomialNotation extends Notation {
             return result;
         }
         let baseString = this.variableStr;
-        let bottomExps = value.slog(this._value, 100, true).sub(this.maxSingleTerm.slog(this._value, 100, true)).plus(1).floor().max(0);
+        let bottomExps = (value.gte(this.maxSingleTerm)) ? value.slog(this._value, 100, true).sub(this.maxSingleTerm.slog(this._value, 100, true)).plus(1).floor().max(0) : Decimal.dZero;
         if (bottomExps.lt(9e15)) {
             value = value.iteratedlog(this._value, bottomExps.toNumber(), true);
             let currentValue = value;
@@ -11343,6 +12176,3754 @@ function physicalScaleInternal(value) {
     }
 }
 
+/**
+ * Similar to LogarithmNotation, but each iteration takes multiple logarithms of different bases.
+ * @param bases ( Decimal[] ! ) The list of bases for the logarithm iterations. For example, if bases is [10, 2], then each iteration performs .log(10).log(2) on the value.
+ * @param iterations ( number ) The amount of logarithm iterations. This can be negative.
+ * @param max_es_in_a_row ( number ) If the logarithm representation would have more E's at the beginning than this, those E's are made into an E^n expression. Default is 5.
+ * @param expChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate logarithm notation. In each pair, the first entry goes before the number, the second entry goes after the number. expChars[0] takes the place of the E in "E10", expChars[1] takes the place of the first E in "EE10" (expChars[0] is for the innermost logarithm, expChars[1] is for the outer ones), and expChars[2] takes the place of the (E^) in (E^10)4. Default is [["E", ""], ["E", ""], ["(E^", ")"]].
+ * @param logChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of expChars used for a logarithm of negative iterations. Default is [["lg", ""], ["lg", ""], ["(lg^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of expChars[2], such as E^-1.
+ * @param superexpAfter ( boolean ) This is false by default; if it's true, an (E^n) expression comes after the number instead of before.
+ * @param expMults ( Decimal[] ) On each logarithm, the result is multiplied by the corresponding number in this array. If expMults has less entries than bases, the remaining entries are given an expMult of 1. Default is an empty array, which is equivalent to an array of 1s.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (E^n) expression is itself notated with. Is the same as innerNotation by default.
+ */
+class MultibaseLogarithmNotation extends Notation {
+    constructor(bases, iterations = 1, max_es_in_a_row = 5, expChars = [["E", ""], ["E", ""], ["(E^", ")"]], logChars = [["lg", ""], ["lg", ""], ["(lg^", ")"]], superexpAfter = false, expMults = [], innerNotation = new DefaultNotation(), superexponentInnerNotation = innerNotation) {
+        super();
+        this._iterations = 1;
+        this.max_es_in_a_row = 5;
+        this.expChars = [["E", ""], ["E", ""], ["(E^", ")"]];
+        this.logChars = [["lg", ""], ["lg", ""], ["(lg^", ")"]];
+        this.superexpAfter = false;
+        this._expMults = [];
+        this.innerNotation = new DefaultNotation();
+        this.superexponentInnerNotation = this.innerNotation;
+        this.name = "Multibase Logarithm Notation";
+        this.setBasesAndExpMults(bases, expMults);
+        this.iterations = iterations;
+        this.max_es_in_a_row = max_es_in_a_row;
+        this.expChars = expChars;
+        this.logChars = logChars;
+        this.superexpAfter = superexpAfter;
+        this.innerNotation = innerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && this._iterations >= 0)
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        if (value.eq(0) && this._iterations == 0)
+            return this.innerNotation.format(0);
+        let result = "";
+        let iterations = this._iterations;
+        // Some optimization has been done in these next few statements to avoid calling slog on small numbers when possible
+        let highestBase = Decimal.dOne;
+        for (let b = 0; b < this._bases.length; b++)
+            highestBase = Decimal.max(highestBase, this._bases[b].pow(this._expMults[b].recip()));
+        if (iterations * this._bases.length >= 1 && value.lte(0))
+            iterations = 0;
+        else if (iterations * this._bases.length >= 2 && value.lte(1))
+            iterations = 1;
+        else if (!multibaseLogarithmmult(value, this._bases, iterations, this._expMults).isFinite())
+            iterations = Math.ceil(Decimal.slog(value).sub(Decimal.slog(highestBase)).sub(1e-12).toNumber() / this._bases.length + 1);
+        while (!multibaseLogarithmmult(value, this._bases, iterations, this._expMults).isFinite())
+            iterations -= 1;
+        value = multibaseLogarithmmult(value, this._bases, iterations, this._expMults);
+        let usedChars = this.expChars;
+        if (iterations < 0 && this.logChars != null) {
+            usedChars = this.logChars;
+            iterations *= -1;
+        }
+        result = this.innerNotation.format(value);
+        if (iterations >= 0 && iterations <= this.max_es_in_a_row && iterations % 1 == 0) {
+            for (let i = 0; i < iterations; i++) {
+                let eChar = usedChars[(i == 0) ? 0 : 1][0];
+                let afterChar = usedChars[(i == 0) ? 0 : 1][1];
+                result = eChar + result + afterChar;
+            }
+        }
+        else {
+            let eChar = usedChars[2][0];
+            let afterChar = usedChars[2][1];
+            let eStr = this.superexponentInnerNotation.format(iterations);
+            eStr = eChar + eStr + afterChar;
+            if (this.superexpAfter)
+                result = result + eStr;
+            else
+                result = eStr + result;
+        }
+        return result;
+    }
+    setBasesAndExpMults(bases, expMults) {
+        if (bases.length == 0)
+            throw new RangeError("Empty bases in Multibase Logarithm Notation");
+        let newBases = [];
+        let newMults = [];
+        for (let b = 0; b < bases.length; b++) {
+            let baseD = toDecimal(bases[b]);
+            let expMultD = (b >= expMults.length) ? Decimal.dOne : toDecimal(expMults[b]);
+            if (expMultD.eq(0))
+                throw new RangeError("expMult should not be zero");
+            if (baseD.pow(expMultD.recip()).lte(1))
+                throw new RangeError("Base <= 1 in Multibase Logarithm Notation");
+            newBases.push(baseD);
+            newMults.push((b >= expMults.length) ? Decimal.dOne : expMultD);
+        }
+        this._bases = newBases;
+        this._expMults = newMults;
+    }
+    get bases() {
+        return this._bases;
+    }
+    set bases(bases) {
+        if (bases.length == 0)
+            throw new RangeError("Empty bases in Multibase Logarithm Notation");
+        let basesD = bases.map(toDecimal);
+        let newBases = [];
+        for (let b = 0; b < bases.length; b++) {
+            let expMultD = (b >= this._expMults.length) ? Decimal.dOne : this._expMults[b];
+            if (basesD[b].pow(expMultD.recip()).lte(1))
+                throw new RangeError("Base <= 1 in Multibase Logarithm Notation");
+            newBases.push(basesD[b]);
+        }
+        this._bases = newBases;
+        this._expMults = this._expMults.slice(0, this._bases.length);
+    }
+    get expMults() {
+        return this._expMults;
+    }
+    set expMults(expMults) {
+        let expMultsD = expMults.map(toDecimal);
+        let newMults = [];
+        for (let b = 0; b < expMults.length && b < this.bases.length; b++) {
+            if (this._bases[b].pow(expMultsD[b].recip()).lte(1))
+                throw new RangeError("Base <= 1 in Multibase Logarithm Notation");
+            newMults.push(expMultsD[b]);
+        }
+        this._expMults = newMults;
+        while (this._expMults.length < this._bases.length)
+            this._expMults.push(Decimal.dOne);
+    }
+    get iterations() {
+        return this._iterations;
+    }
+    set iterations(iterations) {
+        if (iterations % 1 != 0)
+            throw new RangeError("Multibase Logarithm does not support non-integer iterations");
+        this._iterations = iterations;
+    }
+}
+/**
+ * Similar to MultiLogarithmNotation, but each iteration takes multiple logarithms of different bases.
+ * @param bases ( Decimal[] ! ) The list of bases for the logarithm iterations. For example, if bases is [10, 2], then each iteration performs .log(10).log(2) on the value.
+ * @param maxnum ( Decimal ) Only numbers below this value are allowed to show up on their own - anything higher and the amount of iterations increases. Default is 1e12.
+ * @param max_es_in_a_row ( number ) If the logarithm representation would have more E's at the beginning than this, those E's are made into an E^n expression. Default is 5.
+ * @param minIterations ( number ) The minimum amount of logarithm iterations. Default is 1.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed iteration amounts: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted iteration amounts are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param expChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate logarithm notation. In each pair, the first entry goes before the number, the second entry goes after the number. expChars[0] takes the place of the E in "E10", expChars[1] takes the place of the first E in "EE10" (expChars[0] is for the innermost logarithm, expChars[1] is for the outer ones), and expChars[2] takes the place of the (E^) in (E^10)4. Default is [["E", ""], ["E", ""], ["(E^", ")"]].
+ * @param logChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of expChars used for a logarithm of negative iterations. Default is [["lg", ""], ["lg", ""], ["(lg^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of expChars[2], such as E^-1.
+ * @param superexpAfter ( boolean ) This is false by default; if it's true, an (E^n) expression comes after the number instead of before.
+ * @param expMults ( Decimal[] ) On each logarithm, the result is multiplied by the corresponding number in this array. If expMults has less entries than bases, the remaining entries are given an expMult of 1. Default is an empty array, which is equivalent to an array of 1s.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (E^n) expression is itself notated with. Is the same as innerNotation by default.
+ */
+class MultibaseMultiLogarithmNotation extends Notation {
+    constructor(bases, maxnum = 1e12, max_es_in_a_row = 5, minIterations = 1, engineerings = 1, expChars = [["E", ""], ["E", ""], ["(E^", ")"]], logChars = [["lg", ""], ["lg", ""], ["(lg^", ")"]], superexpAfter = false, expMults = [], innerNotation = new DefaultNotation(), superexponentInnerNotation = innerNotation) {
+        super();
+        this._maxnum = new Decimal(1e12);
+        this.max_es_in_a_row = 5;
+        this._minIterations = 1;
+        this._engineerings = [Decimal.dOne];
+        this.expChars = [["E", ""], ["E", ""], ["(E^", ")"]];
+        this.logChars = [["lg", ""], ["lg", ""], ["(lg^", ")"]];
+        this.superexpAfter = false;
+        this._expMults = [];
+        this.innerNotation = new DefaultNotation();
+        this.superexponentInnerNotation = this.innerNotation;
+        this.name = "Multibase Multi-Logarithm Notation";
+        this.setBasesAndExpMults(bases, expMults);
+        this.maxnum = maxnum;
+        this.max_es_in_a_row = max_es_in_a_row;
+        this.minIterations = minIterations;
+        this.engineerings = engineerings;
+        this.expChars = expChars;
+        this.logChars = logChars;
+        this.superexpAfter = superexpAfter;
+        this.innerNotation = innerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && this._minIterations >= 0)
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        let originalValue = value;
+        let iterations = this._minIterations;
+        let highestBase = Decimal.dOne;
+        for (let b = 0; b < this._bases.length; b++)
+            highestBase = Decimal.max(highestBase, this._bases[b].pow(this._expMults[b].recip()));
+        if (!multibaseLogarithmmult(value, this._bases, this._minIterations, this._expMults).isFinite()) {
+            let decIterations = toDecimal(iterations);
+            if (value.gte(highestBase))
+                decIterations = currentEngineeringValue(Decimal.slog(value).sub(Decimal.slog(highestBase)).div(this._bases.length).plus(2), this._engineerings);
+            while (!multibaseLogarithmmult(value, this._bases, decIterations.toNumber(), this._expMults).isFinite())
+                decIterations = previousEngineeringValue(decIterations, this._engineerings);
+            iterations = decIterations.toNumber();
+        }
+        else if (multibaseLogarithmmult(value, this._bases, iterations, this._expMults).gte(this._maxnum)) {
+            if (multibaseLogarithmmult(value, this._bases, iterations, this._expMults).gte(Decimal.iteratedexp(10, 3, highestBase, true))) {
+                iterations = currentEngineeringValue(Decimal.slog(value).sub(Decimal.slog(highestBase)).sub(3).div(this._bases.length).plus(1), this._engineerings).toNumber();
+            }
+            while (iterations * this._bases.length < 9e15 && multibaseLogarithmmult(value, this._bases, iterations, this._expMults).gte(this._maxnum))
+                iterations = nextEngineeringValue(new Decimal(iterations), this._engineerings).toNumber();
+        }
+        if (iterations * this._bases.length >= 9e15) { // Imprecision was causing problems, so if we're too high, just ignore the logarithm process and find an equivalent expression based only on iterations, since at that point the leftover value means nothing
+            let result = this.innerNotation.format(1);
+            let eChar = this.expChars[2][0];
+            let afterChar = this.expChars[2][1];
+            let eStr = this.superexponentInnerNotation.format(iterations);
+            eStr = eChar + eStr + afterChar;
+            if (this.superexpAfter)
+                result = result + eStr;
+            else
+                result = eStr + result;
+            return result;
+        }
+        return new MultibaseLogarithmNotation(this._bases, iterations, this.max_es_in_a_row, this.expChars, this.logChars, this.superexpAfter, this._expMults, this.innerNotation, this.superexponentInnerNotation).format(originalValue);
+    }
+    get maxnum() {
+        return this._maxnum;
+    }
+    set maxnum(maxnum) {
+        let maxnumD = toDecimal(maxnum);
+        if (maxnumD.lt(0))
+            throw new RangeError("Negative maxnum in Multi-Logarithm Notation");
+        this._maxnum = maxnumD;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._engineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        for (let e = 0; e < engineeringsD.length; e++) {
+            if (engineeringsD[e].mod(1).neq(0))
+                throw new RangeError("Multibase Logarithm does not support non-integer iterations");
+        }
+        this._engineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    setBasesAndExpMults(bases, expMults) {
+        if (bases.length == 0)
+            throw new RangeError("Empty bases in Multibase Logarithm Notation");
+        let newBases = [];
+        let newMults = [];
+        for (let b = 0; b < bases.length; b++) {
+            let baseD = toDecimal(bases[b]);
+            let expMultD = (b >= expMults.length) ? Decimal.dOne : toDecimal(expMults[b]);
+            if (expMultD.eq(0))
+                throw new RangeError("expMult should not be zero");
+            if (baseD.pow(expMultD.recip()).lte(1))
+                throw new RangeError("Base <= 1 in Multibase Logarithm Notation");
+            newBases.push(baseD);
+            newMults.push((b >= expMults.length) ? Decimal.dOne : expMultD);
+        }
+        this._bases = newBases;
+        this._expMults = newMults;
+    }
+    get bases() {
+        return this._bases;
+    }
+    set bases(bases) {
+        if (bases.length == 0)
+            throw new RangeError("Empty bases in Multibase Logarithm Notation");
+        let basesD = bases.map(toDecimal);
+        let newBases = [];
+        for (let b = 0; b < bases.length; b++) {
+            let expMultD = (b >= this._expMults.length) ? Decimal.dOne : this._expMults[b];
+            if (basesD[b].pow(expMultD.recip()).lte(1.44466786100976613366))
+                throw new RangeError("Bases with convergent tetration don't work for Multibase Multi-Logarithm Notation");
+            newBases.push(basesD[b]);
+        }
+        this._bases = newBases;
+        this._expMults = this._expMults.slice(0, this._bases.length);
+    }
+    get expMults() {
+        return this._expMults;
+    }
+    set expMults(expMults) {
+        let expMultsD = expMults.map(toDecimal);
+        let newMults = [];
+        for (let b = 0; b < expMults.length && b < this.bases.length; b++) {
+            if (this._bases[b].pow(expMultsD[b].recip()).lte(1.44466786100976613366))
+                throw new RangeError("Base <= 1 in Multibase Logarithm Notation");
+            newMults.push(expMultsD[b]);
+        }
+        this._expMults = newMults;
+        while (this._expMults.length < this._bases.length)
+            this._expMults.push(Decimal.dOne);
+    }
+    get minIterations() {
+        return this._minIterations;
+    }
+    set minIterations(minIterations) {
+        if (minIterations % 1 != 0)
+            throw new RangeError("Multibase Logarithm does not support non-integer iterations");
+        this._minIterations = minIterations;
+    }
+}
+
+/**
+ * Scientific notation, but with "weak tetration" instead of exponentiation, where weak tetration is repeated exponentiation but evaluated bottom-to-top instead of top-to-bottom. xfy = (base↓↓y)^x, where base↓↓y = (((base^base)^base)^base...)^base = base^base^(y - 1).
+ * @param maxnum ( Decimal ) Only exponents below this value are allowed - anything higher and the exponent itself is abbreviated in weak hyperscientific notation. Default is 1e12.
+ * @param max_fs_in_a_row ( number ) If the weak hyperscientific representation would have more f's at the beginning than this, those f's are made into an f^n expression. Default is 5.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0). Default is 1, which corresponds to regular scientific notation.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in weak hyperscientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^2, if mantissaPower is 2 then the bounds are base^2 and base^3, and so on. For example, a number normally represented as "3.543f2" would become "35.43f1" with 1 mantissaPower and "354.3f0" with 2 mantissaPower.
+ * @param iteration_zero ( boolean ) If this is true, then numbers less than maxnum will ignore the weak hyperscientific notation and jump directly to the innerNotation - useful if you want 100 to just be abbreviated as "100" instead of "2f1". Default is false.
+ * @param base ( Decimal ) This notation normally works in powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 81 becomes "2f1".
+ * @param expChars ( [[string, string], [string | boolean, string | boolean], [string, string]] ) An array of three pairs of strings that are used as the between characters for weak hyperscientific notation. In each pair, the first entry goes before the exponent, the second entry goes after the exponent. expChars[0] takes the place of the f in "1f10", expChars[1] takes the place of the first f in "f1f10", and expChars[2] takes the place of the (f^) in (f^10)4. If expChars[1][0] is a boolean instead of a string: if it's false, then expChars[1][0] is set to be expChars[0][0] with the way mantissaInnerNotation formats 1 tacked on the beginning, and if it's true than the 1 is tacked on the end instead. Likewise for expChars[1][1] (expChars[0][1] with a 1 on it). Default is [["f", ""], ["f", ""], ["(f^", ")"]].
+ * @param negExpChars ( null | [[string, string], [string, string], [string, string]] ) This can either be null or an array of three pairs of strings. Ignore this parameter if it's null, which is the default. Otherwise, this acts like expChars, but it's used when the exponent is negative. Default is null.
+ * @param recipString ( null | [string, string] ) If this parameter is null, numbers below 1 are just written in mantissaInnerNotation. If this parameter is a pair of strings, then numbers below 1 are written in terms of their reciprocal, with recipString[0] going before the reciprocal and recipString[1] going after the reciprocal. Default is ["1 / ", ""].
+ * @param expBefore ( boolean ) If this parameter is true, the exponent comes before the mantissa instead of after. Default is false.
+ * @param superexpAfter ( boolean ) If this parameter is true, (f^n) expressions come after the rest of the number instead of before. Default is false.
+ * @param mantissaInnerNotation ( Notation ) The notation that the numbers within the mantissas are themselves notated with. DefaultNotation is the default.
+ * @param exponentInnerNotation ( Notation ) The notation that the highest exponent is itself notated with. Is the same as mantissaInnerNotation by default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (f^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
+ */
+class WeakHyperscientificNotation extends Notation {
+    constructor(maxnum = 1e12, max_fs_in_a_row = 5, rounding = 0, engineerings = 1, mantissaPower = 0, iteration_zero = false, base = 10, expChars = [["f", ""], ["f", ""], ["(f^", ")"]], negExpChars = null, recipString = ["1 / ", ""], expBefore = false, superexpAfter = false, mantissaInnerNotation = new DefaultNotation(), exponentInnerNotation = mantissaInnerNotation, superexponentInnerNotation = exponentInnerNotation) {
+        super();
+        this._maxnum = new Decimal(1e12);
+        this.max_fs_in_a_row = 5;
+        this.rounding = Decimal.dZero;
+        this._engineerings = [Decimal.dOne];
+        this.mantissaPower = Decimal.dZero;
+        this.iteration_zero = false;
+        this._base = Decimal.dTen;
+        this._expChars = [["f", ""], ["f", ""], ["(f^", ")"]];
+        this._negExpChars = null;
+        this.recipString = ["1 / ", ""];
+        this.expBefore = false;
+        this.superexpAfter = false;
+        this.mantissaInnerNotation = new DefaultNotation();
+        this.exponentInnerNotation = this.mantissaInnerNotation;
+        this.superexponentInnerNotation = this.exponentInnerNotation;
+        this.name = "Weak Hyperscientific Notation";
+        this.maxnum = maxnum;
+        this.max_fs_in_a_row = max_fs_in_a_row;
+        this.rounding = rounding;
+        this.engineerings = engineerings;
+        this.mantissaPower = toDecimal(mantissaPower);
+        this.iteration_zero = iteration_zero;
+        this._base = toDecimal(base);
+        this.recipString = recipString;
+        this.expBefore = expBefore;
+        this.superexpAfter = superexpAfter;
+        this.mantissaInnerNotation = mantissaInnerNotation;
+        this.exponentInnerNotation = exponentInnerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+        this.unconvertedExpChars = expChars;
+        this.unconvertedNegExpChars = negExpChars;
+        this.expChars = expChars;
+        this.negExpChars = negExpChars;
+    }
+    formatDecimal(value) {
+        if (value.eq(0) || value.eq(1))
+            return this.mantissaInnerNotation.format(value);
+        if (value.lt(1)) {
+            if (this.recipString === null)
+                return this.mantissaInnerNotation.format(value);
+            else
+                return this.recipString[0] + this.format(value.recip()) + this.recipString[1];
+        }
+        if (this.iteration_zero && value.lt(this._maxnum) && value.gt(this._maxnum.recip()))
+            return this.mantissaInnerNotation.format(value);
+        let result = "";
+        if (multabs(value).lt(weak_tetrate(this._base, this._maxnum))) {
+            let [mantissa, exponent] = weak_hyperscientifify(value, this._base, this.rounding, this.mantissaPower, this._engineerings);
+            let beforeChar = this._expChars[0][0];
+            let afterChar = this._expChars[0][1];
+            if (exponent.lt(0) && this._negExpChars !== null) {
+                beforeChar = this._negExpChars[0][0];
+                afterChar = this._negExpChars[0][1];
+                exponent = exponent.neg();
+            }
+            let mantissaStr = this.mantissaInnerNotation.format(mantissa);
+            let exponentStr = this.exponentInnerNotation.format(exponent);
+            if (this.expBefore)
+                result = beforeChar + exponentStr + afterChar + mantissaStr;
+            else
+                result = mantissaStr + beforeChar + exponentStr + afterChar;
+        }
+        else {
+            let negExp = false;
+            let targetExpChars = this._expChars;
+            if (value.lt(weak_tetrate(this._base, 0))) {
+                negExp = true;
+                if (this._negExpChars !== null)
+                    targetExpChars = this._negExpChars;
+                let [m, e] = weak_hyperscientifify(value, this._base, this.rounding, this.mantissaPower, this._engineerings);
+                value = weak_tetrate(this._base, e.neg()).pow(m);
+            }
+            let added_es = Decimal.slog(value, this._base, true).sub(Decimal.slog(this._maxnum, this._base, true).plus(3)).div(2).floor().toNumber();
+            value = (added_es > 9e15) ? this._maxnum : Decimal.iteratedlog(value, this._base, added_es * 2, true);
+            while (value.gte(weak_tetrate(this._base, this._maxnum))) {
+                added_es += 1;
+                value = weak_slog(value, this._base);
+            }
+            if (negExp) {
+                if (this._negExpChars === null)
+                    negExp = false;
+                else
+                    value = value.neg();
+            }
+            result = this.format(value);
+            if (added_es <= this.max_fs_in_a_row) {
+                for (let i = 0; i < added_es; i++) {
+                    result = targetExpChars[1][0] + result + targetExpChars[1][1];
+                }
+            }
+            else {
+                let eStr = this.superexponentInnerNotation.format(added_es);
+                eStr = targetExpChars[2][0] + eStr + targetExpChars[2][1];
+                if (this.superexpAfter)
+                    result = result + eStr;
+                else
+                    result = eStr + result;
+            }
+        }
+        return result;
+    }
+    get maxnum() {
+        return this._maxnum;
+    }
+    set maxnum(maxnum) {
+        let maxnumD = toDecimal(maxnum);
+        if (maxnumD.lte(0))
+            throw new RangeError("Nonpositive maxnum in Weak Hyperscientific Notation");
+        this._maxnum = maxnumD;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._engineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._engineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get base() {
+        return this._base;
+    }
+    set base(base) {
+        let baseD = toDecimal(base);
+        if (baseD.lte(1))
+            throw new RangeError("Base <= 1 in Weak Hyperscientific Notation");
+        this._base = toDecimal(base);
+    }
+    get expChars() {
+        return this.unconvertedExpChars;
+    }
+    set expChars(input) {
+        let one = this.mantissaInnerNotation.format(1);
+        let expChars = [];
+        expChars.push(input[0]);
+        expChars.push(["", ""]);
+        if (typeof input[1][0] == "string")
+            expChars[1][0] = input[1][0];
+        else if (input[1][0] === false)
+            expChars[1][0] = one + input[0][0];
+        else if (input[1][0] === true)
+            expChars[1][0] = input[0][0] + one;
+        if (typeof input[1][1] == "string")
+            expChars[1][1] = input[1][1];
+        else if (input[1][1] === false)
+            expChars[1][1] = one + input[0][1];
+        else if (input[1][1] === true)
+            expChars[1][1] = input[0][1] + one;
+        expChars.push(input[2]);
+        this._expChars = expChars;
+    }
+    get negExpChars() {
+        return this.unconvertedNegExpChars;
+    }
+    set negExpChars(input) {
+        if (input === null) {
+            this._negExpChars = null;
+        }
+        else {
+            let one = this.mantissaInnerNotation.format(1);
+            let expChars = [];
+            expChars.push(input[0]);
+            expChars.push(["", ""]);
+            if (typeof input[1][0] == "string")
+                expChars[1][0] = input[1][0];
+            else if (input[1][0] === false)
+                expChars[1][0] = one + input[0][0];
+            else if (input[1][0] === true)
+                expChars[1][0] = input[0][0] + one;
+            if (typeof input[1][1] == "string")
+                expChars[1][1] = input[1][1];
+            else if (input[1][1] === false)
+                expChars[1][1] = one + input[0][1];
+            else if (input[1][1] === true)
+                expChars[1][1] = input[0][1] + one;
+            expChars.push(input[2]);
+            this._negExpChars = expChars;
+        }
+    }
+}
+/**
+ * This notation performs weak hyperscientific notation a certain number of times. 1 iteration means the number is in the form AfB (where A and B are abbreviated using the innerNotation), 2 iterations means the number is in the form AfBfC, and so on.
+ * @param iterations ( number ! ) The amount of iterations.
+ * @param max_fs_in_a_row ( number ) If the scientific representation would have more f's at the beginning than this, those f's are made into an f^n expression. Default is 5.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed exponent values: if it's three then the exponent will always be a multiple of 3, as in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted exponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0). Default is 1, which corresponds to regular scientific notation.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in weak hyperscientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^2, if mantissaPower is 2 then the bounds are base^2 and base^3, and so on. For example, a number normally represented as "3.543f2" would become "35.43f1" with 1 mantissaPower and "354.3f0" with 2 mantissaPower.
+ * @param base ( Decimal ) This notation normally works in powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 81 becomes "2f1".
+ * @param expChars ( [[string, string], [string | boolean, string | boolean], [string, string]] ) An array of three pairs of strings that are used as the between characters for weak hyperscientific notation. In each pair, the first entry goes before the exponent, the second entry goes after the exponent. expChars[0] takes the place of the f in "1f10", expChars[1] takes the place of the first f in "f1f10", and expChars[2] takes the place of the (f^) in (f^10)4. If expChars[1][0] is a boolean instead of a string: if it's false, then expChars[1][0] is set to be expChars[0][0] with the way mantissaInnerNotation formats 1 tacked on the beginning, and if it's true than the 1 is tacked on the end instead. Likewise for expChars[1][1] (expChars[0][1] with a 1 on it). Default is [["f", ""], ["f", ""], ["(f^", ")"]].
+ * @param negExpChars ( null | [string, string] ) This can either be null or a pair of strings. Ignore this parameter if it's null, which is the default. Otherwise, this acts like expChars[0], but it's used when the exponent is negative. Default is null.
+ * @param recipString ( null | [string, string] ) If this parameter is null, numbers below 1 are just written in mantissaInnerNotation. If this parameter is a pair of strings, then numbers below 1 are written in terms of their reciprocal, with recipString[0] going before the reciprocal and recipString[1] going after the reciprocal. Default is ["1 / ", ""].
+ * @param expBefore ( boolean ) If this parameter is true, the exponent comes before the mantissa instead of after. Default is false.
+ * @param superexpAfter ( boolean ) If this parameter is true, (f^n) expressions come after the rest of the number instead of before. Default is false.
+ * @param mantissaInnerNotation ( Notation ) The notation that the numbers within the mantissas are themselves notated with. DefaultNotation is the default.
+ * @param exponentInnerNotation ( Notation ) The notation that the highest exponent is itself notated with. Is the same as mantissaInnerNotation by default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (f^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
+ */
+class WeakHyperscientificIterationsNotation extends Notation {
+    constructor(iterations, max_fs_in_a_row = 5, rounding = 0, engineerings = 1, mantissaPower = 0, base = 10, expChars = [["f", ""], ["f", ""], ["(f^", ")"]], negExpChars = null, recipString = ["1 / ", ""], expBefore = false, superexpAfter = false, mantissaInnerNotation = new DefaultNotation(), exponentInnerNotation = mantissaInnerNotation, superexponentInnerNotation = exponentInnerNotation) {
+        super();
+        this.max_fs_in_a_row = 5;
+        this.rounding = Decimal.dZero;
+        this._engineerings = [Decimal.dOne];
+        this.mantissaPower = Decimal.dZero;
+        this._base = Decimal.dTen;
+        this._expChars = [["f", ""], ["f", ""], ["(f^", ")"]];
+        this.negExpChars = null;
+        this.recipString = ["1 / ", ""];
+        this.expBefore = false;
+        this.superexpAfter = false;
+        this.mantissaInnerNotation = new DefaultNotation();
+        this.exponentInnerNotation = this.mantissaInnerNotation;
+        this.superexponentInnerNotation = this.exponentInnerNotation;
+        this.name = "Weak Hyperscientific Iterations Notation";
+        this.iterations = iterations;
+        this.max_fs_in_a_row = max_fs_in_a_row;
+        this.rounding = rounding;
+        this.engineerings = engineerings;
+        this.mantissaPower = toDecimal(mantissaPower);
+        this._base = toDecimal(base);
+        this.recipString = recipString;
+        this.expBefore = expBefore;
+        this.superexpAfter = superexpAfter;
+        this.mantissaInnerNotation = mantissaInnerNotation;
+        this.exponentInnerNotation = exponentInnerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+        this.unconvertedExpChars = expChars;
+        this.expChars = expChars;
+        this.negExpChars = negExpChars;
+    }
+    formatDecimal(value) {
+        if (value.eq(0) || value.eq(1))
+            return this.mantissaInnerNotation.format(value);
+        if (value.lt(1)) {
+            if (this.recipString === null)
+                return this.mantissaInnerNotation.format(value);
+            else
+                return this.recipString[0] + this.format(value.recip()) + this.recipString[1];
+        }
+        if (this._iterations == 0)
+            return this.mantissaInnerNotation.format(value);
+        let iterations = this._iterations;
+        let result = "";
+        let negExp = false;
+        if (value.lt(weak_tetrate(this._base, 0))) {
+            negExp = true;
+            let [m, e] = weak_hyperscientifify(value, this._base, this.rounding, this.mantissaPower, this._engineerings);
+            value = weak_tetrate(this._base, e.neg()).pow(m);
+        }
+        let maxIterations = 0;
+        if (value.gt(Decimal.iteratedexp(10, 4, this._base, true)))
+            maxIterations = Decimal.slog(value, 10, true).sub(Decimal.slog(this._base, 10, true).plus(4)).div(2).floor().toNumber();
+        if (maxIterations < 9e15) {
+            let testingValue = value.iteratedlog(10, maxIterations * 2, true);
+            maxIterations--;
+            while (testingValue.isFinite()) {
+                testingValue = weak_slog(testingValue, this._base);
+                maxIterations++;
+            }
+        }
+        if (iterations > maxIterations)
+            iterations = maxIterations;
+        let added_es = Decimal.min(this._iterations, Decimal.slog(value, this._base, true).sub(Decimal.slog(new Decimal(Number.MAX_SAFE_INTEGER), this._base, true)).div(2).floor()).toNumber();
+        if (added_es < iterations - Decimal.slog(new Decimal(Number.MAX_SAFE_INTEGER), this._base, true).div(2).ceil().toNumber())
+            added_es = iterations - Decimal.slog(new Decimal(Number.MAX_SAFE_INTEGER), this._base, true).div(2).ceil().toNumber();
+        if (added_es < 0)
+            added_es = 0;
+        value = Decimal.iteratedlog(value, this._base, added_es * 2, true);
+        let sciArray = [value];
+        for (let i = 0; i < iterations - added_es; i++) {
+            if (sciArray[sciArray.length - 1].lte(1))
+                break;
+            let [mantissa, exponent] = weak_hyperscientifify(sciArray[sciArray.length - 1], this._base, this.rounding, this.mantissaPower, this._engineerings);
+            if (i == 0 && negExp)
+                exponent = exponent.neg();
+            sciArray.pop();
+            sciArray.push(mantissa, exponent);
+        }
+        let negMantissa = false;
+        if (sciArray.length == 1 && negExp) {
+            sciArray[0] = sciArray[0].neg();
+            negMantissa = true;
+        }
+        let endings = sciArray.length - 1;
+        let beforeChar = this._expChars[0][0];
+        let afterChar = this._expChars[0][1];
+        while (sciArray.length > 0) {
+            let numStr = "";
+            let toFormat = sciArray[0];
+            if (this.negExpChars !== null && typeof this.negExpChars[0] !== "boolean" && toFormat.lt(0) && !negMantissa) {
+                toFormat = toFormat.neg();
+                beforeChar = this.negExpChars[0][0];
+                afterChar = this.negExpChars[0][1];
+                negExp = false;
+            }
+            if (sciArray.length == 1)
+                numStr = this.exponentInnerNotation.format(toFormat);
+            else
+                numStr = this.mantissaInnerNotation.format(toFormat);
+            // if (!onlyNumericCharacters(numStr) && !(onlyNumericCharacters(numStr, true) && sciArray.length == 1)) numStr = "(" + numStr + ")";
+            if (this.expBefore) {
+                if (sciArray.length <= endings)
+                    result = afterChar + result;
+                result = numStr + result;
+                sciArray.shift();
+            }
+            else {
+                if (sciArray.length <= endings)
+                    result += beforeChar;
+                result += numStr;
+                sciArray.shift();
+            }
+            beforeChar = this._expChars[0][0];
+            afterChar = this._expChars[0][1];
+        }
+        for (let e = 0; e < endings; e++) {
+            if (this.expBefore)
+                result = beforeChar + result;
+            else
+                result += afterChar;
+        }
+        if (added_es <= this.max_fs_in_a_row) {
+            for (let i = 0; i < added_es; i++)
+                result = this._expChars[1][0] + result + this._expChars[1][1];
+        }
+        else {
+            let eStr = this.superexponentInnerNotation.format(added_es);
+            eStr = this._expChars[2][0] + eStr + this._expChars[2][1];
+            if (this.superexpAfter)
+                result = result + eStr;
+            else
+                result = eStr + result;
+        }
+        return result;
+    }
+    get iterations() {
+        return this._iterations;
+    }
+    set iterations(iterations) {
+        if (iterations % 1 != 0)
+            throw new RangeError("Weak Hyperscientific Iterations Notation requires a whole number of iterations");
+        this._iterations = iterations;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._engineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._engineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get base() {
+        return this._base;
+    }
+    set base(base) {
+        let baseD = toDecimal(base);
+        if (baseD.lte(1))
+            throw new RangeError("Base <= 1 in Weak Hyperscientific Iterations Notation");
+        this._base = toDecimal(base);
+    }
+    get expChars() {
+        return this.unconvertedExpChars;
+    }
+    set expChars(input) {
+        let one = this.mantissaInnerNotation.format(1);
+        let expChars = [];
+        expChars.push(input[0]);
+        expChars.push(["", ""]);
+        if (typeof input[1][0] == "string")
+            expChars[1][0] = input[1][0];
+        else if (input[1][0] === false)
+            expChars[1][0] = one + input[0][0];
+        else if (input[1][0] === true)
+            expChars[1][0] = input[0][0] + one;
+        if (typeof input[1][1] == "string")
+            expChars[1][1] = input[1][1];
+        else if (input[1][1] === false)
+            expChars[1][1] = one + input[0][1];
+        else if (input[1][1] === true)
+            expChars[1][1] = input[0][1] + one;
+        expChars.push(input[2]);
+        this._expChars = expChars;
+    }
+}
+
+/**
+ * Hyperscientific notation, but with pentation instead of tetration. Abbreviates 9 as "9G0", 10^10^10 as "3G1", and 10^^10,000,000,000 as "2G2" (though that last one is too big for this library).
+ * @param maxnum ( Decimal ) Only exponents below this value are allowed - anything higher and the exponent itself is abbreviated in penta-scientific notation. Default is 1e10.
+ * @param max_Gs_in_a_row ( number ) If the penta-scientific representation would have more G's at the beginning than this, those G's are made into an G^n expression. Default is 5.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed hyperexponent values: if it's three then the hyperexponent will always be a multiple of 3, like in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted hyperexponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0). Default is 1, which corresponds to regular hyperscientific notation.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in penta-scientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^^^2, if mantissaPower is 2 then the bounds are base^^^2 and base^^^3, and so on. For example, a number normally represented as "2G2" would become "(1e10)G1" with 1 mantissaPower and "(10^^1e10)G0" with 2 mantissaPower.
+ * @param iteration_zero ( boolean ) If this is true, then numbers less than maxnum will ignore the scientific notation and jump directly to the innerNotation - useful if you want 2 to just be abbreviated as "2" instead of "2G0". Default is false.
+ * @param base ( Decimal ) Penta-scientific notation normally works in penta-powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 9^^2 becomes "2G1".
+ * @param expChars ( [[string, string], [string | boolean, string | boolean], [string, string]] ) An array of three pairs of strings that are used as the between characters for scientific notation. In each pair, the first entry goes before the penta-exponent, the second entry goes after the penta-exponent. expChars[0] takes the place of the G in "1G10", expChars[1] takes the place of the first G in "G1G10", and expChars[2] takes the place of the (G^) in (G^10)4. If expChars[1][0] is a boolean instead of a string: if it's false, then expChars[1][0] is set to be expChars[0][0] with the way mantissaInnerNotation formats 1 tacked on the beginning, and if it's true than the 1 is tacked on the end instead. Likewise for expChars[1][1] (expChars[0][1] with a 1 on it). Default is [["G", ""], ["G", ""], ["(G^", ")"]].
+ * @param negExpChars ( null | [[string, string] | boolean, [string, string]] ) This can either be null or a pair of pairs of strings (in which the first pair of strings may be a boolean instead). Ignore this parameter if it's null, which is the default. If it's a pair of pairs of strings, then the first pair is used like expChars[0] but for negative exponents (so if it's ["d", ""], then 2e-4 would be 2d4 instead), and the second pair is used on small numbers whose reciprocals are large enough to need expChars[1], in which case the second pair indicates that a reciprocal has been taken. If negExpChars[0] is a boolean instead, then if it's true the notation goes directly to the reciprocal behavior for all inputs less than 1, while if it's false then single-iteration inputs don't use negExpChars but multi-iteration ones still use reciprocal behavior.
+ * @param expBefore ( boolean ) If this parameter is true, the penta-exponent comes before the mantissa instead of after. Default is false.
+ * @param superexpAfter ( boolean ) If this parameter is true, (G^n) expressions come after the rest of the number instead of before. Default is false.
+ * @param formatNegatives ( boolean ) If this parameter is false, negative numbers are just formatted using their absolute value with negativeString around it, like in most notations. If this parameter is true, negative numbers are formatted in penta-scientific directly. Default is true.
+ * @param mantissaInnerNotation ( Notation ) The notation that the numbers within the mantissas are themselves notated with. DefaultNotation is the default.
+ * @param exponentInnerNotation ( Notation ) The notation that the highest penta-exponent is itself notated with. Is the same as mantissaInnerNotation by default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (G^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
+ */
+class PentaScientificNotation extends Notation {
+    constructor(maxnum = 1e10, max_Gs_in_a_row = 5, rounding = 0, engineerings = 1, mantissaPower = 0, iteration_zero = false, base = 10, expChars = [["G", ""], ["G", ""], ["(G^", ")"]], negExpChars = null, expBefore = false, superexpAfter = false, formatNegatives = true, mantissaInnerNotation = new DefaultNotation(), exponentInnerNotation = mantissaInnerNotation, superexponentInnerNotation = exponentInnerNotation) {
+        super();
+        this._maxnum = new Decimal(1e10);
+        this.max_Gs_in_a_row = 5;
+        this.rounding = Decimal.dZero;
+        this._engineerings = [Decimal.dOne];
+        this.mantissaPower = Decimal.dZero;
+        this.iteration_zero = false;
+        this._base = Decimal.dTen;
+        this._expChars = [["G", ""], ["G", ""], ["(G^", ")"]];
+        this.negExpChars = null;
+        this.expBefore = false;
+        this.superexpAfter = false;
+        this.formatNegatives = true;
+        this.mantissaInnerNotation = new DefaultNotation();
+        this.exponentInnerNotation = this.mantissaInnerNotation;
+        this.superexponentInnerNotation = this.exponentInnerNotation;
+        this.name = "Penta-Scientific Notation";
+        this.maxnum = maxnum;
+        this.max_Gs_in_a_row = max_Gs_in_a_row;
+        this.rounding = rounding;
+        this.engineerings = engineerings;
+        this.mantissaPower = toDecimal(mantissaPower);
+        this.iteration_zero = iteration_zero;
+        this._base = toDecimal(base);
+        this.expBefore = expBefore;
+        this.superexpAfter = superexpAfter;
+        this.formatNegatives = formatNegatives;
+        this.mantissaInnerNotation = mantissaInnerNotation;
+        this.exponentInnerNotation = exponentInnerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+        this.unconvertedExpChars = expChars;
+        this.expChars = expChars;
+        this.negExpChars = negExpChars;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && (!this.formatNegatives || decimal.lte(-2) || decimal.gt(this._base.tetrate(decimal.toNumber(), 1, true))))
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        if (this.iteration_zero && value.lt(this._maxnum) && value.gt(this._maxnum.recip()))
+            return this.mantissaInnerNotation.format(value);
+        let result = "";
+        if (value.lt(Decimal.pentate(this._base, this._maxnum.toNumber(), 1, true))) {
+            let [mantissa, exponent] = pentascientifify(value, this._base, this.rounding, this.mantissaPower, this._engineerings);
+            let beforeChar = this._expChars[0][0];
+            let afterChar = this._expChars[0][1];
+            if (exponent.lt(0) && this.negExpChars !== null && this.negExpChars[0] !== false) {
+                if (this.negExpChars[0] === true)
+                    return this.negExpChars[1][0] + this.format(value.recip()) + this.negExpChars[1][1];
+                beforeChar = this.negExpChars[0][0];
+                afterChar = this.negExpChars[0][1];
+                exponent = exponent.neg();
+            }
+            let mantissaStr = this.mantissaInnerNotation.format(mantissa);
+            let exponentStr = this.exponentInnerNotation.format(exponent);
+            if (this.expBefore)
+                result = beforeChar + exponentStr + afterChar + mantissaStr;
+            else
+                result = mantissaStr + beforeChar + exponentStr + afterChar;
+        }
+        else {
+            if (value.lt(1) && this.negExpChars !== null)
+                return this.negExpChars[1][0] + this.format(value.recip()) + this.negExpChars[1][1];
+            let added_Gs = 0;
+            while (value.gte(Decimal.pentate(this._base, this._maxnum.toNumber(), 1, true))) {
+                added_Gs++;
+                value = Decimal.penta_log(value, this._base, true);
+            }
+            result = this.format(value);
+            if (added_Gs <= this.max_Gs_in_a_row) {
+                result = this._expChars[1][0] + result + this._expChars[1][1];
+            }
+            else {
+                let FStr = this.superexponentInnerNotation.format(added_Gs);
+                FStr = this._expChars[2][0] + FStr + this._expChars[2][1];
+                if (this.superexpAfter)
+                    result = result + FStr;
+                else
+                    result = FStr + result;
+            }
+        }
+        return result;
+    }
+    get maxnum() {
+        return this._maxnum;
+    }
+    set maxnum(maxnum) {
+        let maxnumD = toDecimal(maxnum);
+        if (maxnumD.lte(0))
+            throw new RangeError("Nonpositive maxnum in Penta-Scientific Notation");
+        this._maxnum = maxnumD;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._engineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._engineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get base() {
+        return this._base;
+    }
+    set base(base) {
+        let baseD = toDecimal(base);
+        if (Decimal.pentate(baseD, Infinity, 1, true).isFinite())
+            throw new RangeError("Bases with convergent pentation don't work for Penta-Scientific Notation");
+        this._base = baseD;
+    }
+    get expChars() {
+        return this.unconvertedExpChars;
+    }
+    set expChars(input) {
+        let one = this.mantissaInnerNotation.format(1);
+        let expChars = [];
+        expChars.push(input[0]);
+        expChars.push(["", ""]);
+        if (typeof input[1][0] == "string")
+            expChars[1][0] = input[1][0];
+        else if (input[1][0] === false)
+            expChars[1][0] = one + input[0][0];
+        else if (input[1][0] === true)
+            expChars[1][0] = input[0][0] + one;
+        if (typeof input[1][1] == "string")
+            expChars[1][1] = input[1][1];
+        else if (input[1][1] === false)
+            expChars[1][1] = one + input[0][1];
+        else if (input[1][1] === true)
+            expChars[1][1] = input[0][1] + one;
+        expChars.push(input[2]);
+        this._expChars = expChars;
+    }
+}
+/**
+ * This notation performs penta-scientific notation a certain number of times. 1 iteration means the number is in the form AGB (where A and B are abbreviated using the innerNotation), 2 iterations means the number is in the form AGBGC, and so on.
+ * @param iterations ( number ! ) The amount of iterations.
+ * @param max_Gs_in_a_row ( number ) If the penta-scientific representation would have more G's at the beginning than this, those G's are made into an G^n expression. Default is 5.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The mantissa is rounded to the nearest multiple of this value. If this parameter is a function, then the mantissa is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed hyperexponent values: if it's three then the hyperexponent will always be a multiple of 3, like in engineering notation. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted hyperexponent values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0). Default is 1, which corresponds to regular hyperscientific notation.
+ * @param mantissaPower ( Decimal ) Normally, the mantissa in penta-scientific notation is bounded by 1 and the base, which corresponds to the default mantissaPower of 0. If mantissaPower is 1, the bounds are base and base^^^2, if mantissaPower is 2 then the bounds are base^^^2 and base^^^3, and so on. For example, a number normally represented as "2G2" would become "(1e10)G1" with 1 mantissaPower and "(10^^1e10)G0" with 2 mantissaPower.
+ * @param base ( Decimal ) Penta-scientific notation normally works in penta-powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 9^^2 becomes "2G1".
+ * @param expChars ( [[string, string], [string | boolean, string | boolean], [string, string]] ) An array of three pairs of strings that are used as the between characters for scientific notation. In each pair, the first entry goes before the penta-exponent, the second entry goes after the penta-exponent. expChars[0] takes the place of the G in "1G10", expChars[1] takes the place of the first G in "G1G10", and expChars[2] takes the place of the (G^) in (G^10)4. If expChars[1][0] is a boolean instead of a string: if it's false, then expChars[1][0] is set to be expChars[0][0] with the way mantissaInnerNotation formats 1 tacked on the beginning, and if it's true than the 1 is tacked on the end instead. Likewise for expChars[1][1] (expChars[0][1] with a 1 on it). Default is [["G", ""], ["G", ""], ["(G^", ")"]].
+ * @param negExpChars ( null | [[string, string] | boolean, [string, string]] ) This can either be null or a pair of pairs of strings (in which the first pair of strings may be a boolean instead). Ignore this parameter if it's null, which is the default. If it's a pair of pairs of strings, then the first pair is used like expChars[0] but for negative exponents (so if it's ["d", ""], then 2e-4 would be 2d4 instead), and the second pair is used on small numbers whose reciprocals are large enough to need expChars[1], in which case the second pair indicates that a reciprocal has been taken. If negExpChars[0] is a boolean instead, then if it's true the notation goes directly to the reciprocal behavior for all inputs less than 1, while if it's false then single-iteration inputs don't use negExpChars but multi-iteration ones still use reciprocal behavior.
+ * @param expBefore ( boolean ) If this parameter is true, the penta-exponent comes before the mantissa instead of after. Default is false.
+ * @param superexpAfter ( boolean ) If this parameter is true, (G^n) expressions come after the rest of the number instead of before. Default is false.
+ * @param formatNegatives ( boolean ) If this parameter is false, negative numbers are just formatted using their absolute value with negativeString around it, like in most notations. If this parameter is true, negative numbers are formatted in penta-scientific directly. Default is true.
+ * @param mantissaInnerNotation ( Notation ) The notation that the numbers within the mantissas are themselves notated with. DefaultNotation is the default.
+ * @param exponentInnerNotation ( Notation ) The notation that the highest penta-exponent is itself notated with. Is the same as mantissaInnerNotation by default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (G^n) expression is itself notated with. Is the same as exponentInnerNotation by default.
+ */
+class PentaScientificIterationsNotation extends Notation {
+    constructor(iterations, max_Gs_in_a_row = 5, rounding = 0, engineerings = 1, mantissaPower = 0, base = 10, expChars = [["G", ""], ["G", ""], ["(G^", ")"]], negExpChars = null, expBefore = false, superexpAfter = false, formatNegatives = false, mantissaInnerNotation = new DefaultNotation(), exponentInnerNotation = mantissaInnerNotation, superexponentInnerNotation = exponentInnerNotation) {
+        super();
+        this.max_Gs_in_a_row = 5;
+        this.rounding = Decimal.dZero;
+        this._engineerings = [Decimal.dOne];
+        this.mantissaPower = Decimal.dZero;
+        this._base = Decimal.dTen;
+        this._expChars = [["G", ""], ["G", ""], ["(G^", ")"]];
+        this.negExpChars = null;
+        this.expBefore = false;
+        this.superexpAfter = false;
+        this.formatNegatives = false;
+        this.mantissaInnerNotation = new DefaultNotation();
+        this.exponentInnerNotation = this.mantissaInnerNotation;
+        this.superexponentInnerNotation = this.exponentInnerNotation;
+        this.name = "Penta-Scientific Iterations Notation";
+        this.iterations = iterations;
+        this.max_Gs_in_a_row = max_Gs_in_a_row;
+        this.rounding = rounding;
+        this.engineerings = engineerings;
+        this.mantissaPower = toDecimal(mantissaPower);
+        this._base = toDecimal(base);
+        this.expBefore = expBefore;
+        this.superexpAfter = superexpAfter;
+        this.formatNegatives = formatNegatives;
+        this.mantissaInnerNotation = mantissaInnerNotation;
+        this.exponentInnerNotation = exponentInnerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+        this.unconvertedExpChars = expChars;
+        this.expChars = expChars;
+        this.negExpChars = negExpChars;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && (!this.formatNegatives || decimal.lte(-2) || decimal.gt(this._base.tetrate(decimal.toNumber(), 1, true))))
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        if (this._iterations == 0)
+            return this.mantissaInnerNotation.format(value);
+        let iterations = this._iterations;
+        let result = "";
+        // No need for added_Gs, the pentation height never gets high enough.
+        let sciArray = [value];
+        for (let i = 0; i < iterations; i++) {
+            if (sciArray[sciArray.length - 1].lte(0) && !this.formatNegatives)
+                break;
+            let [mantissa, exponent] = pentascientifify(sciArray[sciArray.length - 1], this._base, this.rounding, this.mantissaPower, this._engineerings);
+            sciArray.pop();
+            sciArray.push(mantissa, exponent);
+        }
+        let endings = sciArray.length - 1;
+        let beforeChar = this._expChars[0][0];
+        let afterChar = this._expChars[0][1];
+        while (sciArray.length > 0) {
+            let numStr = "";
+            let toFormat = sciArray[0];
+            if (this.negExpChars !== null && typeof this.negExpChars[0] !== "boolean" && toFormat.lt(0)) {
+                toFormat = toFormat.neg();
+                beforeChar = this.negExpChars[0][0];
+                afterChar = this.negExpChars[0][1];
+            }
+            if (sciArray.length == 1)
+                numStr = this.exponentInnerNotation.format(toFormat);
+            else
+                numStr = this.mantissaInnerNotation.format(toFormat);
+            if (this.expBefore) {
+                if (sciArray.length <= endings)
+                    result = afterChar + result;
+                result = numStr + result;
+                sciArray.shift();
+            }
+            else {
+                if (sciArray.length <= endings)
+                    result += beforeChar;
+                result += numStr;
+                sciArray.shift();
+            }
+            beforeChar = this._expChars[0][0];
+            afterChar = this._expChars[0][1];
+        }
+        for (let e = 0; e < endings; e++) {
+            if (this.expBefore)
+                result = beforeChar + result;
+            else
+                result += afterChar;
+        }
+        return result;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._engineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._engineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get iterations() {
+        return this._iterations;
+    }
+    set iterations(iterations) {
+        if (iterations % 1 != 0)
+            throw new RangeError("Penta-Scientific Iterations Notation requires a whole number of iterations");
+        this._iterations = iterations;
+    }
+    get base() {
+        return this._base;
+    }
+    set base(base) {
+        let baseD = toDecimal(base);
+        if (Decimal.pentate(baseD, Infinity, 1, true).isFinite())
+            throw new RangeError("Bases with convergent pentation don't work for Penta-Scientific Iterations Notation");
+        this._base = baseD;
+    }
+    get expChars() {
+        return this.unconvertedExpChars;
+    }
+    set expChars(input) {
+        let one = this.mantissaInnerNotation.format(1);
+        let expChars = [];
+        expChars.push(input[0]);
+        expChars.push(["", ""]);
+        if (typeof input[1][0] == "string")
+            expChars[1][0] = input[1][0];
+        else if (input[1][0] === false)
+            expChars[1][0] = one + input[0][0];
+        else if (input[1][0] === true)
+            expChars[1][0] = input[0][0] + one;
+        if (typeof input[1][1] == "string")
+            expChars[1][1] = input[1][1];
+        else if (input[1][1] === false)
+            expChars[1][1] = one + input[0][1];
+        else if (input[1][1] === true)
+            expChars[1][1] = input[0][1] + one;
+        expChars.push(input[2]);
+        this._expChars = expChars;
+    }
+}
+
+/**
+ * Abbreviates numbers in terms of their pentational logarithm, so 10 is "G1" and 10^^10^^10 is "G3". Uses the linear approximations of tetration and pentation.
+ * @param iterations ( number ) The amount of logarithm iterations: 1 is basic Penta-Logarithm notation, 2 is double Penta-Logarithm, and so on. This can be negative: with -1 iterations, 2 would be "plg(10^^10)".
+ * @param max_Gs_in_a_row ( number ) If the penta-logarithm representation would have more G's at the beginning than this, those G's are made into an G^n expression. Default is 5.
+ * @param base ( Decimal ) This notation normally works in penta-powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 9^^9 becomes "G2".
+ * @param expChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate logarithm notation. In each pair, the first entry goes before the number, the second entry goes after the number. expChars[0] takes the place of the G in "G10", expChars[1] takes the place of the first G in "GG10" (expChars[0] is for the innermost logarithm, expChars[1] is for the outer ones), and expChars[2] takes the place of the (G^) in (G^10)4. Default is [["G", ""], ["G", ""], ["(G^", ")"]].
+ * @param logChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of expChars used for a logarithm of negative iterations. Default is [["plg", ""], ["plg", ""], ["(plg^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of expChars[2], such as G^-1.
+ * @param superexpAfter ( boolean ) This is false by default; if it's true, a (G^n) expression comes after the number instead of before.
+ * @param baseShown ( number ) This is 0 by default. If this is 0, the base is not shown. If this is positive, the base is shown at the beginning of the expression. If this is negative, the base is shown at the end of the expression.
+ * @param formatNegatives ( boolean ) If this parameter is false, negative numbers are just formatted using their absolute value with negativeString around it, like in most notations. If this parameter is true, negative numbers are formatted in penta-logarithm notation directly. Default is false.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (G^n) expression is itself notated with. Is the same as innerNotation by default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+class PentaLogarithmNotation extends Notation {
+    constructor(iterations = 1, max_Gs_in_a_row = 5, base = 10, expChars = [["G", ""], ["G", ""], ["(G^", ")"]], logChars = [["plg", ""], ["plg", ""], ["(plg^", ")"]], superexpAfter = false, baseShown = 0, formatNegatives = false, innerNotation = new DefaultNotation(), superexponentInnerNotation = innerNotation, baseInnerNotation = innerNotation) {
+        super();
+        this._iterations = 1;
+        this.max_Gs_in_a_row = 5;
+        this._base = Decimal.dTen;
+        this.expChars = [["G", ""], ["G", ""], ["(G^", ")"]];
+        this.logChars = [["plg", ""], ["plg", ""], ["(plg^", ")"]];
+        this.superexpAfter = false;
+        this.baseShown = 0;
+        this.formatNegatives = false;
+        this.innerNotation = new DefaultNotation();
+        this.superexponentInnerNotation = this.innerNotation;
+        this.baseInnerNotation = this.innerNotation;
+        this.name = "Penta-Logarithm Notation";
+        this.iterations = iterations;
+        this.max_Gs_in_a_row = max_Gs_in_a_row;
+        this._base = toDecimal(base);
+        this.expChars = expChars;
+        this.logChars = logChars;
+        this.superexpAfter = superexpAfter;
+        this.baseShown = baseShown;
+        this.formatNegatives = formatNegatives;
+        this.innerNotation = innerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+        this.baseInnerNotation = baseInnerNotation;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && (!this.formatNegatives || decimal.lt(-2) || decimal.gt(this._base.tetrate(decimal.toNumber(), 1, true))))
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        let result = "";
+        let iterations = this._iterations;
+        if (iterations < 0)
+            for (let i = 0; i < -iterations; i++)
+                value = Decimal.pentate(this._base, value.toNumber(), 1, true);
+        else
+            for (let i = 0; i < iterations; i++)
+                value = Decimal.penta_log(value, this._base, true);
+        let usedChars = this.expChars;
+        if (iterations < 0 && this.logChars != null) {
+            usedChars = this.logChars;
+            iterations *= -1;
+        }
+        let baseStr = "";
+        if (this.baseShown)
+            baseStr = this.baseInnerNotation.format(this._base);
+        result = this.innerNotation.format(value);
+        if (iterations >= 0 && iterations <= this.max_Gs_in_a_row && iterations % 1 == 0) {
+            for (let i = 0; i < iterations; i++) {
+                let eChar = usedChars[(i == 0) ? 0 : 1][0];
+                let afterChar = usedChars[(i == 0) ? 0 : 1][1];
+                result = eChar + result + afterChar;
+                if (this.baseShown < 0)
+                    result = result + baseStr;
+                else
+                    result = baseStr + result;
+            }
+        }
+        else {
+            let eChar = usedChars[2][0];
+            let afterChar = usedChars[2][1];
+            let eStr = this.superexponentInnerNotation.format(iterations);
+            eStr = eChar + eStr + afterChar;
+            if (this.superexpAfter)
+                result = result + eStr;
+            else
+                result = eStr + result;
+            if (this.baseShown < 0)
+                result = result + baseStr;
+            else
+                result = baseStr + result;
+        }
+        return result;
+    }
+    get iterations() {
+        return this._iterations;
+    }
+    set iterations(iterations) {
+        if (iterations % 1 != 0)
+            throw new RangeError("Penta-Logarithm Notation requires a whole number of iterations");
+        this._iterations = iterations;
+    }
+    get base() {
+        return this._base;
+    }
+    set base(base) {
+        let baseD = toDecimal(base);
+        if (Decimal.pentate(base, Infinity, 1, true).isFinite())
+            throw new RangeError("Bases with convergent pentation don't work for Penta-Logarithm Notation");
+        this._base = baseD;
+    }
+}
+/**
+ * A variant of penta-logarithm notation that uses a different amount of penta-logarithm iterations depending on how large the number is.
+ * @param maxnum ( Decimal ) Only numbers below this value are allowed to show up on their own - anything higher and the amount of iterations increases. Default is 1e10.
+ * @param max_Gs_in_a_row ( number ) If the penta-logarithm representation would have more G's at the beginning than this, those G's are made into an G^n expression. Default is 5.
+ * @param minIterations ( number ) The minimum amount of logarithm iterations. Default is 1.
+ * @param base ( Decimal ) This notation normally works in penta-powers of 10, but you can change this value to change that. Default is 10. For example, set this to 9, and 9^^9 becomes "G2".
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed iteration amounts: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted iteration amounts are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param expChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate logarithm notation. In each pair, the first entry goes before the number, the second entry goes after the number. expChars[0] takes the place of the G in "G10", expChars[1] takes the place of the first G in "GG10" (expChars[0] is for the innermost logarithm, expChars[1] is for the outer ones), and expChars[2] takes the place of the (G^) in (G^10)4. Default is [["G", ""], ["G", ""], ["(G^", ")"]].
+ * @param logChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of expChars used for a logarithm of negative iterations. Default is [["plg", ""], ["plg", ""], ["(plg^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of expChars[2], such as G^-1.
+ * @param superexpAfter ( boolean ) This is false by default; if it's true, a (G^n) expression comes after the number instead of before.
+ * @param baseShown ( number ) This is 0 by default. If this is 0, the base is not shown. If this is positive, the base is shown at the beginning of the expression. If this is negative, the base is shown at the end of the expression.
+ * @param formatNegatives ( boolean ) If this parameter is false, negative numbers are just formatted using their absolute value with negativeString around it, like in most notations. If this parameter is true, negative numbers are formatted in penta-logarithm notation directly. Default is false.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (G^n) expression is itself notated with. Is the same as innerNotation by default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+class MultiPentaLogarithmNotation extends Notation {
+    constructor(maxnum = 1e10, max_Gs_in_a_row = 5, minIterations = 1, base = 10, engineerings = 1, expChars = [["G", ""], ["G", ""], ["(G^", ")"]], logChars = [["plg", ""], ["plg", ""], ["(plg^", ")"]], superexpAfter = false, baseShown = 0, formatNegatives = false, innerNotation = new DefaultNotation(), superexponentInnerNotation = innerNotation, baseInnerNotation = innerNotation) {
+        super();
+        this._maxnum = new Decimal(1e10);
+        this.max_Gs_in_a_row = 5;
+        this.minIterations = 1;
+        this._base = Decimal.dTen;
+        this._engineerings = [Decimal.dOne];
+        this.expChars = [["G", ""], ["G", ""], ["(G^", ")"]];
+        this.logChars = [["plg", ""], ["plg", ""], ["(plg^", ")"]];
+        this.superexpAfter = false;
+        this.baseShown = 0;
+        this.formatNegatives = false;
+        this.innerNotation = new DefaultNotation();
+        this.superexponentInnerNotation = this.innerNotation;
+        this.baseInnerNotation = this.innerNotation;
+        this.name = "Multi-Penta-Logarithm Notation";
+        this.maxnum = maxnum;
+        this.max_Gs_in_a_row = max_Gs_in_a_row;
+        this.minIterations = minIterations;
+        this._base = toDecimal(base);
+        this.engineerings = engineerings;
+        this.expChars = expChars;
+        this.logChars = logChars;
+        this.superexpAfter = superexpAfter;
+        this.baseShown = baseShown;
+        this.formatNegatives = formatNegatives;
+        this.innerNotation = innerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+        this.baseInnerNotation = baseInnerNotation;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && (!this.formatNegatives || decimal.lt(-2) || decimal.gt(this._base.tetrate(decimal.toNumber(), 1, true))))
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        let iterations = 0;
+        let currentValue = toDecimal(value);
+        if (this.minIterations < 0)
+            while (iterations > this.minIterations) {
+                iterations--;
+                currentValue = Decimal.pentate(this._base, currentValue.toNumber(), 1, true);
+            }
+        else
+            while (iterations < this.minIterations) {
+                iterations++;
+                currentValue = Decimal.penta_log(currentValue, this._base, true);
+            }
+        while (currentValue.gte(this._maxnum)) {
+            let currentiterations = iterations;
+            iterations = nextEngineeringValue(new Decimal(iterations), this._engineerings).toNumber();
+            for (let i = currentiterations; i < iterations; i++)
+                currentValue = Decimal.penta_log(currentValue, this._base, true);
+        }
+        return new PentaLogarithmNotation(iterations, this.max_Gs_in_a_row, this._base, this.expChars, this.logChars, this.superexpAfter, this.baseShown, this.formatNegatives, this.innerNotation, this.superexponentInnerNotation, this.baseInnerNotation).format(value);
+    }
+    get maxnum() {
+        return this._maxnum;
+    }
+    set maxnum(maxnum) {
+        let maxnumD = toDecimal(maxnum);
+        if (maxnumD.lte(0))
+            throw new RangeError("Nonpositive maxnum in Multi-Penta-Logarithm Notation");
+        this._maxnum = maxnumD;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._engineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._engineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get base() {
+        return this._base;
+    }
+    set base(base) {
+        let baseD = toDecimal(base);
+        if (Decimal.pentate(base, Infinity, 1, true).isFinite())
+            throw new RangeError("Bases with convergent pentation don't work for Multi-Penta-Logarithm Notation");
+        this._base = baseD;
+    }
+}
+
+/**
+ * Abbreviates numbers in terms of their pentational root; this is the square penta-root by default, so e8.0723e153 is 4↑↑↑2 and eee2.069e36,305 is 6↑↑↑2.
+ * @param height ( number ) The height of the penta-root. Default is 2. This notation does not work with a penta-root height less than 1.
+ * @param iterations ( number ) The amount of penta-root iterations: 1 is regular Penta-Root notation, 2 means the penta-root is taken twice, and so on. This can be negative.
+ * @param max_in_a_row ( number ) If there are more penta-root iterations than this, then the ↑↑↑b's are made into a (↑↑↑b^n) expression. Default is 5.
+ * @param rootChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate penta-root notation. In each pair, the first entry goes before the number, the second entry goes after the number. rootChars[0] takes the place of the ↑↑↑ in "7↑↑↑2", rootChars[1] takes the place of the second ↑↑ in "(8↑↑↑2)↑↑↑2" (rootChars[0] is for the innermost root, rootChars[1] is for the outer ones), and rootChars[2] takes the place of the (↑↑↑^) in 6(↑↑↑^7)2. Default is [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]].
+ * @param inverseChars ( [[string, string], [string, string], [string, string]] ) An equivalent of rootChars used for a penta-root of negative iterations. Default is [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of rootChars[2], such as (↑↑↑^-1).
+ * @param superexpAfter ( boolean ) This is true by default; if it's true, an (↑↑↑^n) expression comes after the number instead of before.
+ * @param heightShown ( number ) This is 0 by default. If this is 0, the height is not shown. If this is positive, the height is shown at the beginning of the expression. If this is negative, the height is shown at the end of the expression.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (↑↑↑^n) expression is itself notated with. Is the same as innerNotation by default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+class PentaRootNotation extends Notation {
+    constructor(height = 2, iterations = 1, max_Gs_in_a_row = 5, rootChars = [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]], inverseChars = [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]], superexpAfter = true, heightShown = -1, innerNotation = new DefaultNotation(), superexponentInnerNotation = innerNotation, baseInnerNotation = innerNotation) {
+        super();
+        this._height = 2;
+        this._iterations = 1;
+        this.max_in_a_row = 5;
+        this.rootChars = [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]];
+        this.inverseChars = [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]];
+        this.superexpAfter = true;
+        this.heightShown = -1;
+        this.innerNotation = new DefaultNotation();
+        this.superexponentInnerNotation = this.innerNotation;
+        this.baseInnerNotation = this.innerNotation;
+        this.name = "Penta-Root Notation";
+        this.height = height;
+        this.iterations = iterations;
+        this.max_in_a_row = max_Gs_in_a_row;
+        this.rootChars = rootChars;
+        this.inverseChars = inverseChars;
+        this.superexpAfter = superexpAfter;
+        this.heightShown = heightShown;
+        this.innerNotation = innerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+        this.baseInnerNotation = baseInnerNotation;
+    }
+    formatDecimal(value) {
+        let result = "";
+        let iterations = this._iterations;
+        if (iterations < 0) {
+            let i = 0;
+            for (; i > iterations; i--) {
+                value = Decimal.pentate(value, this._height, 1, true);
+            }
+        }
+        else {
+            let i = 0;
+            for (; i < iterations; i++) {
+                let newvalue = Decimal.linear_penta_root(value, this._height);
+                if (newvalue.isNan()) {
+                    iterations = i;
+                    break;
+                }
+                value = newvalue;
+            }
+        }
+        let usedChars = this.rootChars;
+        if (iterations < 0 && this.inverseChars != null) {
+            usedChars = this.inverseChars;
+            iterations *= -1;
+        }
+        let heightStr = "";
+        if (this.heightShown)
+            heightStr = this.baseInnerNotation.format(this._height);
+        result = this.innerNotation.format(value);
+        if (iterations >= 0 && iterations <= this.max_in_a_row && iterations % 1 == 0) {
+            for (let i = 0; i < iterations; i++) {
+                let eChar = usedChars[(i == 0) ? 0 : 1][0];
+                let afterChar = usedChars[(i == 0) ? 0 : 1][1];
+                result = eChar + result + afterChar;
+                if (this.heightShown < 0)
+                    result = result + heightStr;
+                else
+                    result = heightStr + result;
+            }
+        }
+        else {
+            let eChar = usedChars[2][0];
+            let afterChar = usedChars[2][1];
+            let eStr = this.superexponentInnerNotation.format(iterations);
+            eStr = eChar + eStr + afterChar;
+            if (this.superexpAfter)
+                result = result + eStr;
+            else
+                result = eStr + result;
+            if (this.heightShown < 0)
+                result = result + heightStr;
+            else
+                result = heightStr + result;
+        }
+        return result;
+    }
+    get height() {
+        return this._height;
+    }
+    set height(height) {
+        if (height < 1)
+            throw new RangeError("Penta-Root notation does not work with a height less than 1.");
+        this._height = height;
+    }
+    get iterations() {
+        return this._iterations;
+    }
+    set iterations(iterations) {
+        if (iterations % 1 != 0)
+            throw new RangeError("Penta-Root Notation requires a whole number of iterations");
+        this._iterations = iterations;
+    }
+}
+/**
+ * A variant of penta-root notation that uses a different amount of penta-root iterations depending on how large the number is.
+ * @param height ( number ) The height of the penta-root. Default is 2. This notation does not work with a penta-root height less than 1.
+ * @param maxnum ( Decimal ) Only numbers below this value are allowed to show up on their own - anything higher and the amount of iterations increases. Default is 1e10.
+ * @param max_in_a_row ( number ) If there are more penta-root iterations than this, then the ↑↑↑b's are made into a (↑↑↑b^n) expression. Default is 5.
+ * @param minIterations ( number ) The minimum amount of penta-root iterations. Default is 1.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed iteration amounts: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted iteration amounts are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param rootChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate penta-root notation. In each pair, the first entry goes before the number, the second entry goes after the number. rootChars[0] takes the place of the ↑↑↑ in "7↑↑↑2", rootChars[1] takes the place of the second ↑↑ in "(8↑↑↑2)↑↑↑2" (rootChars[0] is for the innermost root, rootChars[1] is for the outer ones), and rootChars[2] takes the place of the (↑↑↑^) in 6(↑↑↑^7)2. Default is [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]].
+ * @param inverseChars ( [[string, string], [string, string], [string, string]] ) An equivalent of rootChars used for a penta-root of negative iterations. Default is [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of rootChars[2], such as (↑↑↑^-1).
+ * @param superexpAfter ( boolean ) This is true by default; if it's true, an (↑↑↑^n) expression comes after the number instead of before.
+ * @param heightShown ( number ) This is 0 by default. If this is 0, the height is not shown. If this is positive, the height is shown at the beginning of the expression. If this is negative, the height is shown at the end of the expression.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param superexponentInnerNotation ( Notation ) The notation that the number in an (↑↑↑^n) expression is itself notated with. Is the same as innerNotation by default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+class MultiPentaRootNotation extends Notation {
+    constructor(height = 2, maxnum = 1e10, max_in_a_row = 5, minIterations = 1, engineerings = 1, rootChars = [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]], inverseChars = [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]], superexpAfter = true, heightShown = -1, innerNotation = new DefaultNotation(), superexponentInnerNotation = innerNotation, baseInnerNotation = innerNotation) {
+        super();
+        this._height = 2;
+        this._maxnum = new Decimal(1e10);
+        this.max_in_a_row = 5;
+        this.minIterations = 1;
+        this._engineerings = [Decimal.dOne];
+        this.rootChars = [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]];
+        this.inverseChars = [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]];
+        this.superexpAfter = true;
+        this.heightShown = -1;
+        this.innerNotation = new DefaultNotation();
+        this.superexponentInnerNotation = this.innerNotation;
+        this.baseInnerNotation = this.innerNotation;
+        this.name = "Multi-Penta-Root Notation";
+        this.height = height;
+        this.maxnum = maxnum;
+        this.max_in_a_row = max_in_a_row;
+        this.minIterations = minIterations;
+        this.engineerings = engineerings;
+        this.rootChars = rootChars;
+        this.inverseChars = inverseChars;
+        this.superexpAfter = superexpAfter;
+        this.heightShown = heightShown;
+        this.innerNotation = innerNotation;
+        this.superexponentInnerNotation = superexponentInnerNotation;
+        this.baseInnerNotation = baseInnerNotation;
+    }
+    formatDecimal(value) {
+        let iterations = 0;
+        let currentValue = toDecimal(value);
+        if (this.minIterations < 0) {
+            for (; iterations > this.minIterations; iterations--) {
+                currentValue = Decimal.pentate(currentValue, this._height, 1, true);
+            }
+        }
+        else {
+            while (iterations < this.minIterations) {
+                let newvalue = Decimal.linear_penta_root(currentValue, this._height);
+                if (newvalue.isNan())
+                    break;
+                currentValue = newvalue;
+                iterations++;
+            }
+        }
+        IterationLoop: while (currentValue.gte(this._maxnum)) {
+            let newvalue = currentValue;
+            let currentiterations = iterations;
+            iterations = nextEngineeringValue(new Decimal(iterations), this._engineerings).toNumber();
+            let iterationDifference = iterations - currentiterations;
+            if (iterations == currentiterations)
+                iterationDifference = 1; //If the amount of iterations is so high that nextEngineeringValue doesn't change it, ignore the engineering stuff and just get down to the point.
+            for (let i = 0; i < iterationDifference; i++) {
+                newvalue = Decimal.linear_penta_root(currentValue, this._height);
+                if (newvalue.isNan()) {
+                    iterations = currentiterations;
+                    break IterationLoop;
+                }
+                currentValue = newvalue;
+            }
+        }
+        return new PentaRootNotation(this._height, iterations, this.max_in_a_row, this.rootChars, this.inverseChars, this.superexpAfter, this.heightShown, this.innerNotation, this.superexponentInnerNotation, this.baseInnerNotation).format(value);
+    }
+    get height() {
+        return this._height;
+    }
+    set height(height) {
+        if (height < 1)
+            throw new RangeError("Penta-Root notation does not work with a height less than 1.");
+        this._height = height;
+    }
+    get maxnum() {
+        return this._maxnum;
+    }
+    set maxnum(maxnum) {
+        let maxnumD = toDecimal(maxnum);
+        if (maxnumD.lte(1))
+            throw new RangeError("maxnum <= 1 in Multi-Penta-Root Notation");
+        this._maxnum = maxnumD;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._engineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._engineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+}
+/**
+ * A variant of penta-root notation that uses a different penta-root height depending on how large the number is.
+ * @param maxnum ( Decimal ) Only numbers below this value are allowed to show up on their own - anything higher and the height increases. Default is 65536.
+ * @param minHeight ( number ) The minimum penta-root height. Default is 2.
+ * @param engineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed height values: if it's three then the height will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted height values are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param rootChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate penta-root notation. In each pair, the first entry goes before the number, the second entry goes after the number. rootChars[0] takes the place of the ↑↑↑ in "7↑↑↑2", rootChars[1] takes the place of the second ↑↑ in "(8↑↑↑2)↑↑↑2" (rootChars[0] is for the innermost root, rootChars[1] is for the outer ones), and rootChars[2] takes the place of the (↑↑↑^) in 6(↑↑↑^7)2. Default is [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]].
+ * @param inverseChars ( [[string, string], [string, string], [string, string]] ) An equivalent of rootChars used for a penta-root of negative iterations. Default is [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of rootChars[2], such as (↑↑↑^-1).
+ * @param heightShown ( number ) This is 0 by default. If this is 0, the height is not shown. If this is positive, the height is shown at the beginning of the expression. If this is negative, the height is shown at the end of the expression.
+ * @param innerNotation ( Notation ) The notation that the numbers within the expression are themselves notated with. DefaultNotation is the default.
+ * @param baseInnerNotation ( Notation ) The notation that the base within the expression, if included, is itself notated with. Is the same as innerNotation by default.
+ */
+class IncreasingPentaRootNotation extends Notation {
+    constructor(maxnum = 65536, minHeight = 2, engineerings = 1, rootChars = [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]], inverseChars = [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]], heightShown = -1, innerNotation = new DefaultNotation(), baseInnerNotation = innerNotation) {
+        super();
+        this._maxnum = new Decimal(65536);
+        this._minHeight = 2;
+        this._engineerings = [Decimal.dOne];
+        this.rootChars = [["", "↑↑↑"], ["(", ")↑↑↑"], ["(↑↑↑^", ")"]];
+        this.inverseChars = [["proot(", ")"], ["proot(", ")"], ["(proot^", ")"]];
+        this.heightShown = -1;
+        this.innerNotation = new DefaultNotation();
+        this.baseInnerNotation = this.innerNotation;
+        this.name = "Increasing Penta-Root Notation";
+        this.maxnum = maxnum;
+        this.minHeight = minHeight;
+        this.engineerings = engineerings;
+        this.rootChars = rootChars;
+        this.inverseChars = inverseChars;
+        this.heightShown = heightShown;
+        this.innerNotation = innerNotation;
+        this.baseInnerNotation = baseInnerNotation;
+    }
+    formatDecimal(value) {
+        if (value.eq(0))
+            return this.innerNotation.format(0);
+        let height = nextEngineeringValue(Decimal.penta_log(value, this._maxnum.toNumber(), true), this._engineerings).max(this._minHeight).toNumber();
+        return new PentaRootNotation(height, 1, 5, this.rootChars, this.inverseChars, true, this.heightShown, this.innerNotation, this.innerNotation, this.baseInnerNotation).format(value);
+    }
+    get maxnum() {
+        return this._maxnum;
+    }
+    set maxnum(maxnum) {
+        let maxnumD = toDecimal(maxnum);
+        if (maxnumD.lte(1))
+            throw new RangeError("maxnum <= 1 in Increasing Penta-Root Notation");
+        this._maxnum = maxnumD;
+    }
+    get minHeight() {
+        return this._minHeight;
+    }
+    set minHeight(minHeight) {
+        if (minHeight < 1)
+            throw new RangeError("Penta-root notation does not work with a height less than 1.");
+        this._minHeight = minHeight;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._engineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._engineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+}
+
+/**
+ * Takes any strictly increasing Decimal => Decimal function (preferrably one whose outputs are larger than its inputs) and uses Decimal.increasingInverse to create a Logarithm-style notation using it.
+ * For example, if the function is (v => v.pow(6)), then 729 would be written as f(3).
+ * @param func ( (value : Decimal) => Decimal ! ) The function that this notation uses. This function must be strictly increasing, and unless maxnum is false, it should return an output larger than its input, at least for numbers above the maxnum.
+ * @param inverseAlready ( boolean ) If this parameter is false, then "func" is the function to take the inverse of. If this parameter is true, then "func" is already the inverse function.
+ * For example, if you want the function to be (v => Decimal.tetrate(2, v)) (which would make this notation equivalent to base-2 super logarithm), then if inverseAlready is true,
+ * you'd enter (v => Decimal.slog(v, 2)) as func instead. Decimal.increasingInverse can be slow, so doing this is mostly useful for speed purposes.
+ * @param layerFunction ( (value : Decimal) => Decimal ) For numbers too large to just repeatedly apply func, layerFunction is used to determine how many extra "layers" to add on.
+ * The default value of layerFunction is value => Decimal.tetrate(10, value.toNumber(), 1, true), i.e. each layer increases the tetra-exponent by 1, i.e. each layer is a power tower layer.
+ * @param layerInverseAlready ( boolean ) Same as inverseAlready, but for layerFunction instead.
+ * @param layerMimics ( boolean ) If this parameter is false, then layers and iterations are treated as separate. If this parameter is true, then layers act as if they're additional iterations.
+ * You should probably only make this parameter true if your layerFunction is approximating what repeatedly applying func would do to large numbers.
+ * @param iterationChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate iterations of the function. In each pair, the first entry goes before the number, the second entry goes after the number. iterationChars[0] takes the place of the f() in "f(25)", iterationChars[1] takes the place of the first f() in "f(f(654))" (iterationChars[0] is for the innermost iteration, iterationChars[1] is for the outer ones), and iterationChars[2] takes the place of the (f^) in (f^10)4. Default is [["f(", ")"], ["f(", ")"], ["(f^", ")"]].
+ * @param negIterationChars ( [[string, string], [string, string], [string, string]] | null ) An equivalent of iterationChars used for negative iterations. Default is [["f^-1(", ")"], ["f^-1(", ")"], ["(f^-", ")"]]. If this is set to null instead of a pair of strings, negative iterations just show negative iterations of iterationChars[2], such as (f^-2).
+ * @param layerChars ( [[string, string], [string, string], [string, string]] ) Same as iterationChars, but for layers instead of iterations. Since each layer is equivalent to an exponent level by default, the default is [["e", ""], ["e", ""], ["(e^", ")"]]. This parameter is unused if layerMimics is true.
+ * @param minIterations ( Decimal ) The minimum amount of iterations of the function. Default is 1.
+ * @param maxnum ( Decimal | null ) If this parameter is a Decimal, then whenever the number within the function would exceed this value, another iteration of the function is taken to bring it back below this value. If this value is null, then there is no maximum, so the amount of iterations does not change. Default is 1e12.
+ * @param layer_maxnum ( Decimal ) Whenever the number, before applying any function iterations, is above this value, the amount of layers is increased to bring it back below this value. Default is (e^6)12.
+ * @param rangeMinimum ( Decimal ) The minimum value that is allowed to be put into the function. If the value given would result in a function argument below this value, the function cannot be applied, and so the amount of iterations is reduced. Default is 0, which doesn't really do anything because notations already handle negatives separately... except if this value is below 0, negatives above this value are handled directly by the function instead of using negativeSign.
+ * @param rangeMaximum ( Decimal ) The maximum value that is allowed to be put into the function. This value must be greater than maxnum, so this parameter doesn't really do anything for the notation, but depending on what function you're using, it may be useful in ensuring Decimal.increasingInverse doesn't try testing invalid values.
+ * @param max_iterations_in_a_row ( number ) If there are more iterations than this, the f()'s are made into an f^n expression. Default is 5.
+ * @param max_layers_in_a_row ( number ) If there are more layers than this, the e's are made into an e^n expression. Default is 3. This parameter is unused if layerMimics is true.
+ * @param superexpAfter ( [boolean, boolean, boolean] ) If superexpAfter[0] is true, the f^n expression from iterationChars comes after the number instead of before. superexpAfter[1] is for negExpChars, superexpAfter[2] is for layerChars. Default is [false, false, false].
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The number within the function is rounded to the nearest multiple of this value. If this parameter is a function, then the value is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param iterationEngineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed amounts of iterations: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted amounts of iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param layerEngineerings ( Decimal | Decimal[] ) Same as iterationEngineerings, but for layers instead of iterations. Default is 1.
+ * @param innerNotation ( Notation ) The notation that the number within the function is itself notated with. DefaultNotation is the default.
+ * @param iterationInnerNotation ( Notation | null ) The notation that the number in an (f^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. Is the same as innerNotation by default.
+ * @param layerInnerNotation ( Notation | null ) The notation that the number in an (e^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. Is the same as iterationInnerNotation by default. This parameter is unused if layerMimics is true.
+ * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal (which happens if it's below 1 and it violates rangeMinimum's lower bound but its reciprocal does not), recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is ["1 / ", ""].
+ */
+class IncreasingFunctionNotation extends Notation {
+    constructor(func, inverseAlready = false, layerFunction = value => Decimal.tetrate(10, value.toNumber(), 1, true), layerInverseAlready = false, layerMimics = false, iterationChars = [["f(", ")"], ["f(", ")"], ["(f^", ")"]], negIterationChars = [["f^-1(", ")"], ["f^-1(", ")"], ["(f^-", ")"]], layerChars = [["e", ""], ["e", ""], ["(e^", ")"]], minIterations = Decimal.dOne, maxnum = new Decimal(1e12), layer_maxnum = new Decimal("(e^6)12"), rangeMinimum = 0, rangeMaximum = Infinity, max_iterations_in_a_row = 5, max_layers_in_a_row = 3, superexpAfter = [false, false, false], rounding = Decimal.dZero, iterationEngineerings = 1, layerEngineerings = 1, innerNotation = new DefaultNotation(), iterationInnerNotation = innerNotation, layerInnerNotation = iterationInnerNotation, recipString = ["1 / ", ""]) {
+        super();
+        this.inverseAlready = false;
+        this.layerFunction = value => Decimal.tetrate(10, value.toNumber(), 1, true);
+        this.layerInverseAlready = false;
+        this.layerMimics = false;
+        this.iterationChars = [["f(", ")"], ["f(", ")"], ["(f^", ")"]];
+        this.negIterationChars = [["f^-1(", ")"], ["f^-1(", ")"], ["(f^-", ")"]];
+        this.layerChars = [["e", ""], ["e", ""], ["(e^", ")"]];
+        this._minIterations = Decimal.dOne;
+        this.maxnum = new Decimal(1e12);
+        this.layer_maxnum = new Decimal("(e^6)12");
+        this._rangeMinimum = Decimal.dZero;
+        this._rangeMaximum = Decimal.dInf;
+        this.max_iterations_in_a_row = 5;
+        this.max_layers_in_a_row = 3;
+        this.superexpAfter = [false, false, false];
+        this.rounding = Decimal.dZero;
+        this._iterationEngineerings = [Decimal.dOne];
+        this._layerEngineerings = [Decimal.dOne];
+        this.innerNotation = new DefaultNotation();
+        this.iterationInnerNotation = this.innerNotation;
+        this.layerInnerNotation = this.iterationInnerNotation;
+        this.recipString = ["1 / ", ""];
+        this.name = "Increasing Function Notation";
+        this.func = func;
+        this.inverseAlready = inverseAlready;
+        this.layerFunction = layerFunction;
+        this.layerInverseAlready = layerInverseAlready;
+        this.layerMimics = layerMimics;
+        this.iterationChars = iterationChars;
+        this.negIterationChars = negIterationChars;
+        this.layerChars = layerChars;
+        this._minIterations = toDecimal(minIterations);
+        this.maxnum = (maxnum === null) ? null : toDecimal(maxnum);
+        this.layer_maxnum = toDecimal(layer_maxnum);
+        this.setRange(rangeMinimum, rangeMaximum);
+        this.max_iterations_in_a_row = max_iterations_in_a_row;
+        this.max_layers_in_a_row = max_layers_in_a_row;
+        this.superexpAfter = superexpAfter;
+        this.rounding = rounding;
+        this.iterationEngineerings = iterationEngineerings;
+        this.layerEngineerings = layerEngineerings;
+        this.innerNotation = innerNotation;
+        this.iterationInnerNotation = iterationInnerNotation;
+        this.layerInnerNotation = layerInnerNotation;
+        this.recipString = recipString;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && (decimal.lt(this._rangeMinimum)))
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        let func, inverse;
+        let maxnum = (this.maxnum !== null) ? this.maxnum : Decimal.dInf;
+        if (this.inverseAlready) {
+            func = this.func;
+            inverse = Decimal.increasingInverse(this.func, false, undefined, this._rangeMinimum, this._rangeMaximum);
+        }
+        else {
+            func = Decimal.increasingInverse(this.func, false, undefined, this._rangeMinimum, this._rangeMaximum);
+            inverse = this.func;
+        }
+        let layerFunc, layerInverse;
+        if (this.layerInverseAlready) {
+            layerFunc = this.layerFunction;
+            layerInverse = Decimal.increasingInverse(this.layerFunction);
+        }
+        else {
+            layerFunc = Decimal.increasingInverse(this.layerFunction);
+            layerInverse = this.layerFunction;
+        }
+        if (value.lt(1) && value.neq(0) && value.lt(this.func(this._rangeMinimum)) && value.recip().gte(this.func(this._rangeMinimum)))
+            return this.recipString[0] + this.format(value.recip()) + this.recipString[1];
+        let currentValue = new Decimal(value);
+        let roundedValue = round(currentValue, this.rounding);
+        let iterations = new Decimal(0);
+        let layers = new Decimal(0);
+        if (roundedValue.gte(this.layer_maxnum)) {
+            if (!this.layerMimics) {
+                let valLayers = layerFunc(currentValue);
+                layers = currentEngineeringValue(valLayers.sub(layerFunc(this.layer_maxnum)), this._layerEngineerings);
+                currentValue = layerInverse(valLayers.sub(layers));
+                roundedValue = round(currentValue, this.rounding);
+                while (roundedValue.gte(this.layer_maxnum)) {
+                    layers = nextEngineeringValue(layers, this._layerEngineerings);
+                    currentValue = layerInverse(valLayers.sub(layers));
+                    roundedValue = round(currentValue, this.rounding);
+                }
+            }
+            else {
+                let valLayers = layerFunc(currentValue);
+                iterations = currentEngineeringValue(valLayers.sub(layerFunc(this.layer_maxnum)), this._iterationEngineerings);
+                currentValue = layerInverse(valLayers.sub(iterations));
+                roundedValue = round(currentValue, this.rounding);
+                while (roundedValue.gte(this.layer_maxnum)) {
+                    iterations = nextEngineeringValue(iterations, this._iterationEngineerings);
+                    currentValue = layerInverse(valLayers.sub(iterations));
+                    roundedValue = round(currentValue, this.rounding);
+                }
+            }
+        }
+        if (this._minIterations.lt(0)) {
+            let inverseMinimum = func(this._rangeMinimum);
+            let inverseMaximum = func(this._rangeMaximum);
+            NegIterationLoop: while (iterations.gt(this._minIterations)) {
+                let nextIterations = previousEngineeringValue(iterations, this._iterationEngineerings);
+                let nextValue = new Decimal(currentValue);
+                roundedValue = round(nextValue, this.rounding);
+                for (let i = 0; i < nextIterations.sub(iterations).neg().toNumber(); i++) {
+                    if (nextValue.lt(inverseMinimum) || nextValue.gt(inverseMaximum))
+                        break NegIterationLoop;
+                    nextValue = inverse(nextValue);
+                    roundedValue = round(nextValue, this.rounding);
+                    if (!nextValue.isFinite() || roundedValue.gte(maxnum))
+                        break NegIterationLoop;
+                }
+                iterations = nextIterations;
+                currentValue = nextValue;
+            }
+        }
+        roundedValue = round(currentValue, this.rounding);
+        IterationLoop: while (iterations.lt(this._minIterations) || roundedValue.gte(maxnum)) {
+            let nextIterations = nextEngineeringValue(iterations, this._iterationEngineerings);
+            let nextValue = new Decimal(currentValue);
+            roundedValue = round(nextValue, this.rounding);
+            for (let i = 0; i < nextIterations.sub(iterations).toNumber(); i++) {
+                if (nextValue.lt(this._rangeMinimum) || nextValue.gt(this._rangeMaximum))
+                    break IterationLoop;
+                nextValue = func(nextValue);
+                roundedValue = round(nextValue, this.rounding);
+                if (!nextValue.isFinite())
+                    break IterationLoop;
+            }
+            iterations = nextIterations;
+            currentValue = nextValue;
+        }
+        roundedValue = round(currentValue, this.rounding);
+        let result = this.innerNotation.format(roundedValue);
+        let usedChars = (this.negIterationChars && iterations.lt(0)) ? this.negIterationChars : this.iterationChars;
+        let usedSuperExpAfter = (this.negIterationChars && iterations.lt(0)) ? this.superexpAfter[1] : this.superexpAfter[0];
+        if (this.negIterationChars && iterations.lt(0))
+            iterations = iterations.abs();
+        if (iterations.gt(0) && iterations.lte(this.max_iterations_in_a_row) && iterations.mod(1).eq(0)) {
+            result = usedChars[0][0] + result + usedChars[0][1];
+            for (let i = 1; i < iterations.toNumber(); i++)
+                result = usedChars[1][0] + result + usedChars[1][1];
+        }
+        else if (iterations.abs().gt(this.max_iterations_in_a_row)) {
+            let eStr = (this.iterationInnerNotation === null ? this : this.iterationInnerNotation).format(iterations);
+            eStr = usedChars[2][0] + eStr + usedChars[2][1];
+            if (usedSuperExpAfter)
+                result = result + eStr;
+            else
+                result = eStr + result;
+        }
+        if (layers.neq(0)) {
+            if (layers.lte(this.max_layers_in_a_row) && layers.mod(1).eq(0)) {
+                result = this.layerChars[0][0] + result + this.layerChars[0][1];
+                for (let i = 1; i < layers.toNumber(); i++)
+                    result = this.layerChars[1][0] + result + this.layerChars[1][1];
+            }
+            else if (layers.abs().gt(this.max_layers_in_a_row)) {
+                let eStr = (this.layerInnerNotation === null ? this : this.layerInnerNotation).format(layers);
+                eStr = this.layerChars[2][0] + eStr + this.layerChars[2][1];
+                if (this.superexpAfter[2])
+                    result = result + eStr;
+                else
+                    result = eStr + result;
+            }
+        }
+        return result;
+    }
+    get minIterations() {
+        return this._minIterations;
+    }
+    set minIterations(minIterations) {
+        minIterations = toDecimal(minIterations);
+        if (minIterations.mod(1).neq(0))
+            throw new RangeError("Increasing Function does not support non-integer iterations");
+        this._minIterations = minIterations;
+    }
+    setRange(minimum, maximum) {
+        let minimumD = toDecimal(minimum);
+        let maximumD = toDecimal(maximum);
+        if (this.maxnum && maximumD.lt(this.maxnum))
+            throw new RangeError("The range maximum in IncreasingFunction must be >= the maxnum");
+        if (!this.maxnum && maximumD.lt(Infinity))
+            throw new RangeError("If maxnum is false, the range maximum in IncreasingFunction must be Infinity");
+        if (maximumD.lte(minimumD))
+            throw new RangeError("In IncreasingFunction, maximumD must be greater than minimumD");
+        this._rangeMinimum = minimumD;
+        this._rangeMaximum = maximumD;
+    }
+    get rangeMinimum() {
+        return this._rangeMinimum;
+    }
+    set rangeMinimum(minimum) {
+        this.setRange(minimum, this._rangeMaximum);
+    }
+    get rangeMaximum() {
+        return this._rangeMaximum;
+    }
+    set rangeMaximum(maximum) {
+        this.setRange(this._rangeMinimum, maximum);
+    }
+    get iterationEngineerings() {
+        return this._iterationEngineerings;
+    }
+    set iterationEngineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._iterationEngineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        for (let e = 0; e < engineeringsD.length; e++) {
+            if (engineeringsD[e].mod(1).neq(0))
+                throw new RangeError("Increasing Function does not support non-integer iterations");
+        }
+        this._iterationEngineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get layerEngineerings() {
+        return this._layerEngineerings;
+    }
+    set layerEngineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._layerEngineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._layerEngineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+}
+/**
+ * Takes an increasing function that takes multiple Decimals as input and returns a Decimal, and uses Decimal.increasingInverse to create a Scientific-style notation using it.
+ * The last argument is considered the highest priority argument to increment, like how the exponent is higher-priority than the mantissa in regular scientific notation.
+ * @param func ( (...values : Decimal[]) => Decimal ! ) The function that is being used. It can have any amount of Decimal arguments, but it must return a Decimal (and it must have a fixed amount of arguments - the arguments can't themselves be an array of Decimals)
+ *
+ * NOTE: Due to how important this function is in determining the rest of the parameters, once an instance of IncreasingFunctionScientificNotation has been constructed,
+ * you cannot change its func to a function with a different amount of arguments than the func it had before. Create a new IncreasingFunctionScientificNotation instance if you want to use a function with a different number of arguments.
+ *
+ * @param limits ( Decimal[] ! ) limits[0] is the minimum value that the first argument is allowed to have; anything less, and the second argument is decreased to bring the first argument back over that limit. Likewise, limits[1] is the minimum for the second argument, limits[2] is the minimum for the third argument, and so on.
+ * The last argument does not have a limit. If this array has less values than (amount of arguments - 1), then all unfilled values will be set equal to the last value that was given.
+ * @param limitsAreMaximums ( boolean ) If this parameter is true, the limits are maximums instead of minimums. Default is false.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed values for each argument: for example, if engineerings[0] is [3], then the second argument will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted values for the third argument are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * The first argument does not have an engineerings array. If engineerings is a single value, then every argument is given that single value as its engineerings entry. If engineerings is an array with less arguments than (amount of arguments - 1), then all unfilled entries will be set equal to the last entry that was given.
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The first argument is rounded to the nearest multiple of this value. If this parameter is a function, then the first argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * NOTE: Unlike the rounding parameter in other scientific notations functions, this one does not detect "overflow", so rounding may cause the first argument to go under or over its limit.
+ * @param rangeLimits ( [Decimal, Decimal][] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ * @param revertValues ( (Decimal | boolean)[] ) If an argument would end up with a non-finite value (such as if increasingInverse returned NaN), that argument's revertValue entry determines what it becomes instead.
+ * If the revertValues entry is 'true', then that argument reverts to its limit. If the revertValues entry is a Decimal, then that argument becomes that value. If the revertValues entry is 'false', the non-finite value remains.
+ * @param argumentOrder ( number[] ) This array should contain the numbers from 0 to (amount of arguments - 1), and it decides what order they're added to the notation's output:
+ * for example, if argumentOrder is [0, 2, 1, 3], then the first argument is added first, then the third, then the second, and finally the fourth. This does not change their priority numerically, only their positions in the notation's output.
+ * If the array given does not contain some arguments, those arguments are added at the end. Default is the empty array, which becomes the default of [0, 1, 2, 3, etc.].
+ * @param argumentChars ( [string, string, string, string, string, string][] ) When one of the arguments is added to the notation's output, argumentChars[n][0] is placed before the entire expression thus far before the argument is added, argumentChars[n][1] is placed after the entire expression thus far before the argument is added,
+ * argumentChars[n][2] is placed around the argument itself and [n][3] is placed after the argument itself, and [n][4] and [n][5] are placed before and after the entire expression after the argument is added.
+ * If this parameter is given less entries than (amount of arguments), the remaining entries are filled in with [["", "", "", ", ", "", ""]], except for the entry corresponding to the argument that's last in argumentOrder, which gets [["", "", "", "", "", ""]].
+ * @param argumentToLeft ( boolean[] ) If an argument's corresponding entry in this array is true, that argument is outputted to the left of the expression thus far instead of the right. Default is an array consisting entirely of false, and if this parameter is given less entries than (amount of arguments), the remaining ones default to false.
+ * @param argumentShown ( (value : Decimal, index : number, allArguments : Decimal[]) => boolean ) If an argument's value would return false when run through this function (similar to Array.map()'s callback function, the second argument is the index of that parameter in the array of parameters, the third argument is the entire array of parameters), that argument is not shown in the notation's output. Default is (value) => true, meaning it does nothing by default.
+ * @param innerNotations ( Notation | Notation[] ) Either a Notation or an array of Notations. If this is a single Notation, then every argument is itself written in that notation. If this is an array, then each argument is itself written in its corresponding innerNotations entry. If the array has less entries than (amount of arguments), the remaining entries are written in DefaultNotation.
+ * @param iteration_maxnum ( Decimal ) If the value exceeds this number, then before running it through func, iterations of iterationFunc are applied to bring it back below this value. Default is (e^5)12.
+ * @param iterationFunction ( (value : Decimal) => Decimal ) The function that's applied to numbers over iteration_maxnum to bring them back under iteration_maxnum. Default is value => Decimal.pow(10, value).
+ * @param iterationInverseAlready ( boolean ) If this parameter is false, then "iterationFunction" is the function to take the inverse of. If this parameter is true, then "iterationFunction" is already the inverse function.
+ * For example, if you want iterationFunction to be (v => Decimal.tetrate(2, v)), then if inverseAlready is true,
+ * you'd enter (v => Decimal.slog(v, 2)) as iterationFunction instead. Decimal.increasingInverse can be slow, so doing this is mostly useful for speed purposes.
+ * @param layer_maxnum ( Decimal ) Whenever the number, before applying any function iterations, is above this value, the amount of layers is increased to bring it back below this value. Default is (e^5)12.
+ * @param layerFunction ( (value : Decimal) => Decimal ) For numbers too large to just repeatedly apply iterationFunction, layerFunction is used to determine how many extra "layers" to add on.
+ * The default value of layerFunction is value => Decimal.tetrate(10, value.toNumber(), 1, true), i.e. each layer increases the tetra-exponent by 1, i.e. each layer is a power tower layer.
+ * @param layerInverseAlready ( boolean ) Same as iterationInverseAlready, but for layerFunction instead.
+ * @param layerMimics ( boolean ) If this parameter is false, then layers and iterations are treated as separate. If this parameter is true, then layers act as if they're additional iterations.
+ * You should probably only make this parameter true if your layerFunction is approximating what repeatedly applying iterationFunction would do to large numbers.
+ * @param iterationChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate iterations of iterationFunction. In each pair, the first entry goes before the number, the second entry goes after the number. iterationChars[0] takes the place of the f() in "f(25)", iterationChars[1] takes the place of the first f() in "f(f(654))" (iterationChars[0] is for the innermost iteration, iterationChars[1] is for the outer ones), and iterationChars[2] takes the place of the (f^) in (f^10)4. Default is [["f(", ")"], ["f(", ")"], ["(f^", ")"]].
+ * @param layerChars ( [[string, string], [string, string], [string, string]] ) Same as iterationChars, but for layers instead of iterations. Since each layer is equivalent to an exponent level by default, the default is [["e", ""], ["e", ""], ["(e^", ")"]]. This parameter is unused if layerMimics is true.
+ * @param max_iterations_in_a_row ( number ) If there are more iterations than this, the f()'s are made into an f^n expression. Default is 5.
+ * @param max_layers_in_a_row ( number ) If there are more layers than this, the e's are made into an e^n expression. Default is 3. This parameter is unused if layerMimics is true.
+ * @param superexpAfter ( [boolean, boolean] ) If superexpAfter[0] is true, the f^n expression from iterationChars comes after the number instead of before. superexpAfter[1] is for layerChars. Default is [false, false].
+ * @param iterationEngineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed amounts of iterations: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted amounts of iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param layerEngineerings ( Decimal | Decimal[] ) Same as iterationEngineerings, but for layers instead of iterations. Default is 1.
+ * @param iterationInnerNotation ( Notation ) The notation that the number in an (f^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. DefaultNotation is the default.
+ * @param layerInnerNotation ( Notation ) The notation that the number in an (e^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. Is the same as iterationInnerNotation by default. This parameter is unused if layerMimics is true.
+ * @param minValue ( Decimal ) The minimum value that is allowed to be run through func. Values below this are just written in innerNotations[0] directly, unless they are reciprocals of numbers that are not below minValue. Default is 0.
+ * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal (which happens if it's below 1 and it's below minValue but its reciprocal is not), recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is ["1 / ", ""].
+ */
+class IncreasingFunctionScientificNotation extends Notation {
+    constructor(func, limits, limitsAreMaximums = false, engineerings = 1, rounding = Decimal.dZero, rangeLimits = [[-Infinity, Infinity]], revertValues = [false], argumentOrder = [], argumentChars = [], argumentToLeft = [false], argumentShown = (value => true), innerNotations = new DefaultNotation(), iteration_maxnum = new Decimal("(e^5)12"), iterationFunction = value => Decimal.pow(10, value), iterationInverseAlready = false, layer_maxnum = new Decimal("(e^5)12"), layerFunction = value => Decimal.tetrate(10, value.toNumber(), 1, true), layerInverseAlready = false, layerMimics = false, iterationChars = [["f(", ")"], ["f(", ")"], ["(f^", ")"]], layerChars = [["e", ""], ["e", ""], ["(e^", ")"]], max_iterations_in_a_row = 5, max_layers_in_a_row = 3, superexpAfter = [false, false], iterationEngineerings = 1, layerEngineerings = 1, iterationInnerNotation = new DefaultNotation(), layerInnerNotation = iterationInnerNotation, minValue = 0, recipString = ["1 / ", ""]) {
+        super();
+        this.limitsAreMaximums = false;
+        this._engineerings = [[Decimal.dOne]];
+        this.rounding = Decimal.dZero;
+        this._rangeLimits = [[Decimal.dNegInf, Decimal.dInf]];
+        this._revertValues = [false];
+        this._argumentOrder = [];
+        this._argumentChars = [];
+        this._argumentToLeft = [false];
+        this.argumentShown = (value => true);
+        this._innerNotations = [new DefaultNotation()];
+        this.iteration_maxnum = new Decimal("(e^5)12");
+        this.iterationFunction = value => Decimal.pow(10, value);
+        this.iterationInverseAlready = false;
+        this.layer_maxnum = new Decimal("(e^5)12");
+        this.layerFunction = value => Decimal.tetrate(10, value.toNumber(), 1, true);
+        this.layerInverseAlready = false;
+        this.layerMimics = false;
+        this.iterationChars = [["f(", ")"], ["f(", ")"], ["(f^", ")"]];
+        this.layerChars = [["e", ""], ["e", ""], ["(e^", ")"]];
+        this.max_iterations_in_a_row = 5;
+        this.max_layers_in_a_row = 3;
+        this.superexpAfter = [false, false];
+        this._iterationEngineerings = [Decimal.dOne];
+        this._layerEngineerings = [Decimal.dOne];
+        this.iterationInnerNotation = new DefaultNotation();
+        this.layerInnerNotation = this.iterationInnerNotation;
+        this.minValue = Decimal.dZero;
+        this.recipString = ["1 / ", ""];
+        this.name = "Increasing Function Scientific Notation";
+        this._func = func;
+        this.argamount = func.length;
+        this.limitsAreMaximums = limitsAreMaximums;
+        this.limits = limits;
+        this.engineerings = engineerings;
+        this.rounding = rounding;
+        this.rangeLimits = rangeLimits;
+        this.revertValues = revertValues;
+        this.argumentOrder = argumentOrder;
+        this.argumentChars = argumentChars;
+        this.argumentToLeft = argumentToLeft;
+        this.argumentShown = argumentShown;
+        this.innerNotations = innerNotations;
+        this.iteration_maxnum = toDecimal(iteration_maxnum);
+        this.iterationFunction = iterationFunction;
+        this.iterationInverseAlready = iterationInverseAlready;
+        this.layer_maxnum = toDecimal(layer_maxnum);
+        this.layerFunction = layerFunction;
+        this.layerInverseAlready = layerInverseAlready;
+        this.layerMimics = layerMimics;
+        this.iterationChars = iterationChars;
+        this.layerChars = layerChars;
+        this.max_iterations_in_a_row = max_iterations_in_a_row;
+        this.max_layers_in_a_row = max_layers_in_a_row;
+        this.superexpAfter = superexpAfter;
+        this.rounding = rounding;
+        this.iterationEngineerings = iterationEngineerings;
+        this.layerEngineerings = layerEngineerings;
+        this.iterationInnerNotation = iterationInnerNotation;
+        this.layerInnerNotation = layerInnerNotation;
+        this.minValue = toDecimal(minValue);
+        this.recipString = recipString;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && (decimal.lt(this.minValue)))
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        let iterationFunc;
+        let maxnum = (this.iteration_maxnum !== null) ? this.iteration_maxnum : Decimal.dInf;
+        if (this.iterationInverseAlready) {
+            iterationFunc = this.iterationFunction;
+            Decimal.increasingInverse(this.iterationFunction);
+        }
+        else {
+            iterationFunc = Decimal.increasingInverse(this.iterationFunction);
+            this.iterationFunction;
+        }
+        let layerFunc, layerInverse;
+        if (this.layerInverseAlready) {
+            layerFunc = this.layerFunction;
+            layerInverse = Decimal.increasingInverse(this.layerFunction);
+        }
+        else {
+            layerFunc = Decimal.increasingInverse(this.layerFunction);
+            layerInverse = this.layerFunction;
+        }
+        if (value.lt(1) && value.neq(0) && value.lt(this.minValue) && value.recip().gte(this.minValue))
+            return this.recipString[0] + this.format(value.recip()) + this.recipString[1];
+        let currentValue = new Decimal(value);
+        let iterations = new Decimal(0);
+        let layers = new Decimal(0);
+        if (currentValue.gte(this.layer_maxnum)) {
+            if (!this.layerMimics) {
+                let valLayers = layerFunc(currentValue);
+                layers = currentEngineeringValue(valLayers.sub(layerFunc(this.layer_maxnum)), this._layerEngineerings);
+                currentValue = layerInverse(valLayers.sub(layers));
+                while (currentValue.gte(this.layer_maxnum)) {
+                    layers = nextEngineeringValue(layers, this._layerEngineerings);
+                    currentValue = layerInverse(valLayers.sub(layers));
+                }
+            }
+            else {
+                let valLayers = layerFunc(currentValue);
+                iterations = currentEngineeringValue(valLayers.sub(layerFunc(this.layer_maxnum)), this._iterationEngineerings);
+                currentValue = layerInverse(valLayers.sub(iterations));
+                while (currentValue.gte(this.layer_maxnum)) {
+                    iterations = nextEngineeringValue(iterations, this._iterationEngineerings);
+                    currentValue = layerInverse(valLayers.sub(iterations));
+                }
+            }
+        }
+        IterationLoop: while (currentValue.gte(maxnum)) {
+            let nextIterations = nextEngineeringValue(iterations, this._iterationEngineerings);
+            let nextValue = new Decimal(currentValue);
+            for (let i = 0; i < nextIterations.sub(iterations).toNumber(); i++) {
+                nextValue = iterationFunc(nextValue);
+                if (!nextValue.isFinite())
+                    break IterationLoop;
+            }
+            iterations = nextIterations;
+            currentValue = nextValue;
+        }
+        let result = "";
+        if (currentValue.lt(this.minValue))
+            result = (this._innerNotations[0] === null ? this : this._innerNotations[0]).format(currentValue);
+        else {
+            let sciArray = increasingFunctionScientifify(currentValue, this._func, this._limits, this.limitsAreMaximums, this._engineerings, this.rounding, this._rangeLimits, this._revertValues);
+            for (let o = 0; o < this._argumentOrder.length; o++) {
+                let arg = this._argumentOrder[o];
+                if (!this.argumentShown(sciArray[arg], arg, sciArray))
+                    continue;
+                result = this._argumentChars[arg][0] + result + this._argumentChars[arg][1];
+                let str = (this._innerNotations[arg] === null ? this : this._innerNotations[arg]).format(sciArray[arg]);
+                str = this._argumentChars[arg][2] + str + this._argumentChars[arg][3];
+                if (this._argumentToLeft[arg])
+                    result = str + result;
+                else
+                    result = result + str;
+                result = this._argumentChars[arg][4] + result + this._argumentChars[arg][5];
+            }
+        }
+        if (iterations.gt(0) && iterations.lte(this.max_iterations_in_a_row) && iterations.mod(1).eq(0)) {
+            result = this.iterationChars[0][0] + result + this.iterationChars[0][1];
+            for (let i = 1; i < iterations.toNumber(); i++)
+                result = this.iterationChars[1][0] + result + this.iterationChars[1][1];
+        }
+        else if (iterations.abs().gt(this.max_iterations_in_a_row)) {
+            let eStr = (this.iterationInnerNotation === null ? this : this.iterationInnerNotation).format(iterations);
+            eStr = this.iterationChars[2][0] + eStr + this.iterationChars[2][1];
+            if (this.superexpAfter[0])
+                result = result + eStr;
+            else
+                result = eStr + result;
+        }
+        if (layers.neq(0)) {
+            if (layers.lte(this.max_layers_in_a_row) && layers.mod(1).eq(0)) {
+                result = this.layerChars[0][0] + result + this.layerChars[0][1];
+                for (let i = 1; i < layers.toNumber(); i++)
+                    result = this.layerChars[1][0] + result + this.layerChars[1][1];
+            }
+            else if (layers.abs().gt(this.max_layers_in_a_row)) {
+                let eStr = (this.layerInnerNotation === null ? this : this.layerInnerNotation).format(layers);
+                eStr = this.layerChars[2][0] + eStr + this.layerChars[2][1];
+                if (this.superexpAfter[1])
+                    result = result + eStr;
+                else
+                    result = eStr + result;
+            }
+        }
+        return result;
+    }
+    get func() {
+        return this._func;
+    }
+    set func(func) {
+        if (func.length != this.argamount)
+            throw new Error("The amount of arguments in Increasing Function Scientific cannot be changed once the notation has been constructed");
+        this._func = func;
+    }
+    get limits() {
+        return this._limits;
+    }
+    set limits(limits) {
+        let limitsD = limits.map(toDecimal);
+        if (limitsD.length == 0)
+            throw new Error("Increasing Function Scientific does not work with an empty limits array");
+        while (limitsD.length < this.argamount - 1)
+            limitsD.push(limitsD[limitsD.length - 1]);
+        limitsD[this.argamount - 1] = (this.limitsAreMaximums) ? Decimal.dInf : Decimal.dNegInf;
+        this._limits = limitsD;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(input) {
+        if (!(Array.isArray(input)))
+            input = [[input]];
+        let result = [[Decimal.dOne]];
+        for (let i = 0; i < input.length; i++) {
+            let entry = input[i];
+            if (entry.length == 0)
+                result[i] = [Decimal.dOne];
+            else
+                result[i] = entry.map(toDecimal);
+        }
+        while (result.length < this.argamount - 1)
+            result.push(result[result.length - 1]);
+        this._engineerings = result;
+    }
+    get rangeLimits() {
+        return this._rangeLimits;
+    }
+    set rangeLimits(rangeLimits) {
+        let limitsD = rangeLimits.map(value => [toDecimal(value[0]), toDecimal(value[1])]);
+        if (limitsD.length == 0)
+            limitsD.push([Decimal.dNegInf, Decimal.dInf]);
+        while (limitsD.length < this.argamount)
+            limitsD.push(limitsD[limitsD.length - 1]);
+        for (let l = 0; l < limitsD.length; l++)
+            if (limitsD[l][0].gte(limitsD[l][1]))
+                throw new Error("Range minimum >= range maximum in Increasing Function Scientifify");
+        this._rangeLimits = limitsD;
+    }
+    get revertValues() {
+        return this._revertValues;
+    }
+    set revertValues(revertValues) {
+        let revertValuesD = revertValues.map(value => (typeof value == "boolean" ? value : toDecimal(value)));
+        if (revertValuesD.length == 0)
+            revertValuesD.push(false);
+        while (revertValuesD.length < this.argamount)
+            revertValuesD.push(revertValuesD[revertValuesD.length - 1]);
+        this._revertValues = revertValuesD;
+    }
+    get argumentChars() {
+        return this._argumentChars;
+    }
+    set argumentChars(argumentChars) {
+        let lastArgument = this._argumentOrder[this._argumentOrder.length - 1];
+        while (argumentChars.length < this.argamount) {
+            if (argumentChars.length == lastArgument)
+                argumentChars.push(["", "", "", "", "", ""]);
+            else
+                argumentChars.push(["", "", "", ", ", "", ""]);
+        }
+        this._argumentChars = argumentChars;
+    }
+    get argumentOrder() {
+        return this._argumentOrder;
+    }
+    set argumentOrder(argumentOrder) {
+        let filledIn = [];
+        let result = [];
+        while (filledIn.length < this.argamount)
+            filledIn.push(false);
+        for (let a = 0; a < argumentOrder.length; a++) {
+            let arg = argumentOrder[a];
+            if (arg >= 0 && arg < this.argamount && arg % 1 == 0) {
+                filledIn[arg] = true;
+                result.push(arg);
+            }
+        }
+        for (let f = 0; f < filledIn.length; f++) {
+            if (filledIn[f] == false)
+                result.push(f);
+        }
+        this._argumentOrder = result;
+    }
+    get argumentToLeft() {
+        return this._argumentToLeft;
+    }
+    set argumentToLeft(argumentToLeft) {
+        while (argumentToLeft.length < this.argamount) {
+            argumentToLeft.push(false);
+        }
+        this._argumentToLeft = argumentToLeft;
+    }
+    get iterationEngineerings() {
+        return this._iterationEngineerings;
+    }
+    set iterationEngineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._iterationEngineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        for (let e = 0; e < engineeringsD.length; e++) {
+            if (engineeringsD[e].mod(1).neq(0))
+                throw new RangeError("Increasing Function does not support non-integer iterations");
+        }
+        this._iterationEngineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get layerEngineerings() {
+        return this._layerEngineerings;
+    }
+    set layerEngineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._layerEngineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._layerEngineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get innerNotations() {
+        return this._innerNotations;
+    }
+    set innerNotations(innerNotations) {
+        if (!Array.isArray(innerNotations))
+            innerNotations = [innerNotations];
+        while (innerNotations.length < this.argamount) {
+            innerNotations.push(new DefaultNotation());
+        }
+        this._innerNotations = innerNotations;
+    }
+}
+/**
+ * Uses three increasing functions to create a Double Factorials-style notation: numbers are expressed as a series of terms, where each term is a whole number run through the first function, then
+ * raised to some power (or whatever the second function does), and the terms are multiplied together (or whatever the third function does).
+ * @param termFunc ( (value : Decimal) => Decimal ! ) The function applied to integers to generate the terms.
+ * @param powerFunc ( (term : Decimal, power : Decimal) => Decimal ) The function used in place of raising a term to a power. Default is (term, power) => Decimal.pow(term, power).
+ * @param betweenFunc ( (leftover : Decimal, term : Decimal) => Decimal ) The function that combines each term. "leftover" is value from the rest of the terms thus far. Default is (leftover, term) => Decimal.mul(leftover, term).
+ * @param termInverseAlready ( boolean ) If this parameter is false, termFunc is the increasing function, so Decimal.increasingInverse is used to figure out what the terms are based on the value given.
+ * If this parameter is true, then termFunc is already the inverse function. Default is false.
+ * @param powerInverseAlready ( boolean ) If this parameter is false, then powerFunc takes the current term and the power and returns their combination's value. If this parameter is true, then
+ * powerFunc is the inverse function: it takes a value and the current term and finds the power that that term would need to be combined with to make that value. Default is false.
+ * @param betweenInverseAlready ( boolean ) If this parameter is false, then betweenFunc takes the remaining number and the current term and returns the total value. If this parameter is true, then
+ * betweenFunc is the inverse function: it takes the total value and the current term and finds the leftover value that that term would need to be combined with to make that value. Default is false.
+ * @param maxTerms ( number ) If there would be too many terms, only the largest few are shown. This parameter controls the maximum amount of terms shown. Default is 8.
+ * @param termChars ( [string, string] ) These two strings are placed around each term's number: termChars[0] goes before the term number, termChars[1] goes after. Default is ["f(", ")"].
+ * @param powerChars ( [string, string, string] ) When the power is large enough to be shown (which, by default, is when it's above 1), powerChars[0] is placed before the power number, powerChars[1] is placed after, and powerChars[2] is placed on the opposite side of the term from the other two. Default is ["^", "", ""].
+ * @param betweenChar ( string ) This string is placed between each term. Default is " * ".
+ * @param powerBefore ( boolean ) If this parameter is false, a term's power is written after the term itself. If this parameter is true, the power is written before the term. Default is false.
+ * @param reverseTerms ( boolean ) If this parameter is false, terms are written largest to smallest. If this parameter is true, terms are written smallest to largest. Default is false.
+ * @param minTerm ( Decimal ) The smallest allowed term number. If the term number would go below this, a constant term (i.e. a term that's just a plain value without using termFunc or powerFunc) is added and the terms stop after that. Default is 1.
+ * @param constantTermChars ( [string, string] ) Same as termChars, but for the constant term instead. Default is ["", ""].
+ * @param edgeChars ( [string, string] ) edgeChars[0] is placed before the whole string of terms, edgeChars[1] is placed after. Default is ["", ""].
+ * @param rangeLimits ( [[Decimal, Decimal], [Decimal, Decimal], [Decimal, Decimal]] ) For the purposes of ensuring Decimal.increasingInverse functions properly, these parameters set limits on the domain of the function.
+ * For each entry, rangeLimits[a][0] is the minimum for an argument, rangeLimits[a][1] is the maximum for an argument. rangeLimits[0] is for termFunc, rangeLimits[1] is for powerFunc, rangeLimits[2] is for betweenFunc.
+ * These parameters do nothing for the actual result, they only ensure valid behavior.
+ * @param termEngineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed term numbers: if it's three then the term number will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted term numbers are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param powerEngineerings ( Decimal | Decimal[] ) Same as termEngineerings, but for the power numbers instead of the term numbers. Default is 1.
+ * @param constantInnerNotation ( Notation ) The notation that the constant term is written in. DefaultNotation is the default.
+ * @param termInnerNotation ( Notation | null ) The notation that the term numbers are written in. If this parameter is null, the term numbers are written in this notation yourself (if you're using this option, make sure small numbers reduce back to the constant term!). Is the same as constantInnerNotation by default.
+ * @param powerInnerNotation ( Notation | null ) The notation that the power numbers are written in. If this parameter is null, the power numbers are written in this notation yourself (if you're using this option, make sure small numbers reduce back to the constant term!). Is the same as constantInnerNotation by default.
+ * @param maxChars ( number ) If the result has reached this many characters after a term has been added, it stops there even if the amount of terms hasn't reached maxTerms yet. Default is Infinity, meaning maxChars doesn't apply by default.
+ * @param showConstantTerm ( (value : Decimal) => boolean ) Even if the constant term is reached, it's only actually shown if plugging it into this function would return true. Default is value => true.
+ * @param showTerms ( (term : Decimal, power : Decimal) => boolean ) A term is only shown if plugging the term and power into this function would return true. The term is still evaluated even if this function would return false, it's just not shown in the result. Default is (term, power) => true.
+ * @param irrelevancyFunc ( (currentValue : Decimal, originalValue : Decimal) => boolean ) If, after a term is added to the result, calling this function (with the current remaining value as its first parameter, the original value before any terms were added (but after the iteration and layer functions are applied, if applicable) as its second) returns true, no more terms are added afterwards. Default is a function that always returns false.
+ * @param maxPowersInARow ( number ) If a term's power is equal to or less than this parameter, then that term's power is not written out. Instead, that term is written multiple times in a row, with that amount of times being equal to its power. Default is 1.
+ * @param betweenPowersChar ( string ) When multiple of the same term are written in a row, this string is placed between copies of the same term instead of betweenChar. Default is "".
+ * @param termWrapperChars ( [string, string] ) When some amount of copies of the same term (that amount of copies may be 1) are written out instead of writing the power as a number, termWrapperChars[0] goes before the whole set of copies, termWrapperChars[1] goes after. Default is ["", ""].
+ * @param iteration_maxnum ( Decimal ) If the value exceeds this number, then before running it through func, iterations of iterationFunc are applied to bring it back below this value. Default is (e^5)12.
+ * @param iterationFunction ( (value : Decimal) => Decimal ! ) The function that's applied to numbers over iteration_maxnum to bring them back under iteration_maxnum. Default is value => Decimal.pow(10, value).
+ * @param iterationInverseAlready ( boolean ) If this parameter is false, then "iterationFunction" is the function to take the inverse of. If this parameter is true, then "iterationFunction" is already the inverse function.
+ * For example, if you want iterationFunction to be (v => Decimal.tetrate(2, v)), then if inverseAlready is true,
+ * you'd enter (v => Decimal.slog(v, 2)) as iterationFunction instead. Decimal.increasingInverse can be slow, so doing this is mostly useful for speed purposes.
+ * @param layer_maxnum ( Decimal ) Whenever the number, before applying any function iterations, is above this value, the amount of layers is increased to bring it back below this value. Default is (e^5)12.
+ * @param layerFunction ( (value : Decimal) => Decimal ) For numbers too large to just repeatedly apply iterationFunction, layerFunction is used to determine how many extra "layers" to add on.
+ * The default value of layerFunction is value => Decimal.tetrate(10, value.toNumber(), 1, true), i.e. each layer increases the tetra-exponent by 1, i.e. each layer is a power tower layer.
+ * @param layerInverseAlready ( boolean ) Same as iterationInverseAlready, but for layerFunction instead.
+ * @param layerMimics ( boolean ) If this parameter is false, then layers and iterations are treated as separate. If this parameter is true, then layers act as if they're additional iterations.
+ * You should probably only make this parameter true if your layerFunction is approximating what repeatedly applying iterationFunction would do to large numbers.
+ * @param iterationChars ( [[string, string], [string, string], [string, string]] ) An array of three pairs of strings that are used as the characters to indicate iterations of iterationFunction. In each pair, the first entry goes before the number, the second entry goes after the number. iterationChars[0] takes the place of the f() in "f(25)", iterationChars[1] takes the place of the first f() in "f(f(654))" (iterationChars[0] is for the innermost iteration, iterationChars[1] is for the outer ones), and iterationChars[2] takes the place of the (f^) in (f^10)4. Default is [["f(", ")"], ["f(", ")"], ["(f^", ")"]].
+ * @param layerChars ( [[string, string], [string, string], [string, string]] ) Same as iterationChars, but for layers instead of iterations. Since each layer is equivalent to an exponent level by default, the default is [["e", ""], ["e", ""], ["(e^", ")"]]. This parameter is unused if layerMimics is true.
+ * @param max_iterations_in_a_row ( number ) If there are more iterations than this, the f()'s are made into an f^n expression. Default is 5.
+ * @param max_layers_in_a_row ( number ) If there are more layers than this, the e's are made into an e^n expression. Default is 3. This parameter is unused if layerMimics is true.
+ * @param superexpAfter ( [boolean, boolean] ) If superexpAfter[0] is true, the f^n expression from iterationChars comes after the number instead of before. superexpAfter[1] is for layerChars. Default is [false, false].
+ * @param iterationEngineerings ( Decimal | Decimal[] ) Either a DecimalSource or an array of DecimalSources; default is 1. This parameter controls the allowed amounts of iterations: if it's three then the amount of iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings is [5, 2], then the permitted amounts of iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * @param layerEngineerings ( Decimal | Decimal[] ) Same as iterationEngineerings, but for layers instead of iterations. Default is 1.
+ * @param iterationInnerNotation ( Notation | null ) The notation that the number in an (f^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. DefaultNotation is the default.
+ * @param layerInnerNotation ( Notation | null ) The notation that the number in an (e^n) expression is itself notated with. If this parameter is null, then that number is written in this notation itself. Is the same as iterationInnerNotation by default. This parameter is unused if layerMimics is true.
+ * @param minValue ( Decimal ) The minimum value that is allowed to be run through func. Values below this are just written in innerNotations[0] directly, unless they are reciprocals of numbers that are not below minValue. Default is 0.
+ * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal (which happens if it's below 1 and it's below minValue but its reciprocal is not), recipString[0] goes before that reciprocal, recipString[1] goes afterwards. Default is ["1 / ", ""].
+ */
+class IncreasingFunctionProductNotation extends Notation {
+    constructor(termFunc, powerFunc = (term, power) => Decimal.pow(term, power), betweenFunc = (leftover, term) => Decimal.mul(leftover, term), termInverseAlready = false, powerInverseAlready = false, betweenInverseAlready = false, maxTerms = 8, termChars = ["f(", ")"], powerChars = ["^", "", ""], betweenChar = " * ", powerBefore = false, reverseTerms = false, minTerm = 1, constantTermChars = ["", ""], edgeChars = ["", ""], rangeLimits = [[Decimal.dNegInf, Decimal.dInf], [Decimal.dNegInf, Decimal.dInf], [Decimal.dNegInf, Decimal.dInf]], termEngineerings = 1, powerEngineerings = 1, constantInnerNotation = new DefaultNotation(), termInnerNotation = constantInnerNotation, powerInnerNotation = constantInnerNotation, maxChars = Infinity, showConstantTerm = (value => true), showTerms = ((term, power) => true), irrelevancyFunc = (currentValue) => false, maxPowersInARow = 1, betweenPowersChar = "", termWrapperChars = ["", ""], iteration_maxnum = new Decimal("(e^5)12"), iterationFunction = value => Decimal.pow(10, value), iterationInverseAlready = false, layer_maxnum = new Decimal("(e^5)12"), layerFunction = value => Decimal.tetrate(10, value.toNumber(), 1, true), layerInverseAlready = false, layerMimics = false, iterationChars = [["f(", ")"], ["f(", ")"], ["(f^", ")"]], layerChars = [["e", ""], ["e", ""], ["(e^", ")"]], max_iterations_in_a_row = 5, max_layers_in_a_row = 3, superexpAfter = [false, false], iterationEngineerings = 1, layerEngineerings = 1, iterationInnerNotation = new DefaultNotation(), layerInnerNotation = iterationInnerNotation, minValue = 0, recipString = ["1 / ", ""]) {
+        super();
+        this.powerFunc = (term, power) => Decimal.pow(term, power);
+        this.betweenFunc = (leftover, term) => Decimal.mul(leftover, term);
+        this.termInverseAlready = false;
+        this.powerInverseAlready = false;
+        this.betweenInverseAlready = false;
+        this._maxTerms = 8;
+        this.termChars = ["f(", ")"];
+        this.powerChars = ["^", "", ""];
+        this.betweenChar = " * ";
+        this.powerBefore = false;
+        this.reverseTerms = false;
+        this.minTerm = Decimal.dOne;
+        this.constantTermChars = ["", ""];
+        this.edgeChars = ["", ""];
+        this.rangeLimits = [[Decimal.dNegInf, Decimal.dInf], [Decimal.dNegInf, Decimal.dInf], [Decimal.dNegInf, Decimal.dInf]];
+        this._termEngineerings = [Decimal.dOne];
+        this._powerEngineerings = [Decimal.dOne];
+        this.constantInnerNotation = new DefaultNotation();
+        this.termInnerNotation = this.constantInnerNotation;
+        this.powerInnerNotation = this.constantInnerNotation;
+        this.maxChars = Infinity;
+        this.showConstantTerm = (value => true);
+        this.showTerms = ((term, power) => true);
+        this.irrelevancyFunc = (currentValue) => false;
+        this.maxPowersInARow = 1;
+        this.betweenPowersChar = "";
+        this.termWrapperChars = ["", ""];
+        this.iteration_maxnum = new Decimal("(e^5)12");
+        this.iterationFunction = value => Decimal.pow(10, value);
+        this.iterationInverseAlready = false;
+        this.layer_maxnum = new Decimal("(e^5)12");
+        this.layerFunction = value => Decimal.tetrate(10, value.toNumber(), 1, true);
+        this.layerInverseAlready = false;
+        this.layerMimics = false;
+        this.iterationChars = [["f(", ")"], ["f(", ")"], ["(f^", ")"]];
+        this.layerChars = [["e", ""], ["e", ""], ["(e^", ")"]];
+        this.max_iterations_in_a_row = 5;
+        this.max_layers_in_a_row = 3;
+        this.superexpAfter = [false, false];
+        this._iterationEngineerings = [Decimal.dOne];
+        this._layerEngineerings = [Decimal.dOne];
+        this.iterationInnerNotation = new DefaultNotation();
+        this.layerInnerNotation = this.iterationInnerNotation;
+        this.minValue = Decimal.dZero;
+        this.recipString = ["1 / ", ""];
+        this.name = "Increasing Function Product Notation";
+        this.termFunc = termFunc;
+        this.powerFunc = powerFunc;
+        this.betweenFunc = betweenFunc;
+        this.termInverseAlready = termInverseAlready;
+        this.powerInverseAlready = powerInverseAlready;
+        this.betweenInverseAlready = betweenInverseAlready;
+        this.maxTerms = maxTerms;
+        this.termChars = termChars;
+        this.powerChars = powerChars;
+        this.betweenChar = betweenChar;
+        this.powerBefore = powerBefore;
+        this.reverseTerms = reverseTerms;
+        this.minTerm = toDecimal(minTerm);
+        this.constantTermChars = constantTermChars;
+        this.edgeChars = edgeChars;
+        this.rangeLimits = [[toDecimal(rangeLimits[0][0]), toDecimal(rangeLimits[0][1])], [toDecimal(rangeLimits[1][0]), toDecimal(rangeLimits[1][1])], [toDecimal(rangeLimits[2][0]), toDecimal(rangeLimits[2][1])]];
+        this.termEngineerings = termEngineerings;
+        this.powerEngineerings = powerEngineerings;
+        this.constantInnerNotation = constantInnerNotation;
+        this.termInnerNotation = termInnerNotation;
+        this.powerInnerNotation = powerInnerNotation;
+        this.showConstantTerm = showConstantTerm;
+        this.showTerms = showTerms;
+        this.irrelevancyFunc = irrelevancyFunc;
+        this.maxPowersInARow = maxPowersInARow;
+        this.betweenPowersChar = betweenPowersChar;
+        this.termWrapperChars = termWrapperChars;
+        this.maxChars = maxChars;
+        this.iteration_maxnum = toDecimal(iteration_maxnum);
+        this.iterationFunction = iterationFunction;
+        this.iterationInverseAlready = iterationInverseAlready;
+        this.layer_maxnum = toDecimal(layer_maxnum);
+        this.layerFunction = layerFunction;
+        this.layerInverseAlready = layerInverseAlready;
+        this.layerMimics = layerMimics;
+        this.iterationChars = iterationChars;
+        this.layerChars = layerChars;
+        this.max_iterations_in_a_row = max_iterations_in_a_row;
+        this.max_layers_in_a_row = max_layers_in_a_row;
+        this.superexpAfter = superexpAfter;
+        this.iterationEngineerings = iterationEngineerings;
+        this.layerEngineerings = layerEngineerings;
+        this.iterationInnerNotation = iterationInnerNotation;
+        this.layerInnerNotation = layerInnerNotation;
+        this.minValue = toDecimal(minValue);
+        this.recipString = recipString;
+    }
+    format(value) {
+        let decimal = toDecimal(value);
+        if (decimal.isNan())
+            return this.NaNString;
+        if (this.isInfinite(decimal)) {
+            return decimal.sgn() < 0 ? this.negativeInfinite : this.infinite;
+        }
+        if (decimal.neq(0) && this.isInfinite(decimal.recip())) {
+            return this.format(0);
+        }
+        return (decimal.sgn() < 0 && (decimal.lt(this.minValue)))
+            ? this.formatNegativeDecimal(decimal.abs())
+            : this.formatDecimal(decimal);
+    }
+    formatDecimal(value) {
+        let iterationFunc;
+        let maxnum = (this.iteration_maxnum !== null) ? this.iteration_maxnum : Decimal.dInf;
+        if (this.iterationInverseAlready) {
+            iterationFunc = this.iterationFunction;
+            Decimal.increasingInverse(this.iterationFunction);
+        }
+        else {
+            iterationFunc = Decimal.increasingInverse(this.iterationFunction);
+            this.iterationFunction;
+        }
+        let layerFunc, layerInverse;
+        if (this.layerInverseAlready) {
+            layerFunc = this.layerFunction;
+            layerInverse = Decimal.increasingInverse(this.layerFunction);
+        }
+        else {
+            layerFunc = Decimal.increasingInverse(this.layerFunction);
+            layerInverse = this.layerFunction;
+        }
+        if (value.lt(1) && value.neq(0) && value.lt(this.minValue) && value.recip().gte(this.minValue))
+            return this.recipString[0] + this.format(value.recip()) + this.recipString[1];
+        let currentValue = new Decimal(value);
+        let iterations = new Decimal(0);
+        let layers = new Decimal(0);
+        if (currentValue.gte(this.layer_maxnum)) {
+            if (!this.layerMimics) {
+                let valLayers = layerFunc(currentValue);
+                layers = currentEngineeringValue(valLayers.sub(layerFunc(this.layer_maxnum)), this._layerEngineerings);
+                currentValue = layerInverse(valLayers.sub(layers));
+                while (currentValue.gte(this.layer_maxnum)) {
+                    layers = nextEngineeringValue(layers, this._layerEngineerings);
+                    currentValue = layerInverse(valLayers.sub(layers));
+                }
+            }
+            else {
+                let valLayers = layerFunc(currentValue);
+                iterations = currentEngineeringValue(valLayers.sub(layerFunc(this.layer_maxnum)), this._iterationEngineerings);
+                currentValue = layerInverse(valLayers.sub(iterations));
+                while (currentValue.gte(this.layer_maxnum)) {
+                    iterations = nextEngineeringValue(iterations, this._iterationEngineerings);
+                    currentValue = layerInverse(valLayers.sub(iterations));
+                }
+            }
+        }
+        IterationLoop: while (currentValue.gte(maxnum)) {
+            let nextIterations = nextEngineeringValue(iterations, this._iterationEngineerings);
+            let nextValue = new Decimal(currentValue);
+            for (let i = 0; i < nextIterations.sub(iterations).toNumber(); i++) {
+                nextValue = iterationFunc(nextValue);
+                if (!nextValue.isFinite())
+                    break IterationLoop;
+            }
+            iterations = nextIterations;
+            currentValue = nextValue;
+        }
+        let termFunc;
+        let termInverse;
+        let powerFunc;
+        let powerInverse;
+        let betweenFunc;
+        if (this.termInverseAlready) {
+            termFunc = this.termFunc;
+            termInverse = Decimal.increasingInverse(this.termFunc, false, undefined, this.rangeLimits[0][0], this.rangeLimits[0][1]);
+        }
+        else {
+            termFunc = Decimal.increasingInverse(this.termFunc, false, undefined, this.rangeLimits[0][0], this.rangeLimits[0][1]);
+            termInverse = this.termFunc;
+        }
+        if (this.powerInverseAlready) {
+            powerFunc = this.powerFunc;
+            powerInverse = (term, power) => (Decimal.increasingInverse((val) => this.powerFunc(val, term), false, undefined, this.rangeLimits[1][0], this.rangeLimits[1][1])(power));
+        }
+        else {
+            powerFunc = (value, term) => (Decimal.increasingInverse((val) => this.powerFunc(term, val), false, undefined, this.rangeLimits[1][0], this.rangeLimits[1][1])(value));
+            powerInverse = this.powerFunc;
+        }
+        if (this.betweenInverseAlready) {
+            betweenFunc = this.betweenFunc;
+        }
+        else {
+            betweenFunc = (value, term) => (Decimal.increasingInverse((val) => this.betweenFunc(val, term), false, undefined, this.rangeLimits[2][0], this.rangeLimits[2][1])(value));
+            this.betweenFunc;
+        }
+        let result = "";
+        if (currentValue.lt(this.minValue))
+            result = this.constantInnerNotation.format(currentValue);
+        else {
+            let irrelevancyCheck = currentValue;
+            let termsSoFar = 0;
+            while (termsSoFar < this._maxTerms && result.length < this.maxChars && !this.irrelevancyFunc(currentValue, irrelevancyCheck)) {
+                let currentTerm = currentEngineeringValue(termFunc(currentValue), this._termEngineerings);
+                if (currentTerm.isFinite() && currentTerm.gte(this.minTerm)) {
+                    let currentTermValue = termInverse(currentTerm);
+                    let currentPower = currentEngineeringValue(powerFunc(currentValue, currentTermValue), this._powerEngineerings);
+                    let combinedTerm = powerInverse(currentTermValue, currentPower);
+                    // console.log(currentValue + " " + currentTerm + " " + currentTermValue + " " + currentPower + " " + combinedTerm)
+                    currentValue = betweenFunc(currentValue, combinedTerm);
+                    if (this.showTerms(currentTerm, currentPower)) {
+                        if (termsSoFar > 0) {
+                            if (this.reverseTerms)
+                                result = this.betweenChar + result;
+                            else
+                                result = result + this.betweenChar;
+                        }
+                        let singleTermStr = this.termChars[0] + (this.termInnerNotation === null ? this : this.termInnerNotation).format(currentTerm) + this.termChars[1];
+                        let termStr = "";
+                        if (currentPower.gte(0) && currentPower.lte(this.maxPowersInARow) && currentPower.mod(1).eq(0)) {
+                            for (let p = 0; p < currentPower.toNumber(); p++) {
+                                if (p > 0)
+                                    termStr = termStr + this.betweenPowersChar;
+                                termStr += singleTermStr;
+                            }
+                            termStr = this.termWrapperChars[0] + termStr + this.termWrapperChars[1];
+                        }
+                        else {
+                            termStr = singleTermStr;
+                            if (this.powerBefore)
+                                termStr = this.powerChars[0] + (this.powerInnerNotation === null ? this : this.powerInnerNotation).format(currentPower) + this.powerChars[1] + termStr + this.powerChars[2];
+                            else
+                                termStr = this.powerChars[2] + termStr + this.powerChars[0] + (this.powerInnerNotation === null ? this : this.powerInnerNotation).format(currentPower) + this.powerChars[1];
+                        }
+                        if (this.reverseTerms)
+                            result = termStr + result;
+                        else
+                            result = result + termStr;
+                        termsSoFar++;
+                    }
+                }
+                else {
+                    if (this.showConstantTerm(currentValue)) {
+                        if (termsSoFar > 0) {
+                            if (this.reverseTerms)
+                                result = this.betweenChar + result;
+                            else
+                                result = result + this.betweenChar;
+                        }
+                        let termStr = this.constantTermChars[0] + this.constantInnerNotation.format(currentValue) + this.constantTermChars[1];
+                        if (this.reverseTerms)
+                            result = termStr + result;
+                        else
+                            result = result + termStr;
+                    }
+                    break;
+                }
+            }
+            result = this.edgeChars[0] + result + this.edgeChars[1];
+        }
+        if (iterations.gt(0) && iterations.lte(this.max_iterations_in_a_row) && iterations.mod(1).eq(0)) {
+            result = this.iterationChars[0][0] + result + this.iterationChars[0][1];
+            for (let i = 1; i < iterations.toNumber(); i++)
+                result = this.iterationChars[1][0] + result + this.iterationChars[1][1];
+        }
+        else if (iterations.abs().gt(this.max_iterations_in_a_row)) {
+            let eStr = (this.iterationInnerNotation === null ? this : this.iterationInnerNotation).format(iterations);
+            eStr = this.iterationChars[2][0] + eStr + this.iterationChars[2][1];
+            if (this.superexpAfter[0])
+                result = result + eStr;
+            else
+                result = eStr + result;
+        }
+        if (layers.neq(0)) {
+            if (layers.lte(this.max_layers_in_a_row) && layers.mod(1).eq(0)) {
+                result = this.layerChars[0][0] + result + this.layerChars[0][1];
+                for (let i = 1; i < layers.toNumber(); i++)
+                    result = this.layerChars[1][0] + result + this.layerChars[1][1];
+            }
+            else if (layers.abs().gt(this.max_layers_in_a_row)) {
+                let eStr = (this.layerInnerNotation === null ? this : this.layerInnerNotation).format(layers);
+                eStr = this.layerChars[2][0] + eStr + this.layerChars[2][1];
+                if (this.superexpAfter[1])
+                    result = result + eStr;
+                else
+                    result = eStr + result;
+            }
+        }
+        return result;
+    }
+    get maxTerms() {
+        return this._maxTerms;
+    }
+    set maxTerms(maxTerms) {
+        if (maxTerms <= 0)
+            throw new RangeError("Nonpositive max terms in Increasing Function Product Notation");
+        this._maxTerms = maxTerms;
+    }
+    get termEngineerings() {
+        return this._termEngineerings;
+    }
+    set termEngineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._termEngineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._termEngineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get powerEngineerings() {
+        return this._powerEngineerings;
+    }
+    set powerEngineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._powerEngineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._powerEngineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get iterationEngineerings() {
+        return this._iterationEngineerings;
+    }
+    set iterationEngineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._iterationEngineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        for (let e = 0; e < engineeringsD.length; e++) {
+            if (engineeringsD[e].mod(1).neq(0))
+                throw new RangeError("Increasing Function does not support non-integer iterations");
+        }
+        this._iterationEngineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+    get layerEngineerings() {
+        return this._layerEngineerings;
+    }
+    set layerEngineerings(engineerings) {
+        if (!Array.isArray(engineerings))
+            engineerings = [engineerings];
+        if (engineerings.length == 0) {
+            this._layerEngineerings = [Decimal.dOne];
+            return;
+        }
+        let engineeringsD = engineerings.map(toDecimal);
+        this._layerEngineerings = engineeringsD.sort(function (a, b) {
+            if (a.lt(b))
+                return -1;
+            else if (a.eq(b))
+                return 0;
+            else
+                return 1;
+        }).reverse();
+    }
+}
+
+/**
+ * A notation that abbreviates numbers using the Fast-Growing Hierarchy, a simple system of functions: f0(n) = n + 1, f1(n) is f0(f0(f0(f0...(n)))) with n f0's,
+ * f2(n) is f1(f1(f1(f1...(n)))) with n f1's, and so on, with each function being a repeated version of the previous one.
+ * The Fast-Growing Hierarchy functions have a similar growth rate to the hyperoperators: f1 multiplies, f2 is exponential, f3 is tetrational, f4 is pentational, and so on.
+ * This notation only goes up to f3.
+ * @param maximums ( Decimal[] ) If the number given is above maximums[0], another iteration of f0 is applied. Likewise, going above maximums[1] causes an iteration of f1 to be applied, going above maximums[2] causes an iteration of f2 to be applied, and so on.
+ * Later functions are applied before earlier ones. Default is [1, 4, 32, ee41373247578.35493], which are the values that cause the argument to stay below 1 and the amount of iterations of each function to stay below 4.
+ * If less than 4 entries are provided, the unfilled entries are set to Infinity, i.e. those later operators don't show up.
+ * @param functionChars ( [string, string][] ) The strings used to show each application of each function. functionChars[n] corresponds to f[n]. For each entry, functionChars[n][0] goes before the argument,
+ * functionChars[n][1] goes after. Default is [["f0(", ")"], ["f1(", ")"], ["f2(", ")"], ["f3(", ")"]]. If less than 4 entries are provided, the unfilled entries go back to their default values.
+ * @param max_in_a_row ( number[] ) If the amount of iterations of f0 is above max_in_a_row[0], the f0's are concatenated into an (f0^n) expression. Likewise for the rest of the functions and their corresponding entries here.
+ * Default is [4, 4, 4, 4]. If less than 4 entries are provided, the unfilled entries are set to the same value as the last filled one.
+ * @param iterationChars ( [string, string, string][] ) The strings used when the amount of iterations is concatenated. In each entry, iterationChars[n][0] goes before the amount of iterations, iterationChars[n][1] goes after the amount of iterations,
+ * and iterationChars[n][2] goes on the opposite side of the argument from the other two. Default is [["(f0^", ")", ""], ["(f1^", ")", ""], ["(f2^", ")", ""], ["(f3^", ")", ""]].
+ * If less than 4 entries are provided, the unfilled entries go back to their default values.
+ * @param iterationAfter ( boolean[] ) If iterationAfter[n] is true, then the amount of iterations of that function goes after the argument instead of before. Default is [false, false, false, false].
+ * If less than 4 entries are provided, the unfilled entries are set to false.
+ * @param edgeChars ( [string, string, boolean] ) If any of the functions are applied to the value at least once, then edgeChars[0] goes on the left end of the whole expression, edgeChars[1] goes on the right end.
+ * If edgeChars[2] is true, then the other two edgeChars appear even if no other functions are visible. Default is ["", "", false].
+ * @param argumentChars ( [string, string, boolean] ) If any of the functions are applied to the value at least once, then argumentChars[0] goes right before the argument, edgeChars[1] goes right after.
+ * If argumentChars[2] is true, then the other two argumentChars appear even if no other functions are visible. Default is ["", "", false].
+ * @param rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The argument is rounded to the nearest multiple of this value. If this parameter is a function, then the argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.
+ * @param delimiterPermutation ( number ) The order that the functions are shown in when multiple are present (they're always applied from greatest to least; this parameter is only a visual change). The default is 23, which corresponds to [f0, f1, f2, f3]. Each value from 0 to 23 represents a different ordering.
+ * @param engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed amount of iterations for each function: for example, if engineerings[0] is [3], then the amount of f0 iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted amounts of f0 iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
+ * If engineerings is a single value, then every argument is given that single value as its engineerings entry. If less than 4 entries are provided, then all unfilled entries will be set equal to the last entry that was given.
+ * @param innerNotation ( Notation ) The notation that the argument is itself written in. DefaultNotation is the default.
+ * @param iterationInnerNotations ( Notation | Notation[] ) iterationInnerNotations[0] is the notation that the amount of iterations of f0 is written in, and likewise for the rest of the functions.
+ * If only a single notation is provided, all 4 entries are set to that notation. If less than 4 entries are provided, the unfilled ones are set to be the same as the last given one. Is the same as innerNotation by default.
+ * @param functionShown ( ((value : Decimal) => boolean)[] ) functionShown[0] controls when the f0 iterations are shown: the f0 iterations, whether concatenated or not, are only shown if functionShown[0](amount of f0 iterations) returns true.
+ * Default is (value => value.gt(0)) for all five entries, i.e. the iterations are only shown if there's more than zero of them. If less than 4 entries are provided, the unfilled ones are set to be the same as the last given one.
+ */
+class FastGrowingHierarchyNotation extends Notation {
+    constructor(maximums = [Decimal.dOne, new Decimal(4), new Decimal(32), new Decimal("ee41373247578.35493")], functionChars = [["f0(", ")"], ["f1(", ")"], ["f2(", ")"], ["f3(", ")"]], max_in_a_row = [4, 4, 4, 4], iterationChars = [["(f0^", ")", ""], ["(f1^", ")", ""], ["(f2^", ")", ""], ["(f3^", ")", ""]], iterationAfter = [false], edgeChars = ["", "", false], argumentChars = ["", "", false], rounding = Decimal.dZero, delimiterPermutation = 23, engineerings = 1, innerNotation = new DefaultNotation(), iterationInnerNotations = innerNotation, functionShown = [(value => value.gt(0))]) {
+        super();
+        this._maximums = [Decimal.dOne, new Decimal(4), new Decimal(32), new Decimal("ee41373247578.35493")];
+        this._functionChars = [["f0(", ")"], ["f1(", ")"], ["f2(", ")"], ["f3(", ")"]];
+        this._max_in_a_row = [4, 4, 4, 4];
+        this._iterationChars = [["(f0^", ")", ""], ["(f1^", ")", ""], ["(f2^", ")", ""], ["(f3^", ")", ""]];
+        this._iterationAfter = [false];
+        this.edgeChars = ["", "", false];
+        this.argumentChars = ["", "", false];
+        this.rounding = Decimal.dZero;
+        this.delimiterPermutation = 23;
+        this._engineerings = [[Decimal.dOne], [Decimal.dOne], [Decimal.dOne], [Decimal.dOne]];
+        this.innerNotation = new DefaultNotation();
+        this._iterationInnerNotations = [this.innerNotation];
+        this._functionShown = [(value => value.gt(0))];
+        this.name = "Fast-Growing Hierarchy Notation";
+        this.maximums = maximums;
+        this.functionChars = functionChars;
+        this.max_in_a_row = max_in_a_row;
+        this.iterationChars = iterationChars;
+        this.iterationAfter = iterationAfter;
+        this.edgeChars = edgeChars;
+        this.argumentChars = argumentChars;
+        this.rounding = rounding;
+        this.delimiterPermutation = delimiterPermutation;
+        this.engineerings = engineerings;
+        this.innerNotation = innerNotation;
+        this.iterationInnerNotations = iterationInnerNotations;
+        this.functionShown = functionShown;
+    }
+    formatDecimal(value) {
+        let currentValue = value;
+        let roundedValues = [value, value, value, value];
+        let iterations = [Decimal.dZero, Decimal.dZero, Decimal.dZero, Decimal.dZero];
+        let initialRun = [true, true, true, true];
+        if (value.eq(0))
+            initialRun = [false, false, false, false];
+        while (roundedValues[3].gte(this._maximums[3]) || initialRun[3]) {
+            initialRun[2] = initialRun[1] = initialRun[0] = true;
+            currentValue = roundedValues[3];
+            iterations[0] = Decimal.dZero;
+            iterations[1] = Decimal.dZero;
+            iterations[2] = Decimal.dZero;
+            if (currentValue.gte(this._maximums[3])) {
+                let iterations3 = currentEngineeringValue(iteratedFGH3log(currentValue, this._maximums[3]).floor().max(0), this._engineerings[3]).toNumber();
+                currentValue = iteratedFGH3(currentValue, -iterations3);
+                iterations[3] = iterations[3].plus(iterations3);
+                while (currentValue.gte(this._maximums[3])) {
+                    iterations3 = nextEngineeringValue(iterations[3], this._engineerings[3]).sub(iterations[3]).toNumber();
+                    currentValue = iteratedFGH3(currentValue, -iterations3);
+                    iterations[3] = iterations[3].plus(iterations3);
+                }
+            }
+            initialRun[3] = false;
+            roundedValues[3] = roundedValues[2] = roundedValues[1] = roundedValues[0] = currentValue;
+            while (roundedValues[2].gte(this._maximums[2]) || initialRun[2]) {
+                initialRun[1] = initialRun[0] = true;
+                currentValue = roundedValues[2];
+                iterations[0] = Decimal.dZero;
+                iterations[1] = Decimal.dZero;
+                if (currentValue.gte(this._maximums[2])) {
+                    let iterations2 = currentEngineeringValue(iteratedFGH2log(currentValue, this._maximums[2]).floor().max(0), this._engineerings[2]).toNumber();
+                    currentValue = iteratedFGH2(currentValue, -iterations2);
+                    iterations[2] = iterations[2].plus(iterations2);
+                    while (currentValue.gte(this._maximums[2])) {
+                        iterations2 = nextEngineeringValue(iterations[2], this._engineerings[2]).sub(iterations[2]).toNumber();
+                        currentValue = iteratedFGH2(currentValue, -iterations2);
+                        iterations[2] = iterations[2].plus(iterations2);
+                    }
+                }
+                initialRun[2] = false;
+                roundedValues[2] = roundedValues[1] = roundedValues[0] = currentValue;
+                while (roundedValues[1].gte(this._maximums[1]) || initialRun[1]) {
+                    initialRun[0] = true;
+                    currentValue = roundedValues[1];
+                    iterations[0] = Decimal.dZero;
+                    if (currentValue.gte(this._maximums[1])) {
+                        let iterations1 = currentEngineeringValue(iteratedFGH1log(currentValue, this._maximums[1]).floor().max(0), this._engineerings[1]);
+                        currentValue = iteratedFGH1(currentValue, -iterations1);
+                        iterations[1] = iterations[1].plus(iterations1);
+                        while (currentValue.gte(this._maximums[1])) {
+                            iterations1 = nextEngineeringValue(iterations[1], this._engineerings[1]).sub(iterations[1]);
+                            currentValue = iteratedFGH1(currentValue, -iterations1);
+                            iterations[1] = iterations[1].plus(iterations1);
+                        }
+                    }
+                    initialRun[1] = false;
+                    roundedValues[1] = roundedValues[0] = currentValue;
+                    while (roundedValues[0].gte(this._maximums[0]) || initialRun[0]) {
+                        currentValue = roundedValues[0];
+                        let roundedValue = round(currentValue, this.rounding);
+                        if (roundedValue.gte(this._maximums[0])) {
+                            let iterations0 = currentEngineeringValue(roundedValue.sub(this._maximums[0]).floor().max(0), this._engineerings[0]);
+                            currentValue = iteratedFGH0(currentValue, -iterations0);
+                            roundedValue = round(currentValue, this.rounding);
+                            iterations[0] = iterations[0].plus(iterations0);
+                            while (roundedValue.gte(this._maximums[0])) {
+                                iterations0 = nextEngineeringValue(iterations[0], this._engineerings[0]).sub(iterations[0]);
+                                currentValue = iteratedFGH0(currentValue, -iterations0);
+                                roundedValue = round(currentValue, this.rounding);
+                                iterations[0] = iterations[0].plus(iterations0);
+                            }
+                        }
+                        initialRun[0] = false;
+                        roundedValues[0] = roundedValue;
+                    }
+                    roundedValues[1] = this.FGHEvaluate(roundedValues[0], [iterations[0]]);
+                }
+                roundedValues[2] = this.FGHEvaluate(roundedValues[1], [Decimal.dZero, iterations[1]]);
+            }
+            roundedValues[3] = this.FGHEvaluate(roundedValues[2], [Decimal.dZero, Decimal.dZero, iterations[2]]);
+        }
+        let anyIterations = false;
+        for (let f = 0; f < 4; f++)
+            if (this._functionShown[f](iterations[f])) {
+                anyIterations = true;
+                break;
+            }
+        let orderArray = [0];
+        orderArray.splice(this.delimiterPermutation % 2, 0, 1);
+        orderArray.splice(Math.floor(this.delimiterPermutation / 2) % 3, 0, 2);
+        orderArray.splice(Math.floor(this.delimiterPermutation / 6) % 4, 0, 3);
+        let result = this.innerNotation.format(roundedValues[0]);
+        if (anyIterations || this.argumentChars[2])
+            result = this.argumentChars[0] + result + this.argumentChars[1];
+        for (let o = 0; o < 4; o++) {
+            let f = orderArray[o];
+            if (this._functionShown[f](iterations[f])) {
+                let currentiterations = iterations[f];
+                if (currentiterations.gt(0) && currentiterations.lte(this._max_in_a_row[f]) && currentiterations.mod(1).eq(0)) {
+                    for (let i = 0; i < currentiterations.toNumber(); i++) {
+                        result = this._functionChars[f][0] + result + this._functionChars[f][1];
+                    }
+                }
+                else if (this._iterationAfter[f]) {
+                    result = this._iterationChars[f][2] + result + this._iterationChars[f][0] + this._iterationInnerNotations[f].format(iterations[f]) + this._iterationChars[f][1];
+                }
+                else
+                    result = this._iterationChars[f][0] + this._iterationInnerNotations[f].format(iterations[f]) + this._iterationChars[f][1] + result + this._iterationChars[f][2];
+            }
+        }
+        if (anyIterations || this.edgeChars[2])
+            result = this.edgeChars[0] + result + this.edgeChars[1];
+        return result;
+    }
+    FGHEvaluate(argument, iterationArray) {
+        let result = argument;
+        if (iterationArray.length > 0)
+            result = iteratedFGH0(result, iterationArray[0]);
+        if (iterationArray.length > 1)
+            result = iteratedFGH1(result, iterationArray[1]);
+        if (iterationArray.length > 2)
+            result = iteratedFGH2(result, iterationArray[2].toNumber());
+        if (iterationArray.length > 3)
+            result = iteratedFGH3(result, iterationArray[3].toNumber());
+        return result;
+    }
+    get maximums() {
+        return this._maximums;
+    }
+    set maximums(maximums) {
+        let maximumsD = maximums.map(toDecimal);
+        while (maximumsD.length < 4)
+            maximumsD.push(Decimal.dInf);
+        this._maximums = maximumsD;
+    }
+    get functionChars() {
+        return this._functionChars;
+    }
+    set functionChars(functionChars) {
+        let result = [["f0(", ")"], ["f1(", ")"], ["f2(", ")"], ["f3(", ")"]];
+        for (let f = 0; f < Math.min(4, functionChars.length); f++)
+            result[f] = functionChars[f];
+        this._functionChars = result;
+    }
+    get max_in_a_row() {
+        return this._max_in_a_row;
+    }
+    set max_in_a_row(max_in_a_row) {
+        if (!Array.isArray(max_in_a_row))
+            max_in_a_row = [max_in_a_row];
+        if (max_in_a_row.length == 0)
+            max_in_a_row.push(4);
+        while (max_in_a_row.length < 4)
+            max_in_a_row.push(max_in_a_row[max_in_a_row.length - 1]);
+        this._max_in_a_row = max_in_a_row;
+    }
+    get iterationChars() {
+        return this._iterationChars;
+    }
+    set iterationChars(iterationChars) {
+        let result = [["(f0^", ")", ""], ["(f1^", ")", ""], ["(f2^", ")", ""], ["(f3^", ")", ""]];
+        for (let f = 0; f < Math.min(4, iterationChars.length); f++)
+            result[f] = iterationChars[f];
+        this._iterationChars = result;
+    }
+    get iterationAfter() {
+        return this._iterationAfter;
+    }
+    set iterationAfter(iterationAfter) {
+        while (iterationAfter.length < 4)
+            iterationAfter.push(false);
+        this._iterationAfter = iterationAfter;
+    }
+    get engineerings() {
+        return this._engineerings;
+    }
+    set engineerings(input) {
+        if (!(Array.isArray(input)))
+            input = [[input]];
+        let result = [[Decimal.dOne]];
+        for (let i = 0; i < input.length; i++) {
+            let entry = input[i];
+            if (entry.length == 0)
+                result[i] = [Decimal.dOne];
+            else
+                result[i] = entry.map(toDecimal);
+        }
+        while (result.length < 4)
+            result.push(result[result.length - 1]);
+        this._engineerings = result;
+    }
+    get iterationInnerNotations() {
+        return this._iterationInnerNotations;
+    }
+    set iterationInnerNotations(iterationInnerNotations) {
+        if (!Array.isArray(iterationInnerNotations))
+            iterationInnerNotations = [iterationInnerNotations];
+        if (iterationInnerNotations.length == 0)
+            iterationInnerNotations.push(new DefaultNotation());
+        while (iterationInnerNotations.length < 4)
+            iterationInnerNotations.push(iterationInnerNotations[iterationInnerNotations.length - 1]);
+        this._iterationInnerNotations = iterationInnerNotations;
+    }
+    get functionShown() {
+        return this._functionShown;
+    }
+    set functionShown(functionShown) {
+        if (functionShown.length == 0)
+            functionShown.push(value => value.gt(0));
+        while (functionShown.length < 4)
+            functionShown.push(functionShown[functionShown.length - 1]);
+        this._functionShown = functionShown;
+    }
+}
+
+/**
+ * Writes numbers as the layers seen in VeproGames's "Omega Meta Zero". Sort of like a mixed radix base, but with Greek letters, alchemical planet symbols, exponent-styled towers of symbols, and more instead of digits and exponents.
+ * This notation would be too complicated to explain all at once, so see the info on the parameters to understand each step of the process.
+ * (Unless otherwise stated, whenever a parameter that's an array where each entry corresponds to a set of symbols is given less entries than the amount of sets of symbols, the unfilled entries are set to be the same as the last entry that was provided.)
+ * @param symbols ( string[][] ) These are the digits of the mixed-radix base. Each entry of symbols is an array of strings used for one position in the base.
+ * symbols[n][0] is the digit for 0 in that position, symbols[n][1] is the digit for 1, and so on. Default is
+ * [["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω",
+ * "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"
+ * ], ["ϝ", "ϛ", "ͱ", "ϻ", "ϙ", "ͳ", "ϸ"], ["☿", "♀", "♁", "♂", "♃", "♄", "♅", "♆", "♇"]].
+ * @param towerHeight ( Decimal | Decimal[] ) Rather than immediately incrementing the next set of symbols after reaching the last symbol of a set, this notation repeats that set of symbols but as an "exponent" on top of the last symbol in its set.
+ * This continues until that tower reaches a certain height, and only afterwards does that set of symbols reset and the next set increment. This parameter controls that maximum tower height. If this parameter is a single Decimal,
+ * every symbol set has the same maximum height. If it's an array of Decimals, towerHeight[n] is the tower height limit for symbols[n]. Default is 5.
+ * @param towerChars ( ([string, string] | boolean )[] ) This parameter controls the characters used to indicate the aforementioned towers. If towerChars[n] is a pair of strings, then for each tower level, towerChars[n][0] goes before the symbol from symbols[n], towerChars[n][1] goes afterwards.
+ * If towerChars[n] is a boolean, then a default pair of strings is used: ["s^", ""] for false, ["s<sup>", "</sup>"] for true, where that "s" is replaced with whatever the last symbol of symbols[n] is. Default is false for all entries.
+ * @param visibleTowerMax ( number | number[] ) If a tower is taller than this, the tower's entries are concatenated into a "tower iteration" expression. Like with towerHeight, a single number applies to all symbol sets,
+ * while an array of numbers has each number correspond to one symbol set. Default is 5.
+ * @param toweriterationChars ( [string, string, boolean, Notation][] ) When a tower is tall enough to be concatenated, the entry of this array corresponding to that symbol set is used to express the amount of tower iterations.
+ * towerIterationChars[n][0] goes before the amount of iterations, towerIterationChars[n][1] goes after the amount of iterations, towerIterationChars[n][2] is whether the iterations expression goes before or after the symbol atop the tower (before if false, after if true), and towerIterationChars[n][3] is the Notation that the amount of iterations is written in.
+ * Default is [["((Ω^)^", ")", false, new DefaultNotation()], ["((ϸ^)^", ")", false, new DefaultNotation()], ["((♇^)^", ")", false, new DefaultNotation()]], though since visibleTowerMax isn't less than towerHeight by default, this parameter doesn't come into play unless one of those parameters is changed from its default.
+ * @param symbolAfter ( boolean | boolean[] ) If symbolAfter[n] is true, then the symbol from the next symbol set will go after the current expression instead of before. If a single boolean is provided, all entries are set to that boolean. Default is false.
+ * @param parentheses ( [string, string, string, string, string, string][] ) When the nth symbol set is added to the resulting string, parentheses[n][0] goes around the entire expression thus far and parentheses[n][1] goes after, before the new symbol is added.
+ * parentheses[n][2] and [n][3] go before and after the new symbol, and parentheses[n][4] and [n][5] go before and after the entire expression after the new symbol is added.
+ * The default has ["", "", "", "", "", ""] for parentheses[0] and ["(", ")", "", "", "", ""] for the rest of the entries.
+ * @param symbolShown ( ((value : Decimal, index : number, symbolValues : Decimal[], digitIndex : number, decimalPlaceAmount : number, digitValues : Decimal[]) => boolean) | ((value : Decimal, index : number, symbolValues : Decimal[], digitIndex : number, decimalPlaceAmount : number, digitValues : Decimal[]) => boolean)[] )
+ * The symbol of the nth symbol set is only shown in the resulting expression if calling symbolShown[n] on the value that symbol represents would return true.
+ * If only a single function is provided, all entries are set to that function. The default has (value => true) for symbolShown[0] and (value => value.gt(0)) for the rest of the entries,
+ * i.e. the greek letters are always visible but the higher two sets only show up if they're nonzero.
+ * Like Array.map(), you can include extra arguments in the function: args[1] will be the symbol set's index (so the first symbol set will have index 0, the second symbol set has index 1, etc.), arg[2] is the entire array of symbol values for that digit,
+ * arg[3] is the index of the digit this symbol set is part of (the ones place is index 0, the next larger digit is index 1, etc. If there are decimal places, they have negative index), arg[4] is the amount of decimal digits, and arg[5] is the entire array of digit values.
+ * @param brackets ( [string, string, string, string, string, string][] ) After the last symbol set, this notation starts using multiple "digits", where a single "digit" consists of a run of symbols from each set.
+ * The entries in brackets are placed around each digit (via the same rules as the entries of parentheses) in a cycle: brackets[0] is used for the last digit, brackets[1] for the second-to-last, brackets[2] for the third-to-last, and so on, looping back to brackets[0] after the last entry.
+ * Default is [["", "", "[", "]", "", ""]].
+ * @param firstBrackets ( [string, string, string, string, string, string][] ) If this array has any entries, the first few digits use those entries instead of the entries in brackets.
+ * Default is [["", "", "", "", "", ""]], i.e. the first digit doesn't have the [] around it but the rest do.
+ * @param lastBrackets ( [string, string, string, string, string, string][] ) If this array has any entries, the last few digits use those entries instead of the entries in brackets.
+ * Default is [], i.e. there's no special treatment for the last digits.
+ * @param reverseDigits ( boolean ) Normally, the largest digit is on the left and the smallest digit is on the right, like in a normal number base.
+ * If this parameter is true, the order of the digits is reversed. Default is false.
+ * @param maxVisibleDigits ( number ) The maximum amount of digits before the notation switches to scientific form (in which the amount of unshown digits is written as an exponent like in scientific notation). Default is 3.
+ * @param expChars ( [string, string, string, string, string, string] ) The characters placed around the exponent in scientific form (using the same rules as parentheses and brackets). Default is ["", "", "{", "}", "", ""].
+ * @param expAfter ( boolean ) If this parameter is true, the exponent is written after the digits instead of before. Default is false.
+ * @param maxVisibleDigitsInExp ( number ) The amount of digits shown once the expression is in scientific form. Default is 2.
+ * @param exponentOffset ( boolean ) If this parameter is false, the exponent is the amount of unwritten digits. If this parameter is true, the exponent is increased to one less than the amount of total digits, as if there was a decimal point after the first digit. Default is true.
+ * @param bracketsInExp ( [string, string, string, string, string, string][] ) Same as brackets, but this parameter is used instead once the expression is in scientific form. Is the same as brackets by default.
+ * @param firstBracketsInExp ( [string, string, string, string, string, string][] ) Same as firstBrackets, but this parameter is used instead once the expression is in scientific form. Is the same as firstBrackets by default.
+ * @param lastBracketsInExp ( [string, string, string, string, string, string][] ) Same as lastBrackets, but this parameter is used instead once the expression is in scientific form. Is the same as lastBrackets by default.
+ * @param expInnerNotation ( Notation | null ) If this parameter is null, the exponent is written in this Omega Meta Zero notation itself. If this parameter is a notation, the exponent is written in that notation. Default is null.
+ * @param uncertainChar ( string ) If the exponent is so large that the digits cease to be relevant, this string is placed where the digits would be. Default is "◯".
+ * @param uncertainThreshold ( Decimal ) If the exponent is equal to or greater than this value, uncertainChar is written instead of the digits. Default is 636152238258658, which matches with the point where the original Omega Meta Zero starts using ◯.
+ * @param maxVisibleLayers ( number ) The maximum amount of layers of nested exponents before the notation starts writing the amount of additional layers separately (note that this is a little different from the original Omega Meta Zero, which switches to base-10 hyperscientific at this point). Default is 4.
+ * @param layerChars ( [string, string, string, string, string, string] ) The characters placed around the amount of extra exponent layers (using the same rules as expChars). Default is ["", "", "◖", "◗", "", ""].
+ * @param layerAfter ( boolean ) If this parameter is true, the amount of layers is written after the rest of the expression instead of before. Default is false.
+ * @param maxVisibleLayersPost ( number ) The amount of nested exponent layers shown after the amount of extra layers starts being written separately. Default is 1.
+ * @param layerOffset ( boolean ) If this parameter is false, the layer number is the amount of unwritten layers. If this parameter is true, the layer number is increased to one less than the amount of total layers. Default is false.
+ * @param layerInnerNotation ( Notation | null ) If this parameter is null, the layer number is written in this Omega Meta Zero notation itself. If this parameter is a notation, the layer number is written in that notation. Default is null.
+ * @param layerUncertainChar ( string ) If the layer is so large that the exponent and digits cease to be relevant, this string is placed where the exponent and digits would be. Is the same as uncertainChar by default.
+ * @param layerUncertainThreshold ( Decimal ) If the layer amount is equal to or greater than this value, layerUncertainChair is written instead of the exponent and digits. Default is 9e15.
+ * @param decimalPlaces ( number ) The amount of digits shown after the ones digit. Default is 0.
+ * @param decimalPoint ( [string, string] ) Once all the sub-ones digits are written but before the whole digits are written, decimalPoint[0] goes before the expression, decimalPoint[1] goes after. Default is [";", ""].
+ * @param decimalBrackets ( [string, string, string, string, string, string][] ) Same as brackets, but used for sub-ones digits instead. Default is [["", "", "[", "]", "", ""]].
+ * @param showDecimalZeroes ( number ) If this number is negative, trailing zero sub-ones digits are not shown. If this number is zero, trailing zero sub-ones digits are only shown if at least one sub-ones digit is nonzero. If this number is positive, training zero sub-ones digits are shown. Default is 1.
+ * @param negExpThreshold ( number ) If the amount of leading zero sub-one digits would be at least this, the number is written in scientific form (with a negative exponent) instead. Default is 1.
+ * @param negExpChars ( null | [string, string, string, string, string, string] ) If this parameter is not null, then when the exponent is negative, negExpChars is used instead of expChars (and the exponent is written as its absolute value). Default is null.
+ * @param negExpAfter ( boolean ) If negExpChars is used instead of expChars, negExpAfter is used instead of expAfter. Default is false.
+ * @param recipThreshold ( number ) Numbers too small to write as themselves are written in terms of their reciprocals.
+ * If recipThreshold is 0, anything below 1 is written in terms of its reciprocal. If recipThreshold is 1, then numbers that would be written in negative-exponent scientific are written in terms of their reciprocal.
+ * If recipThreshold is 2, then the threshold for writing in terms of its reciprocal is the negative exponent point where the digits switch to using undefinedChar, or the point where a second exponent layer shows up, whichever is less small.
+ * If recipThreshold is 3, the threshold is the second exponent layer. Any other recipThreshold value acts as 0. Default is 2.
+ * @param recipString ( [string, string] ) When a number is written in terms of its reciprocal, recipString[0] goes before it, recipString[1] goes after. Default is ["/", ""].
+ */
+class OmegaMetaZeroNotation extends Notation {
+    constructor(symbols = [
+        [
+            "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω",
+            "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"
+        ], ["ϝ", "ϛ", "ͱ", "ϻ", "ϙ", "ͳ", "ϸ"], ["☿", "♀", "♁", "♂", "♃", "♄", "♅", "♆", "♇"]
+    ], towerHeight = 5, towerChars = [false], visibleTowerMax = 5, toweriterationChars = [], symbolAfter = false, parentheses = [["", "", "", "", "", ""], ["(", ")", "", "", "", ""], ["(", ")", "", "", "", ""]], symbolShown = [value => true, value => value.gt(0), value => value.gt(0)], brackets = [["", "", "[", "]", "", ""]], firstBrackets = [["", "", "", "", "", ""]], lastBrackets = [], reverseDigits = false, maxVisibleDigits = 3, expChars = ["", "", "{", "}", "", ""], expAfter = false, maxVisibleDigitsInExp = 2, exponentOffset = true, bracketsInExp = brackets, firstBracketsInExp = firstBrackets, lastBracketsInExp = lastBrackets, expInnerNotation = null, uncertainChar = "◯", uncertainThreshold = 636152238258658, maxVisibleLayers = 4, layerChars = ["", "", "◖", "◗", "", ""], layerAfter = false, maxVisibleLayersPost = 1, layerOffset = false, layerInnerNotation = null, layerUncertainChar = uncertainChar, layerUncertainThreshold = 9e15, decimalPlaces = 0, decimalPoint = [";", ""], decimalBrackets = [["", "", "[", "]", "", ""]], showDecimalZeroes = 1, negExpThreshold = 1, negExpChars = null, negExpAfter = false, recipThreshold = 0, recipString = ["/", ""]) {
+        super();
+        this._symbols = [
+            [
+                "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω",
+                "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"
+            ], ["ϝ", "ϛ", "ͱ", "ϻ", "ϙ", "ͳ", "ϸ"], ["☿", "♀", "♁", "♂", "♃", "♄", "♅", "♆", "♇"]
+        ];
+        this._towerHeight = [new Decimal(5), new Decimal(5), new Decimal(5)];
+        this._towerChars = [];
+        this._visibleTowerMax = [5, 5, 5];
+        this._toweriterationChars = [];
+        this._symbolAfter = [false, false, false];
+        this._parentheses = [["", "", "", "", "", ""], ["(", ")", "", "", "", ""], ["(", ")", "", "", "", ""]];
+        this._symbolShown = [value => true, value => value.gt(0), value => value.gt(0)];
+        this._brackets = [["", "", "[", "]", "", ""]];
+        this.firstBrackets = [["", "", "", "", "", ""]];
+        this.lastBrackets = [];
+        this.reverseDigits = false;
+        this._maxVisibleDigits = 3;
+        this.expChars = ["", "", "{", "}", "", ""];
+        this.expAfter = false;
+        this._maxVisibleDigitsInExp = 2;
+        this.exponentOffset = true;
+        this._bracketsInExp = this._brackets;
+        this.firstBracketsInExp = this.firstBrackets;
+        this.lastBracketsInExp = this.lastBrackets;
+        this.expInnerNotation = null;
+        this.uncertainChar = "◯";
+        this.uncertainThreshold = new Decimal(636152238258658);
+        this._maxVisibleLayers = 4;
+        this.layerChars = ["", "", "◖", "◗", "", ""];
+        this.layerAfter = false;
+        this._maxVisibleLayersPost = 1;
+        this.layerOffset = false;
+        this.layerInnerNotation = null;
+        this.layerUncertainChar = this.uncertainChar;
+        this.layerUncertainThreshold = new Decimal(9e15);
+        this._decimalPlaces = 0;
+        this.decimalPoint = [";", ""];
+        this._decimalBrackets = [["", "", "[", "]", "", ""]];
+        this.showDecimalZeroes = 1;
+        this._negExpThreshold = 1;
+        this.negExpChars = null;
+        this.negExpAfter = false;
+        this.recipThreshold = 0;
+        this.recipString = ["/", ""];
+        this.name = "Omega Meta Zero Notation";
+        this.setSymbolsAndOthers(symbols, towerHeight, towerChars, visibleTowerMax, toweriterationChars, symbolAfter, parentheses, symbolShown);
+        this.brackets = brackets;
+        this.firstBrackets = firstBrackets;
+        this.lastBrackets = lastBrackets;
+        this.reverseDigits = reverseDigits;
+        this.maxVisibleDigits = maxVisibleDigits;
+        this.expChars = expChars;
+        this.expAfter = expAfter;
+        this.maxVisibleDigitsInExp = maxVisibleDigitsInExp;
+        this.exponentOffset = exponentOffset;
+        this.bracketsInExp = bracketsInExp;
+        this.firstBracketsInExp = firstBracketsInExp;
+        this.lastBracketsInExp = lastBracketsInExp;
+        this.expInnerNotation = expInnerNotation;
+        this.uncertainChar = uncertainChar;
+        this.uncertainThreshold = toDecimal(uncertainThreshold);
+        this.maxVisibleLayers = maxVisibleLayers;
+        this.layerChars = layerChars;
+        this.layerAfter = layerAfter;
+        this.maxVisibleLayersPost = maxVisibleLayersPost;
+        this.layerOffset = layerOffset;
+        this.layerInnerNotation = layerInnerNotation;
+        this.layerUncertainChar = layerUncertainChar;
+        this.layerUncertainThreshold = toDecimal(layerUncertainThreshold);
+        this.decimalPlaces = decimalPlaces;
+        this.decimalPoint = decimalPoint;
+        this.decimalBrackets = decimalBrackets;
+        this.showDecimalZeroes = showDecimalZeroes;
+        this.negExpThreshold = negExpThreshold;
+        this.negExpChars = negExpChars;
+        this.negExpAfter = negExpAfter;
+        this.recipThreshold = recipThreshold;
+        this.recipString = recipString;
+    }
+    formatSingleDigit(value, limits, transitions, digitIndex = 0, decimalPlaces = 0, digitValues = [value]) {
+        if (limits === undefined) {
+            limits = [new Decimal(this._symbols[0].length).mul(this._towerHeight[0])];
+            for (let s = 1; s < this._symbols.length - 1; s++)
+                limits.push(Decimal.mul(this._symbols[s].length, this._towerHeight[s]));
+            limits.push(Decimal.dInf);
+        }
+        if (transitions === undefined) {
+            transitions = [limits[0]];
+            for (let s = 1; s < this._symbols.length - 1; s++)
+                transitions.push(transitions[s - 1].mul(limits[s]));
+            transitions.push(Decimal.dInf);
+        }
+        let currentValue = value;
+        let remainders = [];
+        for (let s = this._symbols.length - 2; s >= 0; s--) {
+            let thisRemainder = currentValue.div(transitions[s]).floor();
+            remainders.push(thisRemainder);
+            currentValue = currentValue.mod(transitions[s], true);
+        }
+        remainders.push(currentValue.round());
+        remainders.reverse();
+        let cleared = 0;
+        let copiedRemainders = [];
+        for (let r = 0; r < remainders.length; r++)
+            copiedRemainders.push(remainders[r]);
+        while (copiedRemainders.length > 1 && copiedRemainders[copiedRemainders.length - 1].eq(0))
+            copiedRemainders.pop();
+        while (cleared < copiedRemainders.length) {
+            if (copiedRemainders[cleared].eq(0) && copiedRemainders.length > 1) {
+                let examined = cleared + 1;
+                while (examined < copiedRemainders.length) {
+                    if (copiedRemainders[examined].neq(0))
+                        break;
+                    examined++;
+                }
+                if (examined == copiedRemainders.length) {
+                    copiedRemainders = copiedRemainders.slice(0, cleared);
+                    cleared--;
+                    continue;
+                }
+            }
+            if (copiedRemainders[cleared].gte(0) && copiedRemainders[cleared].lt(limits[cleared]))
+                cleared++;
+            else {
+                let offset = copiedRemainders[cleared].div(limits[cleared]).floor();
+                if (cleared == limits.length - 1) {
+                    if (copiedRemainders[cleared].lt(0)) {
+                        copiedRemainders[cleared] = copiedRemainders[cleared].sub(offset.mul(limits[cleared]));
+                        copiedRemainders.pop();
+                        cleared--;
+                    }
+                    else
+                        break;
+                }
+                if (cleared == copiedRemainders.length - 1)
+                    copiedRemainders.push(Decimal.dZero);
+                copiedRemainders[cleared + 1] = copiedRemainders[cleared + 1].plus(offset);
+                copiedRemainders[cleared] = copiedRemainders[cleared].sub(offset.mul(limits[cleared]));
+            }
+        }
+        for (let r = 0; r < remainders.length; r++)
+            remainders[r] = (r < copiedRemainders.length) ? copiedRemainders[r] : Decimal.dZero;
+        let result = "";
+        for (let s = 0; s < remainders.length; s++) {
+            let thisRemainder = remainders[s];
+            if (this._symbolShown[s](thisRemainder, s, remainders, digitIndex, decimalPlaces, digitValues)) {
+                let towerHeight = thisRemainder.div(this._symbols[s].length).floor();
+                let numRemainder = thisRemainder.mod(this._symbols[s].length, true).toNumber();
+                result = this._parentheses[s][0] + result + this._parentheses[s][1];
+                let symbolStr = this._symbols[s][numRemainder];
+                if (towerHeight.gte(0) && towerHeight.lte(this._visibleTowerMax[s])) {
+                    for (let t = 0; t < towerHeight.toNumber(); t++)
+                        symbolStr = this._towerChars[s][0] + symbolStr + this._towerChars[s][1];
+                }
+                else {
+                    let towerStr = this._toweriterationChars[s][0] + this._toweriterationChars[s][3].format(towerHeight) + this._toweriterationChars[s][1];
+                    if (this._toweriterationChars[s][2])
+                        symbolStr = symbolStr + towerStr;
+                    else
+                        symbolStr = towerStr + symbolStr;
+                }
+                symbolStr = this._parentheses[s][2] + symbolStr + this._parentheses[s][3];
+                if (this._symbolAfter[s])
+                    result = result + symbolStr;
+                else
+                    result = symbolStr + result;
+                result = this._parentheses[s][4] + result + this._parentheses[s][5];
+            }
+        }
+        return result;
+    }
+    formatDecimal(value) {
+        let limits = [new Decimal(this._symbols[0].length).mul(this._towerHeight[0])];
+        for (let s = 1; s < this._symbols.length; s++)
+            limits.push(Decimal.mul(this._symbols[s].length, this._towerHeight[s]));
+        let transitions = [limits[0]];
+        for (let s = 1; s < this._symbols.length; s++)
+            transitions.push(transitions[s - 1].mul(limits[s]));
+        limits.pop();
+        let digitBase = transitions[transitions.length - 1];
+        let recipThreshold = Decimal.dOne;
+        if (this.recipThreshold == 1) {
+            recipThreshold = digitBase.pow(-this._negExpThreshold);
+        }
+        else if (this.recipThreshold == 2) {
+            let offset = (this.exponentOffset) ? 0 : this._maxVisibleDigitsInExp - 1;
+            let exponentLimit = Decimal.min(this.uncertainThreshold.plus(offset), Decimal.pow(digitBase, this._maxVisibleDigits));
+            recipThreshold = Decimal.pow(digitBase, exponentLimit.plus(offset)).recip();
+        }
+        else if (this.recipThreshold == 3) {
+            let offset = (this.exponentOffset) ? 0 : this._maxVisibleDigitsInExp - 1;
+            let exponentLimit = Decimal.pow(digitBase, this._maxVisibleDigits);
+            recipThreshold = Decimal.pow(digitBase, exponentLimit.plus(offset)).recip();
+        }
+        if (value.neq(0) && value.lt(recipThreshold))
+            return this.recipString[0] + this.format(value.recip()) + this.recipString[1];
+        let layerLimit = digitBase.pow(this._maxVisibleDigits);
+        let layerMantissaLimit = layerLimit;
+        for (let l = 0; l < this._maxVisibleLayers;) {
+            if (!this.exponentOffset)
+                layerLimit = layerLimit.plus(this._maxVisibleDigitsInExp - 1);
+            layerLimit = digitBase.pow(layerLimit);
+            if (l < this._maxVisibleLayersPost)
+                layerMantissaLimit = layerLimit;
+            l++;
+            if (layerLimit.gte("e100")) {
+                layerLimit = Decimal.iteratedexp(digitBase, this._maxVisibleLayers - l, layerLimit, true);
+                if (l < this._maxVisibleLayersPost)
+                    layerMantissaLimit = Decimal.iteratedexp(digitBase, this._maxVisibleLayersPost - l, layerLimit, true);
+                break;
+            }
+        }
+        transitions.pop(); // Would have just put this statement into digitBase, but then TypeScript would have to account for the case where it's undefined
+        let digits = [];
+        let currentValue = value;
+        let exponent = Decimal.dZero;
+        let layers = Decimal.dZero;
+        let scientific = false;
+        let layerScientific = false;
+        if (value.gte(layerLimit)) {
+            layerScientific = true;
+            if (currentValue.gte(layerMantissaLimit)) {
+                let safeMax = Decimal.max("ee100", layerMantissaLimit);
+                let safeMaxSlog = Decimal.slog(safeMax, digitBase, true);
+                while (currentValue.gte(safeMax)) {
+                    if (!currentValue.isFinite())
+                        currentValue = layerMantissaLimit; // Combats imprecision
+                    let safeIterations = Decimal.slog(currentValue, digitBase, true).sub(safeMaxSlog).floor().plus(1).max(0).toNumber();
+                    layers = layers.plus(safeIterations);
+                    currentValue = currentValue.iteratedlog(digitBase, safeIterations, true);
+                }
+                while (currentValue.gte(layerMantissaLimit)) {
+                    if (!currentValue.isFinite())
+                        currentValue = layerMantissaLimit; // Combats imprecision
+                    currentValue = currentValue.log(digitBase);
+                    if (!this.exponentOffset)
+                        currentValue = currentValue.sub(this._maxVisibleDigitsInExp - 1);
+                    layers = layers.plus(1);
+                }
+            }
+            if (this.layerOffset)
+                layers = layers.plus(this._maxVisibleLayersPost);
+        }
+        if (layers.gte(this.layerUncertainThreshold))
+            exponent = Decimal.dInf;
+        else if (currentValue.gte(digitBase.pow(this._maxVisibleDigits)) || (currentValue.neq(0) && currentValue.lt(digitBase.pow(-this._negExpThreshold)))) {
+            scientific = true;
+            [currentValue, exponent] = scientifify(currentValue, digitBase, 0, this._maxVisibleDigitsInExp - 1);
+            if (this.exponentOffset)
+                exponent = exponent.plus(this._maxVisibleDigitsInExp - 1);
+        }
+        let decimalPlaces = this._decimalPlaces;
+        if (scientific)
+            decimalPlaces = 0;
+        if (value.eq(0))
+            decimalPlaces = 0;
+        if (exponent.abs().lt(this.uncertainThreshold)) {
+            let digitExponent = Decimal.log(currentValue, digitBase).floor();
+            for (let e = digitExponent.toNumber(); e > -decimalPlaces; e--) {
+                let placeValue = Decimal.pow(digitBase, e);
+                let thisRemainder = currentValue.div(placeValue).floor();
+                digits.push(thisRemainder);
+                currentValue = currentValue.mod(placeValue, true);
+            }
+            digits.push(currentValue.mul(Decimal.pow(digitBase, decimalPlaces)).floor());
+            digits.reverse();
+            while (digits.length > decimalPlaces && digits.length > 1 && digits[digits.length - 1].eq(0))
+                digits.pop();
+            let cleared = 0;
+            let copiedDigits = [];
+            for (let r = 0; r < digits.length; r++)
+                copiedDigits.push(digits[r]);
+            while (cleared < digits.length) {
+                if (copiedDigits[cleared].eq(0)) {
+                    let examined = cleared + 1;
+                    while (examined < copiedDigits.length) {
+                        if (copiedDigits[examined].neq(0))
+                            break;
+                        examined++;
+                    }
+                    if (examined == copiedDigits.length) {
+                        copiedDigits = copiedDigits.slice(0, cleared);
+                        cleared--;
+                        if (copiedDigits.length == 0)
+                            break;
+                        continue;
+                    }
+                }
+                if (copiedDigits[cleared].gte(0) && copiedDigits[cleared].lt(digitBase))
+                    cleared++;
+                else {
+                    let offset = copiedDigits[cleared].div(digitBase).floor();
+                    if (cleared == copiedDigits.length - 1)
+                        copiedDigits.push(Decimal.dZero);
+                    copiedDigits[cleared + 1] = copiedDigits[cleared + 1].plus(offset);
+                    copiedDigits[cleared] = copiedDigits[cleared].sub(offset.mul(digitBase));
+                }
+            }
+            for (let r = 0; r < digits.length; r++)
+                digits[r] = (r < copiedDigits.length) ? copiedDigits[r] : Decimal.dZero;
+        }
+        let removeDecimalZeroes = false;
+        if (this.showDecimalZeroes < 0)
+            removeDecimalZeroes = true;
+        else if (this.showDecimalZeroes > 0)
+            removeDecimalZeroes = false;
+        else {
+            removeDecimalZeroes = true;
+            for (let d = 0; d < this._decimalPlaces && d < digits.length; d++)
+                if (digits[d].neq(0)) {
+                    removeDecimalZeroes = false;
+                    break;
+                }
+        }
+        if (removeDecimalZeroes) {
+            while (digits.length > 0 && digits[0].eq(0) && decimalPlaces > 0) {
+                digits.shift();
+                decimalPlaces--;
+            }
+        }
+        if (digits.length != 0) {
+            while (digits.length < decimalPlaces + 1)
+                digits.push(Decimal.dZero);
+        }
+        let result = "";
+        if (exponent.eq(Infinity)) {
+            result = this.layerUncertainChar;
+        }
+        else {
+            if (digits.length == 0)
+                result = this.uncertainChar;
+            else
+                for (let s = 0; s < digits.length; s++) {
+                    let thisDigit = digits[s];
+                    let usedBrackets;
+                    if (scientific) {
+                        if (digits.length - s - 1 < this.firstBracketsInExp.length)
+                            usedBrackets = this.firstBracketsInExp[digits.length - s - 1];
+                        else if (s < this.lastBracketsInExp.length)
+                            usedBrackets = this.lastBracketsInExp[s];
+                        else
+                            usedBrackets = this._bracketsInExp[s % this._bracketsInExp.length];
+                    }
+                    else {
+                        if (s < decimalPlaces)
+                            usedBrackets = this.decimalBrackets[(-s - 1) % this._decimalBrackets.length];
+                        else if (digits.length - s - 1 < this.firstBrackets.length)
+                            usedBrackets = this.firstBrackets[digits.length - s - 1];
+                        else if ((s - decimalPlaces) < this.lastBrackets.length)
+                            usedBrackets = this.lastBrackets[(s - decimalPlaces)];
+                        else
+                            usedBrackets = this._brackets[(s - decimalPlaces) % this._brackets.length];
+                    }
+                    result = usedBrackets[0] + result + usedBrackets[1];
+                    let symbolStr = this.formatSingleDigit(thisDigit, undefined, undefined, s - decimalPlaces, decimalPlaces, digits);
+                    symbolStr = usedBrackets[2] + symbolStr + usedBrackets[3];
+                    if (this.reverseDigits)
+                        result = result + symbolStr;
+                    else
+                        result = symbolStr + result;
+                    result = usedBrackets[4] + result + usedBrackets[5];
+                    if (s == decimalPlaces - 1) {
+                        result = this.decimalPoint[0] + result + this.decimalPoint[1];
+                    }
+                }
+            if (scientific) {
+                let usedExpChars = this.expChars;
+                let usedExpAfter = this.expAfter;
+                if (exponent.lt(0) && this.negExpChars !== null) {
+                    exponent = exponent.abs();
+                    usedExpChars = this.negExpChars;
+                    usedExpAfter = this.negExpAfter;
+                }
+                result = usedExpChars[0] + result + usedExpChars[1];
+                let symbolStr;
+                if (this.expInnerNotation === null)
+                    symbolStr = this.format(exponent);
+                else
+                    symbolStr = this.expInnerNotation.format(exponent);
+                symbolStr = usedExpChars[2] + symbolStr + usedExpChars[3];
+                if (usedExpAfter)
+                    result = result + symbolStr;
+                else
+                    result = symbolStr + result;
+                result = usedExpChars[4] + result + usedExpChars[5];
+            }
+        }
+        if (layerScientific) {
+            result = this.layerChars[0] + result + this.layerChars[1];
+            let symbolStr;
+            if (this.layerInnerNotation === null)
+                symbolStr = this.format(layers);
+            else
+                symbolStr = this.layerInnerNotation.format(layers);
+            symbolStr = this.layerChars[2] + symbolStr + this.layerChars[3];
+            if (this.layerAfter)
+                result = result + symbolStr;
+            else
+                result = symbolStr + result;
+            result = this.layerChars[4] + result + this.layerChars[5];
+        }
+        return result;
+    }
+    setSymbolsAndOthers(symbols, towerHeight, towerChars, visibleTowerMax, toweriterationChars, symbolAfter, parentheses, symbolShown) {
+        if (symbols.length == 0)
+            throw new Error("Omega Meta Zero notation doesn't work without any symbols!");
+        for (let s = 0; s < symbols.length; s++)
+            if (symbols[s].length < 2)
+                throw new Error("Each set of symbols in Omega Meta Zero notation must have at least two symbols");
+        this._symbols = symbols;
+        // Changing the amount of symbol sets requires re-running a bunch of other setters too
+        this.towerHeight = towerHeight;
+        this.towerChars = towerChars;
+        this.visibleTowerMax = visibleTowerMax;
+        this.towerIterationChars = toweriterationChars;
+        this.symbolAfter = symbolAfter;
+        this.parentheses = parentheses;
+        this.symbolShown = symbolShown;
+    }
+    get symbols() {
+        return this._symbols;
+    }
+    set symbols(symbols) {
+        if (symbols.length == 0)
+            throw new Error("Omega Meta Zero notation doesn't work without any symbols!");
+        for (let s = 0; s < symbols.length; s++)
+            if (symbols[s].length < 2)
+                throw new Error("Each set of symbols in Omega Meta Zero notation must have at least two symbols");
+        this.setSymbolsAndOthers(symbols, this._towerHeight, this._towerChars, this._visibleTowerMax, this._toweriterationChars, this._symbolAfter, this._parentheses, this._symbolShown);
+    }
+    get towerHeight() {
+        return this._towerHeight;
+    }
+    set towerHeight(towerHeight) {
+        if (!Array.isArray(towerHeight))
+            towerHeight = [towerHeight];
+        let towerHeightD = towerHeight.map(toDecimal);
+        if (towerHeightD.length == 0)
+            towerHeightD.push(new Decimal(5));
+        while (towerHeightD.length < this._symbols.length)
+            towerHeightD.push(towerHeightD[towerHeightD.length - 1]);
+        this._towerHeight = towerHeightD;
+    }
+    get towerChars() {
+        return this._towerChars;
+    }
+    set towerChars(towerChars) {
+        if (towerChars.length == 0)
+            towerChars.push(false);
+        while (towerChars.length < this.symbols.length)
+            towerChars.push(towerChars[towerChars.length - 1]);
+        // Another round of "writing the code in a more complicated way to make TypeScript happy":
+        let newTowerChars = [];
+        for (let t = 0; t < towerChars.length; t++) {
+            let tc = towerChars[t];
+            if (tc === true)
+                newTowerChars.push([this.symbols[t][this.symbols[t].length - 1] + "<sup>", "</sup>"]);
+            else if (tc === false)
+                newTowerChars.push([this.symbols[t][this.symbols[t].length - 1] + "^", ""]);
+            else
+                newTowerChars.push(tc);
+        }
+        this._towerChars = newTowerChars;
+    }
+    get visibleTowerMax() {
+        return this._visibleTowerMax;
+    }
+    set visibleTowerMax(visibleTowerMax) {
+        if (!Array.isArray(visibleTowerMax))
+            visibleTowerMax = [visibleTowerMax];
+        if (visibleTowerMax.length == 0)
+            visibleTowerMax.push(5);
+        while (visibleTowerMax.length < this.symbols.length)
+            visibleTowerMax.push(visibleTowerMax[visibleTowerMax.length - 1]);
+        this._visibleTowerMax = visibleTowerMax;
+    }
+    get towerIterationChars() {
+        return this._toweriterationChars;
+    }
+    set towerIterationChars(towerIterationChars) {
+        while (towerIterationChars.length < this.symbols.length)
+            towerIterationChars.push(["(" + this._towerChars[towerIterationChars.length][0] + "^", this._towerChars[towerIterationChars.length][1] + ")", false, new DefaultNotation()]);
+        this._toweriterationChars = towerIterationChars;
+    }
+    get symbolAfter() {
+        return this._symbolAfter;
+    }
+    set symbolAfter(symbolAfter) {
+        if (!Array.isArray(symbolAfter))
+            symbolAfter = [symbolAfter];
+        if (symbolAfter.length == 0)
+            symbolAfter.push(false);
+        while (symbolAfter.length < this.symbols.length)
+            symbolAfter.push(symbolAfter[symbolAfter.length - 1]);
+        this._symbolAfter = symbolAfter;
+    }
+    get parentheses() {
+        return this._parentheses;
+    }
+    set parentheses(parentheses) {
+        if (parentheses.length == 0)
+            parentheses.push(["", "", "", "", "", ""]);
+        while (parentheses.length < this.symbols.length)
+            parentheses.push(parentheses[parentheses.length - 1]);
+        this._parentheses = parentheses;
+    }
+    get symbolShown() {
+        return this._symbolShown;
+    }
+    set symbolShown(symbolShown) {
+        if (!Array.isArray(symbolShown))
+            symbolShown = [symbolShown];
+        if (symbolShown.length == 0)
+            symbolShown.push(value => value.gt(0));
+        while (symbolShown.length < this.symbols.length)
+            symbolShown.push(symbolShown[symbolShown.length - 1]);
+        this._symbolShown = symbolShown;
+    }
+    get brackets() {
+        return this._brackets;
+    }
+    set brackets(brackets) {
+        if (brackets.length == 0)
+            brackets = [["", "", "", "", "", ""]];
+        this._brackets = brackets;
+    }
+    get bracketsInExp() {
+        return this._bracketsInExp;
+    }
+    set bracketsInExp(brackets) {
+        if (brackets.length == 0)
+            brackets = [["", "", "", "", "", ""]];
+        this._bracketsInExp = brackets;
+    }
+    get maxVisibleDigits() {
+        return this._maxVisibleDigits;
+    }
+    set maxVisibleDigits(maxVisibleDigits) {
+        if (maxVisibleDigits < 1)
+            throw new RangeError("maxVisibleDigits cannot be below 1 in Omega Meta Zero notation");
+        if (maxVisibleDigits % 1 != 0)
+            throw new RangeError("maxVisibleDigits must be a whole number in Omega Meta Zero notation");
+        this._maxVisibleDigits = maxVisibleDigits;
+    }
+    get maxVisibleDigitsInExp() {
+        return this._maxVisibleDigitsInExp;
+    }
+    set maxVisibleDigitsInExp(maxVisibleDigits) {
+        if (maxVisibleDigits < 1)
+            throw new RangeError("maxVisibleDigitsInExp cannot be below 1 in Omega Meta Zero notation");
+        if (maxVisibleDigits % 1 != 0)
+            throw new RangeError("maxVisibleDigitsInExp must be a whole number in Omega Meta Zero notation");
+        this._maxVisibleDigitsInExp = maxVisibleDigits;
+    }
+    get maxVisibleLayers() {
+        return this._maxVisibleLayers;
+    }
+    set maxVisibleLayers(maxVisibleLayers) {
+        if (maxVisibleLayers < 0)
+            throw new RangeError("maxVisibleLayers cannot be below 0 in Omega Meta Zero notation");
+        if (maxVisibleLayers % 1 != 0)
+            throw new RangeError("maxVisibleLayers must be a whole number in Omega Meta Zero notation");
+        this._maxVisibleLayers = maxVisibleLayers;
+    }
+    get maxVisibleLayersPost() {
+        return this._maxVisibleLayersPost;
+    }
+    set maxVisibleLayersPost(maxVisibleLayers) {
+        if (maxVisibleLayers < 0)
+            throw new RangeError("maxVisibleLayersPost cannot be below 0 in Omega Meta Zero notation");
+        if (maxVisibleLayers % 1 != 0)
+            throw new RangeError("maxVisibleLayersPost  must be a whole number in Omega Meta Zero notation");
+        this._maxVisibleLayersPost = maxVisibleLayers;
+    }
+    get decimalPlaces() {
+        return this._decimalPlaces;
+    }
+    set decimalPlaces(decimalPlaces) {
+        if (decimalPlaces < 0)
+            throw new RangeError("decimalPlaces cannot be below 0 in Omega Meta Zero notation");
+        if (decimalPlaces % 1 != 0)
+            throw new RangeError("decimalPlaces must be a whole number in Omega Meta Zero notation");
+        this._decimalPlaces = decimalPlaces;
+    }
+    get decimalBrackets() {
+        return this._decimalBrackets;
+    }
+    set decimalBrackets(decimalBrackets) {
+        if (decimalBrackets.length == 0)
+            decimalBrackets = [["", "", "", "", "", ""]];
+        this._decimalBrackets = decimalBrackets;
+    }
+    get negExpThreshold() {
+        return this._negExpThreshold;
+    }
+    set negExpThreshold(negExpThreshold) {
+        if (negExpThreshold < 0)
+            throw new RangeError("negExpThreshold cannot be below 0 in Omega Meta Zero notation");
+        this._negExpThreshold = negExpThreshold;
+    }
+}
+
 // To make TypeScript happy, we assemble all the presets separately, then put them together into collection objects at the end.
 let PresetAssembly = {};
 let HTMLPresetAssembly = {};
@@ -11372,14 +15953,14 @@ PresetAssembly.Logarithm = new MultiLogarithmNotation(...[, , , , , , , , , , ,]
 PresetAssembly.Hyperscientific = new HyperscientificNotation(...[, ,], defaultRound).setName("Hyperscientific");
 PresetAssembly.SuperLogarithm = recipBelow(new MultiSuperLogarithmNotation(...[, , , , , , , , , , , ,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm");
 PresetAssembly.PowerTower = recipBelow(new MultiLogarithmNotation(1e10, -1, 0, 10, 1, false, [["", ""], ["", ""], [" PT ", ""]], null, true), 1e-10).setName("Power Tower"); //Objectively this should be made with Hyperscientific, but I found it easier to do it this way
-PresetAssembly.PentaScientific = recipBelow(new HypersplitNotation([["", ""], ["", ""], ["", ""], ["G", ""]], 10, [10, 1, 1], [1, -1, -1, 1], 23), 1, undefined, "0").setName("Penta-Scientific");
-PresetAssembly.PentaLogarithm = recipBelow(new HypersplitNotation([["", ""], ["", ""], ["", ""], ["G", ""]], 10, [0, 1, 1], [-1, -1, -1, 1], 23, ...[, , ,], new DefaultNotation(-6, 5, 0, 1e12, 0)), 1, undefined, "0").setName("Penta-Logarithm");
+PresetAssembly.PentaScientific = recipBelow(new PentaScientificNotation(...[, ,], defaultRound), 1, undefined, "0").setName("Penta-Scientific");
+PresetAssembly.PentaLogarithm = recipBelow(new MultiPentaLogarithmNotation(...[, , , , , , , , , ,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Penta-Logarithm");
 PresetAssembly.NaturalLogarithm = new MultiLogarithmNotation(...[, , ,], Math.E, undefined, true, [["e^", ""], ["e^", ""], ["((e^)^", ")"]], ...[, , , ,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Natural Logarithm");
 PresetAssembly.NaturalSuperLogarithm = recipBelow(new MultiSuperLogarithmNotation(...[, , ,], Math.E, undefined, [["e↑↑", ""], ["e↑↑", ""], ["(e↑↑^", ")"]], ...[, , , , , ,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Natural Super Logarithm");
-PresetAssembly.NaturalPentaLogarithm = recipBelow(new HypersplitNotation([["", ""], ["", ""], ["", ""], ["e↑↑↑", ""]], Math.E, [0, 1, 1], [-1, -1, -1, 1], 23, ...[, , ,], new DefaultNotation(-6, 5, 0, 1e12, 0)), 1, undefined, "0").setName("Natural Penta-Logarithm");
+PresetAssembly.NaturalPentaLogarithm = recipBelow(new MultiPentaLogarithmNotation(...[, , ,], Math.E, undefined, [["e↑↑↑", ""], ["e↑↑↑", ""], ["(e↑↑↑^", ")"]], ...[, , , ,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Natural Penta-Logarithm");
 PresetAssembly.LogarithmBase = (base) => new MultiLogarithmNotation(...[, , ,], base, undefined, true, [["↑", ""], ["↑", ""], ["(↑^", ")"]], null, false, 1, 1, new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Logarithm (base " + new DefaultNotation().format(base) + ")");
 PresetAssembly.SuperLogarithmBase = (base) => recipBelow(new MultiSuperLogarithmNotation(...[, , ,], base, undefined, [["↑↑", ""], ["↑↑", ""], ["(↑↑^", ")"]], null, false, 1, ...[, , ,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm (base " + new DefaultNotation().format(base) + ")");
-PresetAssembly.PentaLogarithmBase = (base) => recipBelow(new AppliedFunctionNotation((value) => value, new HypersplitNotation([["", ""], ["", ""], ["", ""], ["↑↑↑", ""]], base, [0, 1, 1], [-1, -1, -1, 1], 23, ...[, , ,], new DefaultNotation(-6, 5, 0, 1e12, 0)), (str) => new DefaultNotation().format(base) + str), 1, undefined, "0").setName("Penta-Logarithm (base " + new DefaultNotation().format(base) + ")");
+PresetAssembly.PentaLogarithmBase = (base) => recipBelow(new MultiPentaLogarithmNotation(...[, , ,], base, undefined, [["↑↑↑", ""], ["↑↑↑", ""], ["(↑↑↑^", ")"]], null, false, 1, ...[,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Penta-Logarithm (base " + new DefaultNotation().format(base) + ")");
 PresetAssembly.DoubleLogarithm = new MultiLogarithmNotation(undefined, undefined, 2, undefined, 2, ...[, , , , , ,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Double Logarithm");
 HTMLPresetAssembly.Scientific = new ScientificNotation(...[, ,], defaultRound).setName("Scientific");
 HTMLPresetAssembly.Engineering = new ScientificNotation(...[, ,], defaultRound, 3).setName("Engineering");
@@ -11387,17 +15968,18 @@ HTMLPresetAssembly.Logarithm = new MultiLogarithmNotation(...[, , , , , , , , , 
 HTMLPresetAssembly.Hyperscientific = new HyperscientificNotation(...[, ,], defaultRound).setName("Hyperscientific");
 HTMLPresetAssembly.SuperLogarithm = recipBelow(new MultiSuperLogarithmNotation(...[, , , , , , , , , , , ,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm");
 HTMLPresetAssembly.PowerTower = recipBelow(new MultiLogarithmNotation(1e10, -1, 0, 10, 1, false, [["", ""], ["", ""], [" PT ", ""]], null, true), 1e-10).setName("Power Tower"); //Objectively this should be made with Hyperscientific, but I found it easier to do it this way
-HTMLPresetAssembly.PentaScientific = recipBelow(new HypersplitNotation([["", ""], ["", ""], ["", ""], ["G", ""]], 10, [10, 1, 1], [1, -1, -1, 1], 23), 1, undefined, "0").setName("Penta-Scientific");
-HTMLPresetAssembly.PentaLogarithm = recipBelow(new HypersplitNotation([["", ""], ["", ""], ["", ""], ["G", ""]], 10, [0, 1, 1], [-1, -1, -1, 1], 23, ...[, , ,], new DefaultNotation(-6, 5, 0, 1e12, 0)), 1, undefined, "0").setName("Penta-Logarithm");
+HTMLPresetAssembly.PentaScientific = recipBelow(new PentaScientificNotation(...[, ,], defaultRound), 1, undefined, "0").setName("Penta-Scientific");
+HTMLPresetAssembly.PentaLogarithm = recipBelow(new MultiPentaLogarithmNotation(...[, , , , , , , , , ,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Penta-Logarithm");
 HTMLPresetAssembly.NaturalLogarithm = new MultiLogarithmNotation(...[, , ,], Math.E, undefined, true, [["e^", ""], ["e^", ""], ["((e^)^", ")"]], ...[, , , ,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Natural Logarithm");
 HTMLPresetAssembly.NaturalSuperLogarithm = recipBelow(new MultiSuperLogarithmNotation(...[, , ,], Math.E, undefined, [["e&#8593;&#8593;", ""], ["e&#8593;&#8593;", ""], ["(e&#8593;&#8593;^", ")"]], ...[, , , , , ,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Natural Super Logarithm");
-HTMLPresetAssembly.NaturalPentaLogarithm = recipBelow(new HypersplitNotation([["", ""], ["", ""], ["", ""], ["e↑↑↑", ""]], Math.E, [0, 1, 1], [-1, -1, -1, 1], 23, ...[, , ,], new DefaultNotation(-6, 5, 0, 1e12, 0)), 1, undefined, "0").setName("Natural Penta-Logarithm");
+HTMLPresetAssembly.NaturalPentaLogarithm = recipBelow(new MultiPentaLogarithmNotation(...[, , ,], Math.E, undefined, [["e&#8593;&#8593;&#8593;", ""], ["e&#8593;&#8593;&#8593;", ""], ["(e&#8593;&#8593;&#8593;^", ")"]], ...[, , , ,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Natural Penta-Logarithm");
 HTMLPresetAssembly.LogarithmBase = (base) => new MultiLogarithmNotation(...[, , ,], base, undefined, true, [["&#8593;", ""], ["&#8593;", ""], ["(&#8593;^", ")"]], null, false, 1, 1, new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Logarithm (base " + new DefaultNotation().format(base) + ")");
 HTMLPresetAssembly.SuperLogarithmBase = (base) => recipBelow(new MultiSuperLogarithmNotation(...[, , ,], base, undefined, [["&#8593;&#8593;", ""], ["&#8593;&#8593;", ""], ["(&#8593;&#8593;^", ")"]], null, false, 1, ...[, , ,], new DefaultNotation(-5, 4, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Super Logarithm (base " + new DefaultNotation().format(base) + ")");
-HTMLPresetAssembly.PentaLogarithmBase = (base) => recipBelow(new AppliedFunctionNotation((value) => value, new HypersplitNotation([["", ""], ["", ""], ["", ""], ["&#8593;&#8593;&#8593;", ""]], base, [0, 1, 1], [-1, -1, -1, 1], 23, ...[, , ,], new DefaultNotation(-6, 5, 0, 1e12, 0)), (str) => new DefaultNotation().format(base) + str), 1, undefined, "0").setName("Penta-Logarithm (base " + new DefaultNotation().format(base) + ")");
+HTMLPresetAssembly.PentaLogarithmBase = (base) => recipBelow(new MultiPentaLogarithmNotation(...[, , ,], base, undefined, [["&#8593;&#8593;&#8593;", ""], ["&#8593;&#8593;&#8593;", ""], ["(&#8593;&#8593;&#8593;^", ")"]], null, false, 1, ...[,], new DefaultNotation(-6, 5, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()), 1, undefined, "0").setName("Penta-Logarithm (base " + new DefaultNotation().format(base) + ")");
 HTMLPresetAssembly.DoubleLogarithm = new MultiLogarithmNotation(undefined, undefined, 2, undefined, 2, ...[, , , , , ,], new DefaultNotation(-4, 3, 0, 1e12, 0), new DefaultNotation(), new DefaultNotation()).setName("Double Logarithm");
 PresetAssembly.AlternateBase = (base) => new AlternateBaseNotation(base).setName("Base " + new DefaultNotation().format(base));
 PresetAssembly.Binary = new AlternateBaseNotation(2, 0, -8, -8, 0, 65536, 1 / 256, ...[, , , , ,], 4, ...[, ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary");
+PresetAssembly.BinaryIL = new AlternateBaseNotation(["ı", "l"], 0, -8, -8, 0, 65536, 1 / 256, ...[, , , , ,], 4, ...[, ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary (ı, l)");
 PresetAssembly.Ternary = new AlternateBaseNotation(3, 0, -7, -7, ...[, , , , , , , , , , ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Ternary");
 PresetAssembly.Quaternary = new AlternateBaseNotation(4, 0, -6, -6, ...[, , , , , , , , , , ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Quaternary");
 PresetAssembly.Seximal = new AlternateBaseNotation(6, 0, -5, -5, ...[, , , , , , , , , , ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Seximal");
@@ -11410,6 +15992,7 @@ PresetAssembly.BalancedTernary = new AlternateBaseNotation(["-", "0", "+"], 1, -
 PresetAssembly.BijectiveDecimal = recipBelow(new AlternateBaseNotation(["1", "2", "3", "4", "5", "6", "7", "8", "9", "A"], -1, 0, 0, ...[, , , ,], 3, 1, ...[, , , , ,], [["e", ""], ["e", ""], ["#", ""], ["#", ""]]), 1).setName("Bijective Decimal");
 HTMLPresetAssembly.AlternateBase = (base) => new AlternateBaseNotation(base).setName("Base " + new DefaultNotation().format(base));
 HTMLPresetAssembly.Binary = new AlternateBaseNotation(2, 0, -8, -8, 0, 65536, 1 / 256, ...[, , , , ,], 4, ...[, ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary");
+HTMLPresetAssembly.BinaryIL = new AlternateBaseNotation(["&#305;", "l"], 0, -8, -8, 0, 65536, 1 / 256, ...[, , , , ,], 4, ...[, ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Binary (ı, l)");
 HTMLPresetAssembly.Ternary = new AlternateBaseNotation(3, 0, -7, -7, ...[, , , , , , , , , , ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Ternary");
 HTMLPresetAssembly.Quaternary = new AlternateBaseNotation(4, 0, -6, -6, ...[, , , , , , , , , , ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Quaternary");
 HTMLPresetAssembly.Seximal = new AlternateBaseNotation(6, 0, -5, -5, ...[, , , , , , , , , , ,], [["e", ""], ["e", ""], ["F", ""], ["F", ""]]).setName("Seximal");
@@ -11590,6 +16173,7 @@ HTMLPresetAssembly.Septecoman = new ExpandedDefaultNotation(17 ** 7, 1 / 289, 3,
 ], 1 / 289), [true, true]).setName("Septecoman");
 PresetAssembly.SI = new NestedSINotation(...[, , , ,], defaultRound).setName("SI");
 PresetAssembly.SIWritten = new NestedSINotation(10, [["quetta", 30], ["ronna", 27], ["yotta", 24], ["zetta", 21], ["exa", 18], ["peta", 15], ["tera", 12], ["giga", 9], ["mega", 6], ["kilo", 3]], [["quecto", 30], ["ronto", 27], ["yocto", 24], ["zepto", 21], ["atto", 18], ["femto", 15], ["pico", 12], ["nano", 9], ["micro", 6], ["milli", 3]], true, defaultRound, 2, 3, 0, 0, " ", "", [["^(", ")"], ["^^(", ")"]]).setName("SI (Written)");
+PresetAssembly.MixedSI = new ScientificNotation(1e33, ...[, , , ,], true, ...[, , , , , ,], new ConditionalNotation(false, [new NestedSINotation(...[, , , ,], defaultRound), (value) => value.lt(1e33)], [new ScientificNotation(), (value) => true])).setName("Mixed SI");
 PresetAssembly.BinarySI = new NestedSINotation(2, [["Yi", 80], ["Zi", 70], ["Ei", 60], ["Pi", 50], ["Ti", 40], ["Gi", 30], ["Mi", 20], ["Ki", 10]], "/", true, defaultRound).setName("Binary SI");
 PresetAssembly.BinarySIWritten = new NestedSINotation(2, [["yobi", 80], ["zebi", 70], ["exbi", 60], ["pebi", 50], ["tebi", 40], ["gibi", 30], ["mebi", 20], ["kibi", 10]], "/", true, defaultRound, 2, 3, 0, 0, " ", "", [["^(", ")"], ["^^(", ")"]]).setName("Binary SI (Written)");
 PresetAssembly.CombinedD = new NestedSINotation(10, [["D", 33], ["N", 30], ["O", 27], ["Sp", 24], ["Sx", 21], ["Qi", 18], ["Qa", 15], ["T", 12], ["B", 9], ["M", 6]], "/", true, defaultRound, 2, 3, 0, 0, "", "*").setName("Combined-D");
@@ -11597,8 +16181,22 @@ PresetAssembly.HyperSI = new NestedHyperSINotation(...[, , , ,], defaultRound).s
 PresetAssembly.HyperSIWritten = new NestedHyperSINotation(10, [["deckerexi-", 10], ["tenebexi-", 9], ["cloctexi-", 8], ["hypocexi-", 7], ["alifexi-", 6], ["madenexi-", 5], ["swekexi-", 4], ["brinexi-", 3], ["digexi-", 2], ["plexi-", 1]], [["nepogo-", 2], ["logo-", 1]], true, defaultRound, 2, 0, " ", "", ["^(", ")"]).setName("Hyper-SI (Written)");
 PresetAssembly.SandcastleBuilder = new NestedSINotation(10, [["Q", 210], ["W", 42], ["L", 39], ["F", 36], ["H", 33], ["S", 30], ["U", 27], ["Y", 24], ["Z", 21], ["E", 18], ["P", 15], ["T", 12], ["G", 9], ["M", 6], ["K", 3]], "/", true, defaultRound).setNotationGlobals(undefined, undefined, undefined, "Mustard", undefined).setName("Sandcastle Builder");
 PresetAssembly.SandcastleBuilderWritten = new NestedSINotation(10, [["Quita", 210], ["Wololo", 42], ["Lotta", 39], ["Ferro", 36], ["Helo", 33], ["Squilli", 30], ["Umpty", 27], ["Yotta", 24], ["Zetta", 21], ["Exa", 18], ["Peta", 15], ["Tera", 12], ["Giga", 9], ["Mega", 6], ["Kilo", 3]], "/ ", true, defaultRound, 4, 3, 0, 0, " ", " ", [["^(", ")"], ["^^(", ")"]]).setNotationGlobals(undefined, undefined, undefined, "Mustard", undefined).setName("Sandcastle Builder (Written)");
+PresetAssembly.CookieFonsterExtendedSI = recipBelow(new MultibaseMultiLogarithmNotation([1000, 1000], "1000^^3", 3, 0, undefined, [["Ω^", ""], ["Ω^", ""], ["((Ω^)^", ") "]], ...[, , ,], new ConditionalNotation(false, [new DefaultNotation(), value => ((value.gte(1) && value.lt(1000)) || value.eq(0))], [new ScientificIterationsNotation(1, undefined, 0, ...[, ,], 1000, [[" ", ""], ["", ""], ["", ""]], null, ...[, , , ,], new ConditionalNotation(true, [
+        new ExpandedDefaultNotation(1e9, ...[, ,], 1000, 0, 1, ...[, , ,], [["Ω^", ""], ["Ω^", ""], ["Ω^^", ""], ["Ω^^", ""]], null, ...[, , , ,], new NestedSignValueNotation([
+            ["Ω", 1000], ["Σ", 900], ["Λ", 800], ["κ", 700], ["Ι", 600], ["Θ", 500], ["Δ", 400], ["Γ", 300], ["β", 200], ["α", 100],
+            ["X", 90], ["N", 80], ["C", 70], ["S", 60], ["J", 50], ["Y", 40], ["R", 30], ["A", 20], ["O", 10],
+            ["B", 9], ["Y", 8], ["Z", 7], ["E", 6], ["P", 5], ["T", 4], ["G", 3], ["M", 2], ["K", 1]
+        ], 0, ...[, ,], 1, ...[, ,], 1, ...[, ,], [["", ""], ["^", ""], ["^^", ""]], 16), new DefaultNotation()), value => value.gte(0)
+    ], [
+        new AppliedFunctionNotation(value => value.abs(), new ExpandedDefaultNotation(1e9, ...[, ,], 1000, 0, 1, ...[, , ,], [["ψ^", ""], ["ψ^", ""], ["ψ^^", ""], ["ψ^^", ""]], null, ...[, , , ,], new NestedSignValueNotation([
+            ["ψ", 1000], ["χ", 900], ["φ", 800], ["υ", 700], ["τ", 600], ["π", 500], ["ο", 400], ["ξ", 300], ["ν", 200], ["ε", 100],
+            ["x", 90], ["e", 80], ["c", 70], ["s", 60], ["j", 50], ["k", 40], ["h", 30], ["i", 20], ["g", 10],
+            ["b", 9], ["y", 8], ["z", 7], ["a", 6], ["f", 5], ["p", 4], ["n", 3], ["μ", 2], ["m", 1]
+        ], 0, ...[, ,], 1, ...[, ,], 1, ...[, ,], [["", ""], ["^", ""], ["^^", ""]], 16), new DefaultNotation())), value => value.lt(0)
+    ])), value => true])), Decimal.recip("1000^^3")).setName("Cookie Fonster's Extended SI");
 HTMLPresetAssembly.SI = new NestedSINotation(...[, , , ,], defaultRound).setName("SI");
 HTMLPresetAssembly.SIWritten = new NestedSINotation(10, [["quetta", 30], ["ronna", 27], ["yotta", 24], ["zetta", 21], ["exa", 18], ["peta", 15], ["tera", 12], ["giga", 9], ["mega", 6], ["kilo", 3]], [["quecto", 30], ["ronto", 27], ["yocto", 24], ["zepto", 21], ["atto", 18], ["femto", 15], ["pico", 12], ["nano", 9], ["micro", 6], ["milli", 3]], true, defaultRound, 2, 3, 0, 0, " ", "", [["^(", ")"], ["^^(", ")"]]).setName("SI (Written)");
+HTMLPresetAssembly.MixedSI = new ScientificNotation(1e33, ...[, , , ,], true, ...[, , , , , ,], new ConditionalNotation(false, [new NestedSINotation(...[, , , ,], defaultRound), (value) => value.lt(1e33)], [new ScientificNotation(), (value) => true])).setName("Mixed SI");
 HTMLPresetAssembly.BinarySI = new NestedSINotation(2, [["Yi", 80], ["Zi", 70], ["Ei", 60], ["Pi", 50], ["Ti", 40], ["Gi", 30], ["Mi", 20], ["Ki", 10]], "/", true, defaultRound).setName("Binary SI");
 HTMLPresetAssembly.BinarySIWritten = new NestedSINotation(2, [["yobi", 80], ["zebi", 70], ["exbi", 60], ["pebi", 50], ["tebi", 40], ["gibi", 30], ["mebi", 20], ["kibi", 10]], "/", true, defaultRound, 2, 3, 0, 0, " ", "", [["^(", ")"], ["^^(", ")"]]).setName("Binary SI (Written)");
 HTMLPresetAssembly.CombinedD = new NestedSINotation(10, [["D", 33], ["N", 30], ["O", 27], ["Sp", 24], ["Sx", 21], ["Qi", 18], ["Qa", 15], ["T", 12], ["B", 9], ["M", 6]], "/", true, defaultRound, 2, 3, 0, 0, "", "*").setName("Combined-D");
@@ -11606,6 +16204,19 @@ HTMLPresetAssembly.HyperSI = new NestedHyperSINotation(...[, , , ,], defaultRoun
 HTMLPresetAssembly.HyperSIWritten = new NestedHyperSINotation(10, [["deckerexi-", 10], ["tenebexi-", 9], ["cloctexi-", 8], ["hypocexi-", 7], ["alifexi-", 6], ["madenexi-", 5], ["swekexi-", 4], ["brinexi-", 3], ["digexi-", 2], ["plexi-", 1]], [["nepogo-", 2], ["logo-", 1]], true, defaultRound, 2, 0, " ", "", ["^(", ")"]).setName("Hyper-SI (Written)");
 HTMLPresetAssembly.SandcastleBuilder = new NestedSINotation(10, [["Q", 210], ["W", 42], ["L", 39], ["F", 36], ["H", 33], ["S", 30], ["U", 27], ["Y", 24], ["Z", 21], ["E", 18], ["P", 15], ["T", 12], ["G", 9], ["M", 6], ["K", 3]], "/", true, defaultRound).setNotationGlobals(undefined, undefined, undefined, "Mustard", undefined).setName("Sandcastle Builder");
 HTMLPresetAssembly.SandcastleBuilderWritten = new NestedSINotation(10, [["Quita", 210], ["Wololo", 42], ["Lotta", 39], ["Ferro", 36], ["Helo", 33], ["Squilli", 30], ["Umpty", 27], ["Yotta", 24], ["Zetta", 21], ["Exa", 18], ["Peta", 15], ["Tera", 12], ["Giga", 9], ["Mega", 6], ["Kilo", 3]], "/ ", true, defaultRound, 4, 3, 0, 0, " ", " ", [["^(", ")"], ["^^(", ")"]]).setNotationGlobals(undefined, undefined, undefined, "Mustard", undefined).setName("Sandcastle Builder (Written)");
+HTMLPresetAssembly.CookieFonsterExtendedSI = recipBelow(new MultibaseMultiLogarithmNotation([1000, 1000], "1000^^3", 3, 0, undefined, [["Ω^", ""], ["Ω^", ""], ["((Ω^)^", ") "]], ...[, , ,], new ConditionalNotation(false, [new DefaultNotation(), value => ((value.gte(1) && value.lt(1000)) || value.eq(0))], [new ScientificIterationsNotation(1, undefined, 0, ...[, ,], 1000, [[" ", ""], ["", ""], ["", ""]], null, ...[, , , ,], new ConditionalNotation(true, [
+        new ExpandedDefaultNotation(1e9, ...[, ,], 1000, 0, 1, ...[, , ,], [["&#x3A9;^", ""], ["&#x3A9;^", ""], ["&#x3A9;^^", ""], ["&#x3A9;^^", ""]], null, ...[, , , ,], new NestedSignValueNotation([
+            ["&#x3A9;", 1000], ["&#x3A3;", 900], ["&#x39B;", 800], ["&#x3BA;", 700], ["&#x399;", 600], ["&#x398;", 500], ["&#x394;", 400], ["&#x393;", 300], ["&#x3B2;", 200], ["&#x3B1;", 100],
+            ["X", 90], ["N", 80], ["C", 70], ["S", 60], ["J", 50], ["Y", 40], ["R", 30], ["A", 20], ["O", 10],
+            ["B", 9], ["Y", 8], ["Z", 7], ["E", 6], ["P", 5], ["T", 4], ["G", 3], ["M", 2], ["K", 1]
+        ], 0, ...[, ,], 1, ...[, ,], 1, ...[, ,], [["", ""], ["^", ""], ["^^", ""]], 16), new DefaultNotation()), value => value.gte(0)
+    ], [
+        new AppliedFunctionNotation(value => value.abs(), new ExpandedDefaultNotation(1e9, ...[, ,], 1000, 0, 1, ...[, , ,], [["&#x3C8;^", ""], ["&#x3C8;^", ""], ["&#x3C8;^^", ""], ["&#x3C8;^^", ""]], null, ...[, , , ,], new NestedSignValueNotation([
+            ["&#x3C8;", 1000], ["&#x3C7;", 900], ["&#x3C6;", 800], ["&#x3C5;", 700], ["&#x3C4;", 600], ["&#x3C0;", 500], ["&#x3BF;", 400], ["&#x3BE;", 300], ["&#x3BD;", 200], ["&#x3B5;", 100],
+            ["x", 90], ["e", 80], ["c", 70], ["s", 60], ["j", 50], ["k", 40], ["h", 30], ["i", 20], ["g", 10],
+            ["b", 9], ["y", 8], ["z", 7], ["a", 6], ["f", 5], ["p", 4], ["n", 3], ["μ", 2], ["m", 1]
+        ], 0, ...[, ,], 1, ...[, ,], 1, ...[, ,], [["", ""], ["^", ""], ["^^", ""]], 16), new DefaultNotation())), value => value.lt(0)
+    ])), value => true])), Decimal.recip("1000^^3")).setName("Cookie Fonster's Extended SI");
 PresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0").setName("Fraction (Loose)");
 PresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0").setName("Fraction (Medium)");
 PresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0").setName("Fraction (Precise)");
@@ -11656,10 +16267,18 @@ HTMLPresetAssembly.DoubleBinaryPrefixes = new NestedSINotation(2, [
     ["P", 256], ["F", 128], ["L", 64], ["I", 32],
     ["S", 16], ["B", 8], ["H", 4]
 ], "/", true, defaultRound, 1, ...[, , , , ,], [["^(", ")"], [" # (", ")"]], 5).setName("Double Binary Prefixes");
+PresetAssembly.Alphaquint = new AppliedFunctionNotation(value => value.mul(1 + 1e-14), new IncreasingFunctionProductNotation(value => Decimal.pow(5, value).round(), (term, power) => Decimal.div(term, power), (leftover, term) => Decimal.sub(leftover, term).round(), false, true, true, 15, ["", ""], ["", "", ""], "", false, false, 0, ["", ""], ["", ""], ...[, , ,], undefined, new AppliedFunctionNotation(value => value.plus(1), new LetterDigitsNotation(), function (str) {
+    return str[0].toUpperCase() + str.slice(1);
+}), undefined, 100, value => false, value => true, (current, total) => Decimal.div(total, current).gte(5 ** 19), 5, "", ["", ""], Decimal.pow(5, 8353082582), value => Decimal.pow(5, value), false, "eee16", value => Decimal.tetrate(5, value.toNumber(), 1, true), false, true, [["B^", ""], ["B^", ""], ["[", "] "]], undefined, 0, ...[, , , ,], null, undefined, 1, ["/", ""])).setName("Alphaquint"); // The multiplication by 1 + 1e-14 is to combat imprecision
+PresetAssembly.Alphaquint = new AppliedFunctionNotation(value => value.mul(1 + 1e-14), new IncreasingFunctionProductNotation(value => Decimal.pow(5, value).round(), (term, power) => Decimal.div(term, power), (leftover, term) => Decimal.sub(leftover, term).round(), false, true, true, 15, ["", ""], ["", "", ""], "", false, false, 0, ["", ""], ["", ""], ...[, , ,], undefined, new AppliedFunctionNotation(value => value.plus(1), new LetterDigitsNotation(), function (str) {
+    return str[0].toUpperCase() + str.slice(1);
+}), undefined, 100, value => false, value => true, (current, total) => Decimal.div(total, current).gte(5 ** 19), 5, "", ["", ""], Decimal.pow(5, 8353082582), value => Decimal.pow(5, value), false, "eee16", value => Decimal.tetrate(5, value.toNumber(), 1, true), false, true, [["B^", ""], ["B^", ""], ["[", "] "]], undefined, 0, ...[, , , ,], null, undefined, 1, ["/", ""])).setName("Alphaquint");
 PresetAssembly.Hypersplit = new HypersplitNotation(...[, , , , , , ,], defaultRound).setName("Hypersplit");
 HTMLPresetAssembly.Hypersplit = new HypersplitNotation(...[, , , , , , ,], defaultRound).setName("Hypersplit");
 PresetAssembly.HypersplitBase3 = new HypersplitNotation([["", ""], ["*3^", ""], ["((3^)^", ") "], ["((3^^)^", ") "]], 3, [3, 3, 3], ...[, , , ,], defaultRound).setName("Hypersplit (Base 3)");
 HTMLPresetAssembly.HypersplitBase3 = new HypersplitNotation([["", ""], ["*3^", ""], ["((3^)^", ") "], ["((3^^)^", ") "]], 3, [3, 3, 3], ...[, , , ,], defaultRound).setName("Hypersplit (Base 3)");
+PresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [2, 4, 4], ...[, , , ,], defaultRound).setName("Hypersplit (Base 2)");
+HTMLPresetAssembly.HypersplitBase2 = new HypersplitNotation([["", ""], ["*2^", ""], ["((2^)^", ") "], ["((2^^)^", ") "]], 2, [2, 4, 4], ...[, , , ,], defaultRound).setName("Hypersplit (Base 2)");
 PresetAssembly.HyperE = new ConditionalNotation(false, [
     new ScientificNotation(...[, ,], defaultRound, ...[, , , ,], [["E", ""], ["E", ""], ["(E^", ")"]]),
     function (value) { return (multabs(value).lt("1e10") || value.eq(0)); }
@@ -11764,6 +16383,9 @@ PresetAssembly.SuperSquareRoot = recipBelow(new MultiSuperRootNotation(2), 1, un
 PresetAssembly.Tritetrated = recipBelow(new MultiSuperRootNotation(3), 1, undefined, "0").setName("Tritetrated");
 PresetAssembly.SuperRoot = (degree) => recipBelow(new MultiSuperRootNotation(degree), 1, undefined, "0").setName("Super Root (Degree " + new DefaultNotation().format(degree) + ")");
 PresetAssembly.IncreasingSuperRoot = recipBelow(new IncreasingSuperRootNotation(), 1, undefined, "0").setName("Increasing Super Root");
+PresetAssembly.PentaSquareRoot = recipBelow(new MultiPentaRootNotation(2), 1, undefined, "0").setName("Penta Square Root");
+PresetAssembly.Tripentated = recipBelow(new MultiPentaRootNotation(3), 1, undefined, "0").setName("Tripentated");
+PresetAssembly.PentaRoot = (degree) => recipBelow(new MultiPentaRootNotation(degree), 1, undefined, "0").setName("Penta-Root (Degree " + new DefaultNotation().format(degree) + ")");
 HTMLPresetAssembly.SquareRoot = new MultiRootNotation(2).setName("Square Root");
 HTMLPresetAssembly.CubeRoot = new MultiRootNotation(3).setName("Cube Root");
 HTMLPresetAssembly.Root = (degree) => new MultiRootNotation(degree).setName("Root (Degree " + new DefaultNotation().format(degree) + ")");
@@ -11772,12 +16394,31 @@ HTMLPresetAssembly.SuperSquareRoot = recipBelow(new MultiSuperRootNotation(2), 1
 HTMLPresetAssembly.Tritetrated = recipBelow(new MultiSuperRootNotation(3), 1, undefined, "0").setName("Tritetrated");
 HTMLPresetAssembly.SuperRoot = (degree) => recipBelow(new MultiSuperRootNotation(degree), 1, undefined, "0").setName("Super Root (Degree " + new DefaultNotation().format(degree) + ")");
 HTMLPresetAssembly.IncreasingSuperRoot = recipBelow(new IncreasingSuperRootNotation(), 1, undefined, "0").setName("Increasing Super Root");
+HTMLPresetAssembly.PentaSquareRoot = recipBelow(new MultiPentaRootNotation(2), 1, undefined, "0").setName("Penta Square Root");
+HTMLPresetAssembly.Tripentated = recipBelow(new MultiPentaRootNotation(3), 1, undefined, "0").setName("Tripentated");
+HTMLPresetAssembly.PentaRoot = (degree) => recipBelow(new MultiPentaRootNotation(degree), 1, undefined, "0").setName("Penta-Root (Degree " + new DefaultNotation().format(degree) + ")");
+PresetAssembly.WeakHyperscientific = new WeakHyperscientificNotation(...[, ,], defaultRound).setName("Weak Hyperscientific");
+HTMLPresetAssembly.WeakHyperscientific = new WeakHyperscientificNotation(...[, ,], defaultRound).setName("Weak Hyperscientific");
+PresetAssembly.SuperSquareScientific = new IncreasingFunctionScientificNotation((m, e) => Decimal.mul(m, Decimal.tetrate(e, 2)), [1], ...[, , ,], [[-Infinity, Infinity], [1, Infinity]], [1, false], [0, 1], [["", "", "", "", "", ""], ["", "", " * ", "↑↑2", "", ""]], ...[, , ,], Decimal.tetrate(1e9, 2), value => value.tetrate(2), false, "eee16", value => Decimal.tetrate(10, value.toNumber(), 1, true), false, true, [["(", ")↑↑2"], ["(", ")↑↑2"], [" ((↑↑2)^(", "))"]], undefined, 4, undefined, [true, true], ...[, ,], null, null, 1, ["1 / (", ")"]).setName("Super Square Scientific");
+HTMLPresetAssembly.SuperSquareScientific = new IncreasingFunctionScientificNotation((m, e) => Decimal.mul(m, Decimal.tetrate(e, 2)), [1], ...[, , ,], [[-Infinity, Infinity], [1, Infinity]], [1, false], [0, 1], [["", "", "", "", "", ""], ["", "", " * ", "↑↑2", "", ""]], ...[, , ,], Decimal.tetrate(1e9, 2), value => value.tetrate(2), false, "eee16", value => Decimal.tetrate(10, value.toNumber(), 1, true), false, true, [["(", ")↑↑2"], ["(", ")↑↑2"], [" ((↑↑2)^(", "))"]], undefined, 4, undefined, [true, true], ...[, ,], null, null, 1, ["1 / (", ")"]).setName("Super Square Scientific");
+PresetAssembly.ExponentTower = new IncreasingFunctionScientificNotation((a, b, c, d) => Decimal.pow(a, Decimal.pow(b, Decimal.pow(c, d))), [10, 10, 10], true, ...[, ,], [[1, Infinity]], [1, 1, 1, 1], [0, 1, 2, 3], [["", "", "", "", "", ""], ["", "^", "", "", "", ""], ["", "^", "", "", "", ""], ["", "^", "", "", "", ""]], [false, false, false, false], value => value.gt(1), new DefaultNotation(), Decimal.pow(10, Decimal.pow(9, Decimal.pow(6, 2))), value => Decimal.log(value, 10), true, "10^^5", value => Decimal.tetrate(10, value.toNumber(), 1, true), false, true, [["10^", ""], ["10^", ""], ["((10^)^(", ")) "]], undefined, 2, undefined, [false, false], ...[, ,], null, null, 1 + 1.2e-16, ["1 / ", ""]).setName("Exponent Tower");
+PresetAssembly.ExponentTowerK = new IncreasingFunctionScientificNotation((a, b, c, d) => Decimal.pow(a, Decimal.pow(b, Decimal.pow(c, d))), [1000, 1000, 1000], true, ...[, ,], [[1, Infinity]], [1, 1, 1, 1], [0, 1, 2, 3], [["", "", "", "", "", ""], ["", "^", "", "", "", ""], ["", "^", "", "", "", ""], ["", "^", "", "", "", ""]], [false, false, false, false], value => value.gt(1), new DefaultNotation(), Decimal.pow(1000, Decimal.pow(999, Decimal.pow(92, 2))), value => Decimal.log(value, 1000), true, "1000^^4", value => Decimal.tetrate(1000, value.toNumber(), 1, true), false, true, [["1,000^", ""], ["1,000^", ""], ["((1,000^)^(", ")) "]], undefined, 2, undefined, [false, false], ...[, ,], null, null, 1 + 1.2e-16, ["1 / ", ""]).setName("Exponent Tower K");
+HTMLPresetAssembly.ExponentTower = new IncreasingFunctionScientificNotation((a, b, c, d) => Decimal.pow(a, Decimal.pow(b, Decimal.pow(c, d))), [10, 10, 10], true, ...[, ,], [[1, Infinity]], [1, 1, 1, 1], [3, 2, 1, 0], [["<sup>", "</sup>", "", "", "", ""], ["<sup>", "</sup>", "", "", "", ""], ["<sup>", "</sup>", "", "", "", ""], ["", "", "", "", "", ""]], [true, true, true, true], value => value.gt(1), new DefaultNotation(), Decimal.pow(10, Decimal.pow(9, Decimal.pow(6, 2))), value => Decimal.log(value, 10), true, "10^^5", value => Decimal.tetrate(10, value.toNumber(), 1, true), false, true, [["10<sup>", "</sup>"], ["10<sup>", "</sup>"], ["((10^)^", ") "]], undefined, 2, undefined, [false, false], ...[, ,], null, null, 1 + 1.2e-16, ["1 / ", ""]).setName("Exponent Tower");
+HTMLPresetAssembly.ExponentTowerK = new IncreasingFunctionScientificNotation((a, b, c, d) => Decimal.pow(a, Decimal.pow(b, Decimal.pow(c, d))), [1000, 1000, 1000], true, ...[, ,], [[1, Infinity]], [1, 1, 1, 1], [3, 2, 1, 0], [["<sup>", "</sup>", "", "", "", ""], ["<sup>", "</sup>", "", "", "", ""], ["<sup>", "</sup>", "", "", "", ""], ["", "", "", "", "", ""]], [true, true, true, true], value => value.gt(1), new DefaultNotation(), Decimal.pow(1000, Decimal.pow(999, Decimal.pow(92, 2))), value => Decimal.log(value, 1000), true, "1000^^4", value => Decimal.tetrate(1000, value.toNumber(), 1, true), false, true, [["1,000<sup>", "</sup>"], ["1,000<sup>", "</sup>"], ["((1,000^)^", ") "]], undefined, 2, undefined, [false, false], ...[, ,], null, null, 1 + 1.2e-16, ["1 / ", ""]).setName("Exponent Tower K");
 PresetAssembly.Prime = new PrimeNotation().setName("Prime");
 HTMLPresetAssembly.Prime = new PrimeNotation(...[, , , , , , ,], ["<sup>", "</sup>"]).setName("Prime");
 PresetAssembly.PsiLetters = new PsiDashNotation(1).setName("Psi Letters");
 PresetAssembly.PsiDash = new PsiDashNotation().setName("Psi Dash");
+PresetAssembly.PsiLettersBinary = new PsiDashNotation(1, 16, 2).setName("Binary Psi Letters");
+PresetAssembly.PsiDashBinary = new PsiDashNotation([2, 5, 12, 24], 16, 2).setName("Binary Psi Dash");
 HTMLPresetAssembly.PsiLetters = new PsiDashNotation(1).setName("Psi Letters");
 HTMLPresetAssembly.PsiDash = new PsiDashNotation().setName("Psi Dash");
+HTMLPresetAssembly.PsiLettersBinary = new PsiDashNotation(1, 16, 2).setName("Binary Psi Letters");
+HTMLPresetAssembly.PsiDashBinary = new PsiDashNotation([2, 5, 12, 24], 16, 2).setName("Binary Psi Dash");
+PresetAssembly.FastGrowingHierarchy = recipBelow(new FastGrowingHierarchyNotation(...[, , , , , , ,], 1e-4), 1).setName("Fast-Growing Hierarchy");
+PresetAssembly.HardyHierarchy = recipBelow(new FastGrowingHierarchyNotation([1, 10, 5120, "(e^9)1544.461457532905"], [["", ""], ["ω + ", ""], ["ω^2 + ", ""], ["ω^3 + ", ""]], 1, [["", "", ""], ["ω*", " + ", ""], ["ω^2*", " + ", ""], ["ω^3*", " + ", ""]], [false], ["H[", "", false], ["](", ")", false], 1e-4, ...[, , ,], [new DefaultNotation(), new DefaultNotation()], [value => true, value => value.gt(0)]), 1).setName("Hardy Hierarchy");
+HTMLPresetAssembly.FastGrowingHierarchy = recipBelow(new FastGrowingHierarchyNotation(undefined, [["f<sub>0</sub>(", ")"], ["f<sub>1</sub>(", ")"], ["f<sub>2</sub>(", ")"], ["f<sub>3</sub>(", ")"], ["f<sub>4</sub>(", ")"]], ...[, , , , ,], 1e-4), 1).setName("Fast-Growing Hierarchy");
+HTMLPresetAssembly.HardyHierarchy = recipBelow(new FastGrowingHierarchyNotation([1, 10, 5120, "(e^9)1544.461457532905"], undefined, -1, [["", "", ""], ["ω", "+", ""], ["ω<sup>2</sup>", "+", ""], ["ω<sup>3</sup>", "+", ""]], [false], ["H<sub>", "", false], ["</sub>(", ")", false], 1e-4, ...[, , ,], [new DefaultNotation(), new ConditionalNotation(true, [new PredeterminedNotation(""), value => value.lte(1)], [new DefaultNotation(), value => true])], [value => true, value => value.gt(0)]), 1).setName("Hardy Hierarchy");
 // This preset has been removed for now because it's too laggy
 // Presets.PrestigeLayer = (root : Decimal, requirement : Decimal) => new PrestigeLayerNotation(root, requirement, true).setName("Prestige Layer (Root " + new DefaultNotation().format(root) + ", Requirement" + new DefaultNotation().format(requirement) + ")");
 // HTMLPresets.PrestigeLayer = (root : Decimal, requirement : Decimal) => new PrestigeLayerNotation(root, requirement, true).setName("Prestige Layer (Root " + new DefaultNotation().format(root) + ", Requirement" + new DefaultNotation().format(requirement) + ")");
@@ -11973,6 +16614,8 @@ PresetAssembly.Square = new PolygonalNotation(4, [["□", ""], ["□(", ")"], ["
 HTMLPresetAssembly.Square = new PolygonalNotation(4, [["□", ""], ["□(", ")"], ["□□", ""], ["□□(", ")"], ["□□□", ""], ["□□□(", ")"]], 65536).setName("Square");
 PresetAssembly.DoubleFactorials = new DoubleFactorialsNotation().setName("Double Factorials");
 HTMLPresetAssembly.DoubleFactorials = new DoubleFactorialsNotation().setName("Double Factorials");
+PresetAssembly.TritetratedProduct = new IncreasingFunctionProductNotation(value => value.tetrate(3), ...[, , , , ,], 8, ["", "↑↑3"], [")^", "", "("], ...[, , ,], 2, ...[, , , , , , , , , , ,], (CV, OV) => (OV.log10().log10().div(CV.log10().log10()).gte(1000)), ...[, , ,], Decimal.tetrate(16 ** 8, 3), value => value.tetrate(3), false, "eeee20", value => Decimal.tetrate(10, value.toNumber() * 2, 1, true), false, true, [["( ", " )↑↑3"], ["(", ")↑↑3"], [" ((↑↑3)^(", "))"]], undefined, 3, undefined, [true, true], ...[, ,], null, undefined, 16, ["1 / (", ")"]).setName("Tritetrated Product");
+HTMLPresetAssembly.TritetratedProduct = new IncreasingFunctionProductNotation(value => value.tetrate(3), ...[, , , , ,], 8, ["", "&#8593;&#8593;3"], [")^", "", "("], ...[, , ,], 2, ...[, , , , , , , , , , ,], (CV, OV) => (OV.log10().log10().div(CV.log10().log10()).gte(1000)), ...[, , ,], Decimal.tetrate(16 ** 8, 3), value => value.tetrate(3), false, "eeee20", value => Decimal.tetrate(10, value.toNumber() * 2, 1, true), false, true, [["( ", " )&#8593;&#8593;3"], ["(", ")&#8593;&#8593;3"], [" ((&#8593;&#8593;3)^(", "))"]], undefined, 3, undefined, [true, true], ...[, ,], null, undefined, 16, ["1 / (", ")"]).setName("Tritetrated Product");
 PresetAssembly.Grid = new GridNotation(...[, , , , , , , ,], " || ").setName("Grid");
 HTMLPresetAssembly.Grid = new GridNotation(...[, ,], ["&#x25A1;", "&#x25A0;"], ["", "&nbsp;&nbsp;&nbsp;", "&#x25C7;"], undefined, "<br>", "", "<br>", "<br><br>").setName("Grid");
 let tetrationFloat = new HypersplitNotation([["", ""], ["", ""], ["", ""], ["", ""]], 2, [2, 1024, 512], [1, 1, 1, 1], 0, ...[, , ,], [
@@ -11995,6 +16638,34 @@ HTMLPresetAssembly.BaseThreeHalves = new ExpandedDefaultNotation(1.5 ** 39, 1, 5
 HTMLPresetAssembly.BasePhi = new ExpandedDefaultNotation(1.618033988749895 ** 30, 1, 5, 1.618033988749895, ...[, , , , , , , , , , ,], new PolynomialNotation(1.618033988749895, 0, -Infinity, false, 39, "", 1.618033988749895 ** 30, 1.618033988749895 ** 30, 5, 1, undefined, "", "", "", "", ...[, , , ,], [true, true], ...[, , ,], "-", ["", "."])).setName("Base phi");
 HTMLPresetAssembly.BaseE = new ExpandedDefaultNotation(2.718281828459045 ** 21, 1, 5, 2.718281828459045, ...[, , , , , , , , , , ,], new PolynomialNotation(2.718281828459045, 0, -Infinity, false, 39, "", 2.718281828459045 ** 21, 2.718281828459045 ** 21, 5, 1, undefined, "", "", "", "", ...[, , , ,], [true, true], ...[, , ,], "-", ["", "."])).setName("Base e");
 HTMLPresetAssembly.BasePi = new ExpandedDefaultNotation(3.141592653589793 ** 20, 1, 5, 3.141592653589793, ...[, , , , , , , , , , ,], new PolynomialNotation(3.141592653589793, 0, -Infinity, false, 39, "", 3.141592653589793 ** 20, 3.141592653589793 ** 20, 5, 1, undefined, "", "", "", "", ...[, , , ,], [true, true], ...[, , ,], "-", ["", "."])).setName("Base pi");
+PresetAssembly.Parentheses = recipBelow(new PolynomialNotation(2, 1, 0, true, 10, "", "2^^5", "2^^5", 2, -1, new SignValueNotation([["(())", 2], ["()", 1]], 1e-12), "", "", "", "", true, ["(", ")"], ...[, ,], [false, false], true, [["(", ")"], ["(", ")"], ["[", "]"], ["[", "]"]], ...[, , , ,], 1), 1, ["{", "}"], ")").setNotationGlobals([")", ""], "{}", undefined, "][").setName("Parentheses");
+HTMLPresetAssembly.Parentheses = recipBelow(new PolynomialNotation(2, 1, 0, true, 10, "", "2^^5", "2^^5", 2, -1, new SignValueNotation([["(())", 2], ["()", 1]], 1e-12), "", "", "", "", true, ["(", ")"], ...[, ,], [false, false], true, [["(", ")"], ["(", ")"], ["[", "]"], ["[", "]"]], ...[, , , ,], 1), 1, ["{", "}"], ")").setNotationGlobals([")", ""], "{}", undefined, "][").setName("Parentheses");
+let OMZPlain = new OmegaMetaZeroNotation([
+    [
+        "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω",
+        "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω"
+    ], ["ϝ", "ϛ", "ͱ", "ϻ", "ϙ", "ͳ", "ϸ"], ["☿", "♀", "♁", "♂", "♃", "♄", "♅", "♆", "♇"]
+], 5, [false], 5, [["((Ω^)^", ")", false, new DefaultNotation()], ["((ϸ^)^", ")", false, new DefaultNotation()], ["((♇^)^", ")", false, new DefaultNotation()]]);
+let OMZHTML = new OmegaMetaZeroNotation([
+    [
+        "&#x3B1;", "&#x3B2;", "&#x3B3;", "&#x3B4;", "&#x3B5;", "&#x3B6;", "&#x3B7;", "&#x3B8;", "&#x3B9;", "&#x3BA;", "&#x3BB;", "&#x3BC;", "&#x3BD;", "&#x3BE;", "&#x3BF;", "&#x3C0;", "&#x3C1;", "&#x3C3;", "&#x3C4;", "&#x3C5;", "&#x3C6;", "&#x3C7;", "&#x3C8;", "&#x3C9;",
+        "&#x391;", "&#x392;", "&#x393;", "&#x394;", "&#x395;", "&#x396;", "&#x397;", "&#x398;", "&#x399;", "&#x39A;", "&#x39B;", "&#x39C;", "&#x39D;", "&#x39E;", "&#x39F;", "&#x3A0;", "&#x3A1;", "&#x3A3;", "&#x3A4;", "&#x3A5;", "&#x3A6;", "&#x3A7;", "&#x3A8;", "&#x3A9;"
+    ], ["&#x3DD;", "&#x3DB;", "&#x371;", "&#x3FB;", "&#x3D9;", "&#x373;", "&#x3F8;"], ["&#x263F;", "&#x2640;", "&#x2641;", "&#x2642;", "&#x2643;", "&#x2644;", "&#x2645;", "&#x2646;", "&#x2647;"]
+], 5, [true], 5, [["(&#x3A9;<sup>", "</sup>)", false, new DefaultNotation()], ["(&#x3F8;<sup>", "</sup>)", false, new DefaultNotation()], ["(&#x2647;<sup>", "</sup>)", false, new DefaultNotation()]], ...[, , , ,], [["<sub>", "</sub>", "", "", "", ""]], ...[, , ,], ["", "", "<sub>{", "}</sub>", "", ""], ...[, , , , , , ,], "&#x25EF;");
+let OMZPlain2 = new ConditionalNotation(false, [OMZPlain, value => value.lte("eeee9e15")], [new HyperscientificNotation(Infinity, ...[, , ,], Decimal.slog("9e15", 10, true).sub(1), ...[, ,], [["<|", "|>:"], ["<|", "|>:"], ["<<", ">>"]], undefined, true, false, false, ...[, ,], OMZPlain), value => true]).setName("Omega Meta Zero");
+let OMZHTML2 = new ConditionalNotation(false, [OMZHTML, value => value.lte("eeee9e15")], [new HyperscientificNotation(Infinity, ...[, , ,], Decimal.slog("9e15", 10, true).sub(1), ...[, ,], [["<|", "|>:"], ["<|", "|>:"], ["<<", ">>"]], undefined, true, false, false, ...[, ,], OMZHTML), value => true]).setName("Omega Meta Zero");
+PresetAssembly.OmegaMetaZero = recipBelow(OMZPlain2, 1, ["/", ""]).setName("Omega Meta Zero");
+HTMLPresetAssembly.OmegaMetaZero = recipBelow(OMZHTML2, 1, ["/", ""]).setName("Omega Meta Zero");
+PresetAssembly.OmegaMetaZeroAlphaAmount = new PrestigeLayerNotation(Decimal.log(Decimal.pow(2, 1024), 10), Decimal.pow(2, 1024), false, [], [" ", ""], false, true, new ConditionalNotation(false, [new SINotation(10, [["Dc", 33], ["No", 30], ["Oc", 27], ["Sp", 24], ["Sx", 21], ["Qi", 18], ["Qa", 15], ["T", 12], ["B", 9]], ...[, , , , ,], ""), value => (value.gte(1e9) && value.lt(1e36))], [new DefaultNotation(), value => true]), OMZPlain2).setName("Omega Meta Zero (Alpha Amount)");
+HTMLPresetAssembly.OmegaMetaZeroAlphaAmount = new PrestigeLayerNotation(Decimal.log(Decimal.pow(2, 1024), 10), Decimal.pow(2, 1024), false, [], [" ", ""], false, true, new ConditionalNotation(false, [new SINotation(10, [["Dc", 33], ["No", 30], ["Oc", 27], ["Sp", 24], ["Sx", 21], ["Qi", 18], ["Qa", 15], ["T", 12], ["B", 9]], ...[, , , , ,], ""), value => (value.gte(1e9) && value.lt(1e36))], [new DefaultNotation(), value => true]), OMZHTML2).setName("Omega Meta Zero (Alpha Amount)");
+PresetAssembly.FillingFractions = new OmegaMetaZeroNotation([
+    ["0", "½", "1"], ["0", "⅓", "⅔", "1"], ["0", "¼", "½", "¾", "1"], ["0", "⅕", "⅖", "⅗", "⅘", "1"],
+    ["0", "⅙", "⅓", "½", "⅔", "⅚", "1"], ["0", "⅛", "¼", "⅜", "½", "⅝", "¾", "⅞", "1"]
+], 1, ...[, , , ,], [["", "", "", "", "", ""]], [(value, index, symbolValues, digitIndex, DPA, digitValues) => (digitIndex < 0 || (digitIndex == 0 && index == 0) || digitIndex + DPA < digitValues.length - 1 || symbolValues.map(s => !!s.toNumber()).lastIndexOf(true) >= index)], [["/", "", "", "", "", ""]], [], [["", "", "", "", "", ""]], false, 3, [" // ", "", "", "", "", ""], false, 3, false, ...[, , ,], null, "½", 11666192832000, 1, [" // ", "", "", "", "", ""], false, 1, false, null, "½ // ½", 9e15, 1, ["\\", ""], [["", "", "", "", "", ""]], -1, 1, null, undefined, 1, ["⅟(", ")"]).setName("Filling Fractions");
+HTMLPresetAssembly.FillingFractions = new OmegaMetaZeroNotation([
+    ["0", "&#xBD;", "1"], ["0", "&#x2153;", "&#x2154;", "1"], ["0", "&#xBC;", "&#xBD;", "&#xBE;", "1"], ["0", "&#x2155;", "&#x2156;", "&#x2157;", "&#x2158;", "1"],
+    ["0", "&#x2159;", "&#x2153;", "&#xBD;", "&#x2154;", "&#x215A;", "1"], ["0", "&#x215B;", "&#xBC;", "&#x215C;", "&#xBD;", "&#x215D;", "&#xBE;", "&#x215E;", "1"]
+], 1, ...[, , , ,], [["", "", "", "", "", ""]], [(value, index, symbolValues, digitIndex, DPA, digitValues) => (digitIndex < 0 || (digitIndex == 0 && index == 0) || digitIndex + DPA < digitValues.length - 1 || symbolValues.map(s => !!s.toNumber()).lastIndexOf(true) >= index)], [["/", "", "", "", "", ""]], [], [["", "", "", "", "", ""]], false, 3, [" // ", "", "", "", "", ""], false, 3, false, ...[, , ,], null, "½", 11666192832000, 1, [" // ", "", "", "", "", ""], false, 1, false, null, "½ // ½", 9e15, 1, ["&#x5C;", ""], [["", "", "", "", "", ""]], -1, 1, null, undefined, 1, ["&#x215F;(", ")"]).setName("Filling Fractions");
 PresetAssembly.Blind = new PredeterminedNotation("").setName("Blind");
 PresetAssembly.PowersOfOne = new AppliedFunctionNotation((value) => Decimal.pow(1, value), new DefaultNotation(), (str) => str).setName("Powers of One");
 HTMLPresetAssembly.Blind = new PredeterminedNotation("").setName("Blind");
@@ -12019,6 +16690,7 @@ let Presets = {
     DoubleLogarithm: PresetAssembly.DoubleLogarithm,
     AlternateBase: PresetAssembly.AlternateBase,
     Binary: PresetAssembly.Binary,
+    BinaryIL: PresetAssembly.BinaryIL,
     Ternary: PresetAssembly.Ternary,
     Quaternary: PresetAssembly.Quaternary,
     Seximal: PresetAssembly.Seximal,
@@ -12055,6 +16727,7 @@ let Presets = {
     Septecoman: PresetAssembly.Septecoman,
     SI: PresetAssembly.SI,
     SIWritten: PresetAssembly.SIWritten,
+    MixedSI: PresetAssembly.MixedSI,
     BinarySI: PresetAssembly.BinarySI,
     BinarySIWritten: PresetAssembly.BinarySIWritten,
     CombinedD: PresetAssembly.CombinedD,
@@ -12062,6 +16735,7 @@ let Presets = {
     HyperSIWritten: PresetAssembly.HyperSIWritten,
     SandcastleBuilder: PresetAssembly.SandcastleBuilder,
     SandcastleBuilderWritten: PresetAssembly.SandcastleBuilderWritten,
+    CookieFonsterExtendedSI: PresetAssembly.CookieFonsterExtendedSI,
     LooseFraction: PresetAssembly.LooseFraction,
     MediumFraction: PresetAssembly.MediumFraction,
     PreciseFraction: PresetAssembly.PreciseFraction,
@@ -12075,8 +16749,10 @@ let Presets = {
     AarexMyriad: PresetAssembly.AarexMyriad,
     DoubleBinaryNames: PresetAssembly.DoubleBinaryNames,
     DoubleBinaryPrefixes: PresetAssembly.DoubleBinaryPrefixes,
+    Alphaquint: PresetAssembly.Alphaquint,
     Hypersplit: PresetAssembly.Hypersplit,
     HypersplitBase3: PresetAssembly.HypersplitBase3,
+    HypersplitBase2: PresetAssembly.HypersplitBase2,
     HyperE: PresetAssembly.HyperE,
     Infinity: PresetAssembly.Infinity,
     Eternity: PresetAssembly.Eternity,
@@ -12099,9 +16775,20 @@ let Presets = {
     Tritetrated: PresetAssembly.Tritetrated,
     SuperRoot: PresetAssembly.SuperRoot,
     IncreasingSuperRoot: PresetAssembly.IncreasingSuperRoot,
+    PentaSquareRoot: PresetAssembly.PentaSquareRoot,
+    Tripentated: PresetAssembly.Tripentated,
+    PentaRoot: PresetAssembly.PentaRoot,
+    WeakHyperscientific: PresetAssembly.WeakHyperscientific,
+    SuperSquareScientific: PresetAssembly.SuperSquareScientific,
+    ExponentTower: PresetAssembly.ExponentTower,
+    ExponentTowerK: PresetAssembly.ExponentTowerK,
     Prime: PresetAssembly.Prime,
     PsiLetters: PresetAssembly.PsiLetters,
     PsiDash: PresetAssembly.PsiDash,
+    PsiLettersBinary: PresetAssembly.PsiLettersBinary,
+    PsiDashBinary: PresetAssembly.PsiDashBinary,
+    FastGrowingHierarchy: PresetAssembly.FastGrowingHierarchy,
+    HardyHierarchy: PresetAssembly.HardyHierarchy,
     OmegaLayers: PresetAssembly.OmegaLayers,
     OmegaLayersRamped: PresetAssembly.OmegaLayersRamped,
     OmegaLayerNumber: PresetAssembly.OmegaLayerNumber,
@@ -12114,6 +16801,7 @@ let Presets = {
     Triangular: PresetAssembly.Triangular,
     Square: PresetAssembly.Square,
     DoubleFactorials: PresetAssembly.DoubleFactorials,
+    TritetratedProduct: PresetAssembly.TritetratedProduct,
     Grid: PresetAssembly.Grid,
     TetrationFloat: PresetAssembly.TetrationFloat,
     Polynomial: PresetAssembly.Polynomial,
@@ -12122,6 +16810,10 @@ let Presets = {
     BasePhi: PresetAssembly.BasePhi,
     BaseE: PresetAssembly.BaseE,
     BasePi: PresetAssembly.BasePi,
+    Parentheses: PresetAssembly.Parentheses,
+    OmegaMetaZero: PresetAssembly.OmegaMetaZero,
+    OmegaMetaZeroAlphaAmount: PresetAssembly.OmegaMetaZeroAlphaAmount,
+    FillingFractions: PresetAssembly.FillingFractions,
     Blind: PresetAssembly.Blind,
     PowersOfOne: PresetAssembly.PowersOfOne
 };
@@ -12145,6 +16837,7 @@ let HTMLPresets = {
     DoubleLogarithm: HTMLPresetAssembly.DoubleLogarithm,
     AlternateBase: HTMLPresetAssembly.AlternateBase,
     Binary: HTMLPresetAssembly.Binary,
+    BinaryIL: HTMLPresetAssembly.BinaryIL,
     Ternary: HTMLPresetAssembly.Ternary,
     Quaternary: HTMLPresetAssembly.Quaternary,
     Seximal: HTMLPresetAssembly.Seximal,
@@ -12181,6 +16874,7 @@ let HTMLPresets = {
     Septecoman: HTMLPresetAssembly.Septecoman,
     SI: HTMLPresetAssembly.SI,
     SIWritten: HTMLPresetAssembly.SIWritten,
+    MixedSI: HTMLPresetAssembly.MixedSI,
     BinarySI: HTMLPresetAssembly.BinarySI,
     BinarySIWritten: HTMLPresetAssembly.BinarySIWritten,
     CombinedD: HTMLPresetAssembly.CombinedD,
@@ -12188,6 +16882,7 @@ let HTMLPresets = {
     HyperSIWritten: HTMLPresetAssembly.HyperSIWritten,
     SandcastleBuilder: HTMLPresetAssembly.SandcastleBuilder,
     SandcastleBuilderWritten: HTMLPresetAssembly.SandcastleBuilderWritten,
+    CookieFonsterExtendedSI: HTMLPresetAssembly.CookieFonsterExtendedSI,
     LooseFraction: HTMLPresetAssembly.LooseFraction,
     MediumFraction: HTMLPresetAssembly.MediumFraction,
     PreciseFraction: HTMLPresetAssembly.PreciseFraction,
@@ -12201,8 +16896,10 @@ let HTMLPresets = {
     AarexMyriad: HTMLPresetAssembly.AarexMyriad,
     DoubleBinaryNames: HTMLPresetAssembly.DoubleBinaryNames,
     DoubleBinaryPrefixes: HTMLPresetAssembly.DoubleBinaryPrefixes,
+    Alphaquint: PresetAssembly.Alphaquint,
     Hypersplit: HTMLPresetAssembly.Hypersplit,
     HypersplitBase3: HTMLPresetAssembly.HypersplitBase3,
+    HypersplitBase2: HTMLPresetAssembly.HypersplitBase2,
     HyperE: HTMLPresetAssembly.HyperE,
     Infinity: HTMLPresetAssembly.Infinity,
     Eternity: HTMLPresetAssembly.Eternity,
@@ -12226,9 +16923,20 @@ let HTMLPresets = {
     Tritetrated: HTMLPresetAssembly.Tritetrated,
     SuperRoot: HTMLPresetAssembly.SuperRoot,
     IncreasingSuperRoot: HTMLPresetAssembly.IncreasingSuperRoot,
+    PentaSquareRoot: HTMLPresetAssembly.PentaSquareRoot,
+    Tripentated: HTMLPresetAssembly.Tripentated,
+    PentaRoot: HTMLPresetAssembly.PentaRoot,
+    WeakHyperscientific: HTMLPresetAssembly.WeakHyperscientific,
+    SuperSquareScientific: HTMLPresetAssembly.SuperSquareScientific,
+    ExponentTower: HTMLPresetAssembly.ExponentTower,
+    ExponentTowerK: HTMLPresetAssembly.ExponentTowerK,
     Prime: HTMLPresetAssembly.Prime,
     PsiLetters: HTMLPresetAssembly.PsiLetters,
     PsiDash: HTMLPresetAssembly.PsiDash,
+    PsiLettersBinary: HTMLPresetAssembly.PsiLettersBinary,
+    PsiDashBinary: HTMLPresetAssembly.PsiDashBinary,
+    FastGrowingHierarchy: HTMLPresetAssembly.FastGrowingHierarchy,
+    HardyHierarchy: HTMLPresetAssembly.HardyHierarchy,
     OmegaLayers: HTMLPresetAssembly.OmegaLayers,
     OmegaLayersRamped: HTMLPresetAssembly.OmegaLayersRamped,
     OmegaLayerNumber: HTMLPresetAssembly.OmegaLayerNumber,
@@ -12241,6 +16949,7 @@ let HTMLPresets = {
     Triangular: HTMLPresetAssembly.Triangular,
     Square: HTMLPresetAssembly.Square,
     DoubleFactorials: HTMLPresetAssembly.DoubleFactorials,
+    TritetratedProduct: HTMLPresetAssembly.TritetratedProduct,
     Grid: HTMLPresetAssembly.Grid,
     TetrationFloat: HTMLPresetAssembly.TetrationFloat,
     Polynomial: HTMLPresetAssembly.Polynomial,
@@ -12249,8 +16958,12 @@ let HTMLPresets = {
     BasePhi: HTMLPresetAssembly.BasePhi,
     BaseE: HTMLPresetAssembly.BaseE,
     BasePi: HTMLPresetAssembly.BasePi,
+    Parentheses: HTMLPresetAssembly.Parentheses,
+    OmegaMetaZero: HTMLPresetAssembly.OmegaMetaZero,
+    OmegaMetaZeroAlphaAmount: HTMLPresetAssembly.OmegaMetaZeroAlphaAmount,
+    FillingFractions: HTMLPresetAssembly.FillingFractions,
     Blind: HTMLPresetAssembly.Blind,
     PowersOfOne: HTMLPresetAssembly.PowersOfOne
 };
 
-export { AlternateBaseNotation, AppliedFunctionNotation, BaseConvert, ConditionalNotation, CustomNotation, DefaultNotation, DoubleFactorialsNotation, ExpandedDefaultNotation, FactoradicConvert, FactoradicNotation, FactorialAmountNotation, FactorialHyperscientificIterationsNotation, FactorialHyperscientificNotation, FactorialNotation, FactorialScientificIterationsNotation, FactorialScientificNotation, FractionNotation, GridNotation, HTMLPresets, HyperSINotation, HyperscientificIterationsNotation, HyperscientificNotation, HypersplitNotation, IncreasingOperatorNotation, IncreasingRootNotation, IncreasingSuperRootNotation, LetterDigitsNotation, LettersNotation, LogarithmNotation, MultiFactorialAmountNotation, MultiFactorialNotation, MultiLogarithmNotation, MultiRootNotation, MultiSuperLogarithmNotation, MultiSuperRootNotation, MyriadNotation, NestedHyperSINotation, NestedSINotation, NestedSignValueNotation, Notation, PolygonalNotation, PolynomialNotation, PredeterminedNotation, Presets, PrestigeLayerNotation, PrimeNotation, PsiDashNotation, RootNotation, SINotation, ScientificIterationsNotation, ScientificNotation, SignValueNotation, StandardNotation, SuperLogarithmNotation, SuperRootNotation, biPolygon, biPolygonRoot, commasAndDecimals, factorial_hyperscientifify, factorial_scientifify, factorial_slog, fractionApproximation, fractionApproximationD, hyperscientifify, hypersplit, inverse_factorial, iteratedBiPolygonRoot, iteratedPolygonRoot, iteratedfactorial, multabs, physicalScale, polygon, polygonLog, polygonRoot, primeFactorize, primeFactorizeFraction, scientifify, toDecimal, triPolygon, triPolygonRoot };
+export { AlternateBaseNotation, AppliedFunctionNotation, BaseConvert, ConditionalNotation, CustomNotation, DefaultNotation, DoubleFactorialsNotation, ExpandedDefaultNotation, FGH0, FGH0inverse, FGH1, FGH1inverse, FGH2, FGH2inverse, FGH3, FGH3inverse, FactoradicConvert, FactoradicNotation, FactorialAmountNotation, FactorialHyperscientificIterationsNotation, FactorialHyperscientificNotation, FactorialNotation, FactorialScientificIterationsNotation, FactorialScientificNotation, FastGrowingHierarchyNotation, FractionNotation, GridNotation, HTMLPresets, HyperSINotation, HyperscientificIterationsNotation, HyperscientificNotation, HypersplitNotation, IncreasingFunctionNotation, IncreasingFunctionProductNotation, IncreasingFunctionScientificNotation, IncreasingOperatorNotation, IncreasingPentaRootNotation, IncreasingRootNotation, IncreasingSuperRootNotation, LetterDigitsNotation, LettersNotation, LogarithmNotation, MultiFactorialAmountNotation, MultiFactorialNotation, MultiLogarithmNotation, MultiPentaLogarithmNotation, MultiPentaRootNotation, MultiRootNotation, MultiSuperLogarithmNotation, MultiSuperRootNotation, MultibaseLogarithmNotation, MultibaseMultiLogarithmNotation, MyriadNotation, NestedHyperSINotation, NestedSINotation, NestedSignValueNotation, Notation, OmegaMetaZeroNotation, PentaLogarithmNotation, PentaRootNotation, PentaScientificIterationsNotation, PentaScientificNotation, PolygonalNotation, PolynomialNotation, PredeterminedNotation, Presets, PrestigeLayerNotation, PrimeNotation, PsiDashNotation, RootNotation, SINotation, ScientificIterationsNotation, ScientificNotation, SignValueNotation, StandardNotation, SuperLogarithmNotation, SuperRootNotation, WeakHyperscientificIterationsNotation, WeakHyperscientificNotation, biPolygon, biPolygonRoot, commasAndDecimals, factorial_hyperscientifify, factorial_scientifify, factorial_slog, fractionApproximation, fractionApproximationD, hyperscientifify, hypersplit, increasingFunctionScientifify, increasingScientififyFunction, inverse_factorial, iteratedBiPolygonRoot, iteratedFGH0, iteratedFGH0inverse, iteratedFGH1, iteratedFGH1log, iteratedFGH2, iteratedFGH2log, iteratedFGH3, iteratedFGH3log, iteratedPolygonRoot, iteratedfactorial, multabs, multibaseLogarithm, pentascientifify, physicalScale, polygon, polygonLog, polygonRoot, primeFactorize, primeFactorizeFraction, scientifify, toDecimal, triPolygon, triPolygonRoot, weak_hyperscientifify, weak_slog, weak_tetrate };

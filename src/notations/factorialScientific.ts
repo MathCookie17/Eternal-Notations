@@ -256,13 +256,18 @@ export class FactorialScientificIterationsNotation extends Notation {
       sciArray.pop();
       sciArray.push(mantissa, exponent);
     }
+    let negMantissa = false;
+    if (sciArray.length == 1 && negExp) {
+      sciArray[0] = sciArray[0].neg();
+      negMantissa = true;
+    }
     let endings = sciArray.length - 1;
     let beforeChar = this._expChars[0][0];
     let afterChar = this._expChars[0][1];
     while (sciArray.length > 0) {
       let numStr = "";
       let toFormat = sciArray[0];
-      if (this.negExpChars !== null && typeof this.negExpChars[0] !== "boolean" && toFormat.lt(0)) {
+      if (this.negExpChars !== null && typeof this.negExpChars[0] !== "boolean" && toFormat.lt(0) && !negMantissa) {
         toFormat = toFormat.neg();
         beforeChar = this.negExpChars[0][0];
         afterChar = this.negExpChars[0][1];
