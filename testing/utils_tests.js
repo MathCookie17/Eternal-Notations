@@ -367,15 +367,15 @@ var test_iteratedFGH3log = function() {
     }
 }
 
-var test_FGH4inverse = function() {
-    console.log("test_FGH4inverse");
-    for (var i = 0; i < 1000; ++i) {
-        let value = Math.random()*1.1 + 1;
-        console.log(value);
-        let round_trip = EternalNotations.FGH4inverse(EternalNotations.FGH4(value));
-        assert_eq_tolerance(value + " -> " + round_trip, value, round_trip);
-    }
-}
+// var test_FGH4inverse = function() {
+//     console.log("test_FGH4inverse");
+//     for (var i = 0; i < 1000; ++i) {
+//         let value = Math.random()*1.1 + 1;
+//         console.log(value);
+//         let round_trip = EternalNotations.FGH4inverse(EternalNotations.FGH4(value));
+//         assert_eq_tolerance(value + " -> " + round_trip, value, round_trip);
+//     }
+// }
 
 var all_tests = function() {
     test_factorial_round_trip();
@@ -401,5 +401,5 @@ var all_tests = function() {
     test_iteratedFGH2log();
     test_FGH3inverse();
     test_iteratedFGH3log();
-    test_FGH4inverse();
+    // test_FGH4inverse();
 }

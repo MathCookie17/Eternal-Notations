@@ -1890,30 +1890,30 @@
                     A notation that abbreviates numbers using the Fast-Growing Hierarchy, a simple system of functions: f0(n) = n + 1, f1(n) is f0(f0(f0(f0...(n)))) with n f0's,
                     f2(n) is f1(f1(f1(f1...(n)))) with n f1's, and so on, with each function being a repeated version of the previous one.
                     The Fast-Growing Hierarchy functions have a similar growth rate to the hyperoperators: f1 multiplies, f2 is exponential, f3 is tetrational, f4 is pentational, and so on.
-                    This notation only goes up to f4.
+                    This notation only goes up to f3.
                 </p>
                 <ul class="param_list start_hide">
                     <li>
                         maximums ( Decimal[] ) If the number given is above maximums[0], another iteration of f0 is applied. Likewise, going above maximums[1] causes an iteration of f1 to be applied, going above maximums[2] causes an iteration of f2 to be applied, and so on.
-                        Later functions are applied before earlier ones. Default is [1, 4, 32, ee41373247578.35493, Infinity], which are the values that cause the argument to stay below 1 and the amount of iterations of each function to stay below 4.
-                        If less than 5 entries are provided, the unfilled entries are set to Infinity, i.e. those later operators don't show up.
+                        Later functions are applied before earlier ones. Default is [1, 4, 32, ee41373247578.35493], which are the values that cause the argument to stay below 1 and the amount of iterations of each function to stay below 4.
+                        If less than 4 entries are provided, the unfilled entries are set to Infinity, i.e. those later operators don't show up.
                     </li>
                     <li>
                         functionChars ( [string, string][] ) The strings used to show each application of each function. functionChars[n] corresponds to f[n]. For each entry, functionChars[n][0] goes before the argument,
-                        functionChars[n][1] goes after. Default is [["f0(", ")"], ["f1(", ")"], ["f2(", ")"], ["f3(", ")"], ["f4(", ")"]]. If less than 5 entries are provided, the unfilled entries go back to their default values.
+                        functionChars[n][1] goes after. Default is [["f0(", ")"], ["f1(", ")"], ["f2(", ")"], ["f3(", ")"]]. If less than 4 entries are provided, the unfilled entries go back to their default values.
                     </li>
                     <li>
                         max_in_a_row ( number[] ) If the amount of iterations of f0 is above max_in_a_row[0], the f0's are concatenated into an (f0^n) expression. Likewise for the rest of the functions and their corresponding entries here.
-                        Default is [4, 4, 4, 4, 4]. If less than 5 entries are provided, the unfilled entries are set to the same value as the last filled one.
+                        Default is [4, 4, 4, 4]. If less than 4 entries are provided, the unfilled entries are set to the same value as the last filled one.
                     </li>
                     <li>
                         iterationChars ( [string, string, string][] ) The strings used when the amount of iterations is concatenated. In each entry, iterationChars[n][0] goes before the amount of iterations, iterationChars[n][1] goes after the amount of iterations,
-                        and iterationChars[n][2] goes on the opposite side of the argument from the other two. Default is [["(f0^", ")", ""], ["(f1^", ")", ""], ["(f2^", ")", ""], ["(f3^", ")", ""], ["(f4^", ")", ""]].
+                        and iterationChars[n][2] goes on the opposite side of the argument from the other two. Default is [["(f0^", ")", ""], ["(f1^", ")", ""], ["(f2^", ")", ""], ["(f3^", ")", ""]].
                         If less than 5 entries are provided, the unfilled entries go back to their default values.
                     </li>
                     <li>
-                        iterationAfter ( boolean[] ) If iterationAfter[n] is true, then the amount of iterations of that function goes after the argument instead of before. Default is [false, false, false, false, false].
-                        If less than 5 entries are provided, the unfilled entries are set to false.
+                        iterationAfter ( boolean[] ) If iterationAfter[n] is true, then the amount of iterations of that function goes after the argument instead of before. Default is [false, false, false, false].
+                        If less than 4 entries are provided, the unfilled entries are set to false.
                     </li>
                     <li>
                         edgeChars ( [string, string, boolean] ) If any of the functions are applied to the value at least once, then edgeChars[0] goes on the left end of the whole expression, edgeChars[1] goes on the right end.
@@ -1924,19 +1924,19 @@
                         If argumentChars[2] is true, then the other two argumentChars appear even if no other functions are visible. Default is ["", "", false].
                     </li>
                     <li>rounding ( DecimalSource | ((value : Decimal) => Decimal) ) The argument is rounded to the nearest multiple of this value. If this parameter is a function, then the argument is plugged into the function, and whatever the function returns is used as the value to round to the nearest multiple of. The rounding is not performed at all if rounding is 0. Default is 0.</li>
-                    <li>delimiterPermutation ( number ) The order that the functions are shown in when multiple are present (they're always applied from greatest to least; this parameter is only a visual change). The default is 119, which corresponds to [f0, f1, f2, f3, f4]. Each value from 0 to 119 represents a different ordering.</li>
+                    <li>delimiterPermutation ( number ) The order that the functions are shown in when multiple are present (they're always applied from greatest to least; this parameter is only a visual change). The default is 23, which corresponds to [f0, f1, f2, f3]. Each value from 0 to 23 represents a different ordering.</li>
                     <li>
                         engineerings ( Decimal | Decimal[][] ) Either a DecimalSource or an array of arrays of DecimalSources; default is 1. This parameter controls the allowed amount of iterations for each function: for example, if engineerings[0] is [3], then the amount of f0 iterations will always be a multiple of 3. If this is an array, then multiples of those values are added from greatest to least to get the allowed values: for example, if engineerings[1] is [5, 2], then the permitted amounts of f0 iterations are 2, 4, 5, 7, 9, 10, 12, 14... and so on, i.e. multiples of 5 plus a multiple of 2 less than 5 (which may be 0).
-                        If engineerings is a single value, then every argument is given that single value as its engineerings entry. The amount of iterations for f4 may not be a non-integer, though the iterations for the rest may be. If less than 5 entries are provided, then all unfilled entries will be set equal to the last entry that was given.
+                        If engineerings is a single value, then every argument is given that single value as its engineerings entry. If less than 5 entries are provided, then all unfilled entries will be set equal to the last entry that was given.
                     </li>
                     <li>innerNotation ( Notation ) The notation that the argument is itself written in. DefaultNotation is the default.</li>
                     <li>
                         iterationInnerNotations ( Notation | Notation[] ) iterationInnerNotations[0] is the notation that the amount of iterations of f0 is written in, and likewise for the rest of the functions.
-                        If only a single notation is provided, all 5 entries are set to that notation. If less than 5 entries are provided, the unfilled ones are set to be the same as the last given one. Is the same as innerNotation by default.
+                        If only a single notation is provided, all 4 entries are set to that notation. If less than 5 entries are provided, the unfilled ones are set to be the same as the last given one. Is the same as innerNotation by default.
                     </li>
                     <li>
                         functionShown ( ((value : Decimal) => boolean)[] ) functionShown[0] controls when the f0 iterations are shown: the f0 iterations, whether concatenated or not, are only shown if functionShown[0](amount of f0 iterations) returns true.
-                        Default is (value => value.gt(0)) for all five entries, i.e. the iterations are only shown if there's more than zero of them. If less than 5 entries are provided, the unfilled ones are set to be the same as the last given one. 
+                        Default is (value => value.gt(0)) for all five entries, i.e. the iterations are only shown if there's more than zero of them. If less than 4 entries are provided, the unfilled ones are set to be the same as the last given one. 
                     </li>
                 </ul>
             </div>
@@ -2520,20 +2520,12 @@
                     </ul>
                     <li>
                         iteratedFGH3log(value, base) : Decimal ---
-                        One of the inverses of iteratedFGH2: given iteratedFGH3(base, x) = value and knowing what the base and value are, finds x.
+                        One of the inverses of iteratedFGH3: given iteratedFGH3(base, x) = value and knowing what the base and value are, finds x.
                         Similar to penta_log.
                     </li>
                     <ul>
                         <li>value ( Decimal ) The answer given by iteratedFGH3 when called on the result this inverse outputs.</li>
                         <li>base ( Decimal ) The base that iteratedFGH3 is called on with the result this inverse outputs to return the given value.</li>
-                    </ul>
-                    <li>FGH4(value) : Decimal --- f4(n) in the Fast-Growing Hierarchy. f4(n) = f3(f3(f3(f3...(n)))) with n f3's. Grows pentationally.</li>
-                    <ul>
-                        <li>value ( Decimal ) The input to f4.</li>
-                    </ul>
-                    <li>FGH4inverse(value) : Decimal --- The inverse of f4(n) in the Fast-Growing Hierarchy. Similar to penta-logarithm.</li>
-                    <ul>
-                        <li>value ( Decimal ) The value that FGH4 will return when given the result of this function.</li>
                     </ul>
                 </ul>
             </div>

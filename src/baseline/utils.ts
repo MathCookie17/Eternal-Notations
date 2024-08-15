@@ -2451,53 +2451,53 @@ export function iteratedFGH3log(value : DecimalSource, base : DecimalSource) : D
     return Decimal.fromNumber(result);
 }
 
-/**
- * f4(n) in the Fast-Growing Hierarchy. f4(n) = f3(f3(f3(f3...(n)))) with n f3's. Grows pentationally.
- * @param value ( Decimal ) The input to f4.
- */
-export function FGH4(value : DecimalSource) : Decimal {
-    let valueD = toDecimal(value);
-    if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
-    if (valueD.eq(Infinity)) return new Decimal(Infinity);
-    return iteratedFGH3(valueD, valueD.toNumber());
-}
+// /**
+//  * f4(n) in the Fast-Growing Hierarchy. f4(n) = f3(f3(f3(f3...(n)))) with n f3's. Grows pentationally.
+//  * @param value ( Decimal ) The input to f4.
+//  */
+// export function FGH4(value : DecimalSource) : Decimal {
+//     let valueD = toDecimal(value);
+//     if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
+//     if (valueD.eq(Infinity)) return new Decimal(Infinity);
+//     return iteratedFGH3(valueD, valueD.toNumber());
+// }
 
-/**
- * The inverse of f4(n) in the Fast-Growing Hierarchy. Similar to penta-logarithm.
- * @param value ( Decimal ) The value that FGH4 will output when given the result of this function.
- */
-export function FGH4inverse(value : DecimalSource) : Decimal {
-    let valueD = toDecimal(value);
-    if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
-    if (valueD.eq(Infinity)) return new Decimal(Infinity);
-    // return Decimal.increasingInverse((value : Decimal) => FGH4(value))(valueD);
-    let has_changed_directions_once = false;
-    let previously_rose = false;
-    let result = 0;
-    let step_size = 0.001;
-    for (var i = 1; i < 100; ++i)
-    {
-      let new_decimal = FGH4(result);
-      let currently_rose = new_decimal.gt(valueD);
-      if (i > 1)
-      {
-        if (previously_rose != currently_rose)
-        {
-          has_changed_directions_once = true;
-        }
-      }
-      previously_rose = currently_rose;
-      if (has_changed_directions_once)
-      {
-        step_size /= 2;
-      }
-      else
-      {
-        step_size *= 2;
-      }
-      step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
-      result += step_size;
-      if (result + step_size == result) { break; }
-    }
-    return Decimal.fromNumber(result);
-}
+// /**
+//  * The inverse of f4(n) in the Fast-Growing Hierarchy. Similar to penta-logarithm.
+//  * @param value ( Decimal ) The value that FGH4 will output when given the result of this function.
+//  */
+// export function FGH4inverse(value : DecimalSource) : Decimal {
+//     let valueD = toDecimal(value);
+//     if (valueD.lt(0) || valueD.isNan()) return new Decimal(NaN);
+//     if (valueD.eq(Infinity)) return new Decimal(Infinity);
+//     // return Decimal.increasingInverse((value : Decimal) => FGH4(value))(valueD);
+//     let has_changed_directions_once = false;
+//     let previously_rose = false;
+//     let result = 0;
+//     let step_size = 0.001;
+//     for (var i = 1; i < 100; ++i)
+//     {
+//       let new_decimal = FGH4(result);
+//       let currently_rose = new_decimal.gt(valueD);
+//       if (i > 1)
+//       {
+//         if (previously_rose != currently_rose)
+//         {
+//           has_changed_directions_once = true;
+//         }
+//       }
+//       previously_rose = currently_rose;
+//       if (has_changed_directions_once)
+//       {
+//         step_size /= 2;
+//       }
+//       else
+//       {
+//         step_size *= 2;
+//       }
+//       step_size = Math.abs(step_size) * (currently_rose ? -1 : 1);
+//       result += step_size;
+//       if (result + step_size == result) { break; }
+//     }
+//     return Decimal.fromNumber(result);
+// }
