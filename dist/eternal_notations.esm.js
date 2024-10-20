@@ -4112,6 +4112,8 @@ class ScientificNotation extends Notation {
             }
             let added_es = multslog(value, this._base, this._expMult).sub(multslog(this._maxnum, this._base, this._expMult)).floor().toNumber();
             value = (added_es > 9e15) ? this._maxnum : iteratedmultlog(value, this._base, added_es, this._expMult);
+            if (value.isNan())
+                value = this._maxnum; // Quick fix
             while (value.gte(Decimal.pow(this._base, this._maxnum))) {
                 added_es += 1;
                 value = iteratedmultlog(value, this._base, 1, this._expMult);
@@ -7702,6 +7704,8 @@ class FactorialScientificNotation extends Notation {
             }
             let added_es = factorial_slog(value, this._maxnum).floor().toNumber();
             value = (added_es > 9e15) ? this._maxnum : inverse_factorial(value, added_es);
+            if (value.isNan())
+                value = this._maxnum; // Quick fix
             while (value.gte(this._maxnum.factorial())) {
                 added_es += 1;
                 value = inverse_factorial(value, 1);
@@ -12601,6 +12605,8 @@ class WeakHyperscientificNotation extends Notation {
             }
             let added_es = Decimal.slog(value, this._base, true).sub(Decimal.slog(this._maxnum, this._base, true).plus(3)).div(2).floor().toNumber();
             value = (added_es > 9e15) ? this._maxnum : Decimal.iteratedlog(value, this._base, added_es * 2, true);
+            if (value.isNan())
+                value = this._maxnum; // Quick fix
             while (value.gte(weak_tetrate(this._base, this._maxnum))) {
                 added_es += 1;
                 value = weak_slog(value, this._base);

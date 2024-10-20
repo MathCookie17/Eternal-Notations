@@ -99,6 +99,7 @@ export class FactorialScientificNotation extends Notation {
         }
         let added_es = factorial_slog(value, this._maxnum).floor().toNumber();
         value = (added_es > 9e15) ? this._maxnum : inverse_factorial(value, added_es);
+        if (value.isNan()) value = this._maxnum; // Quick fix
         while (value.gte(this._maxnum.factorial())) {
           added_es += 1;
           value = inverse_factorial(value, 1);

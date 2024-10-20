@@ -113,6 +113,7 @@ export class WeakHyperscientificNotation extends Notation {
         }
         let added_es = Decimal.slog(value, this._base, true).sub(Decimal.slog(this._maxnum, this._base, true).plus(3)).div(2).floor().toNumber();
         value = (added_es > 9e15) ? this._maxnum : Decimal.iteratedlog(value, this._base, added_es * 2, true);
+        if (value.isNan()) value = this._maxnum; // Quick fix
         while (value.gte(weak_tetrate(this._base, this._maxnum))) {
           added_es += 1;
           value = weak_slog(value, this._base);
