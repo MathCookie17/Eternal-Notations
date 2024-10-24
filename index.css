@@ -114,3 +114,24 @@
     display: flex;
     justify-content: center;
 }
+
+#homepage_return {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    font-size: 25px;
+    background-color: #00aeff;
+    color: #8df0ff;
+    border: solid #8df0ff 5px;
+    max-width: 400px;
+    min-height: 45px;
+    font-weight: bold;
+    text-decoration: none;
+}
+.hover_grow {
+    transition: scale 0.5s;
+}
+.hover_grow:hover {
+    scale: 1.05
+}
