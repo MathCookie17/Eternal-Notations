@@ -4881,6 +4881,7 @@
                   value = value.iteratedlog(limBase, fronts.toNumber(), true);
                   if (value.gte(limit)) { // Fights imprecision
                       value = value.log(limBase);
+                      fronts = fronts.plus(1);
                   }
                   if (this._dialect == 2) {
                       if (negExp)
