@@ -490,18 +490,18 @@ HTMLPresetAssembly.CookieFonsterExtendedSI = recipBelow(new MultibaseMultiLogari
         ), value => true])
 ), Decimal.recip("1000^^3")).setName("Cookie Fonster's Extended SI");
 
-PresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0").setName("Fraction (Loose)");
-PresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0").setName("Fraction (Medium)");
-PresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0").setName("Fraction (Precise)");
-PresetAssembly.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Loose)");
-PresetAssembly.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Medium)");
-PresetAssembly.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Precise)");
-HTMLPresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0").setName("Fraction (Loose)");
-HTMLPresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0").setName("Fraction (Medium)");
-HTMLPresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0").setName("Fraction (Precise)");
-HTMLPresetAssembly.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Loose)");
-HTMLPresetAssembly.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Medium)");
-HTMLPresetAssembly.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Precise)");
+PresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Loose)");
+PresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Medium)");
+PresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Precise)");
+PresetAssembly.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Loose)");
+PresetAssembly.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Medium)");
+PresetAssembly.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Precise)");
+HTMLPresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Loose)");
+HTMLPresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Medium)");
+HTMLPresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Precise)");
+HTMLPresetAssembly.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Loose)");
+HTMLPresetAssembly.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Medium)");
+HTMLPresetAssembly.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Precise)");
 
 PresetAssembly.LetterDigits = zeroString(new LetterDigitsNotation(...[,,,,,,,,,,,,,,], 1/18279),"_").setName("Letter Digits");
 PresetAssembly.AlphabetDigits = new LetterDigitsNotation(

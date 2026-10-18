@@ -47,7 +47,7 @@ export class StandardNotation extends Notation {
             layer1: [["", "U", "D", "T", "Qa", "Qt", "Sx", "Sp", "O", "N"], 
                      ["", "Dc", "Vg", "Tg", "Qd", "Qi", "Se", "St", "Og", "Nn"], 
                      ["", "Ce", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]], 
-            early2: ["", "MI", "MC", "NA", "PC", "FM", "AT", "ZP"]
+            early2: ["", "MI", "MC", "NA", "PC", "FM", "AT", "ZP", "YC"]
         };
       }
       else if (dialect == 2) this.prefixes = {
@@ -83,7 +83,7 @@ export class StandardNotation extends Notation {
                   "NeK", "NkeN", "NcoD", "NctR", "NctE", "NkpT", "NkeX", "NczE", "NkyO", "NcxN"],
                   ["", "Ho", "Do", "To", "Tr", "Po", "Ex", "Zo", "Yo", "No"]], // layer3[0] is the layer3 entries below 100, layer3[1] is the layer3 entries below 100 when they come after a multiple of 100, and layer3[2] is the multiples of 100
         prefixearly3: ["", "", "D", "T", "Tr", "P", "Ex", "Z", "Y", "N", "DK", "HN", "DoK", "TrD", "TeD", "PeD", "ExD", "ZeD", "YoD", "NeD"],
-        early4: ["", "KaL", "MeJ", "GiJ", "AsT", "LuN", "FrM", "JoV", "SoL", "BeT", "GaX", "GlO", "SuP", "VrS", "MlT"]
+        early4: ["", "KaL", "MeJ", "GiJ", "AsT", "LuN", "FrM", "JoV", "SoL", "BeT", "GaX", "GlO", "SuP", "VrS", "MlT", "MXSPeD"]
       };
       else this.prefixes = {
         // MathCookie's Standard
@@ -91,16 +91,16 @@ export class StandardNotation extends Notation {
         layer1: [["", "U", "D", "T", "Qa", "Qi", "Sx", "Sp", "O", "N"], 
                  ["", "Dc", "Vg", "Tg", "Qg", "Qq", "Sg", "St", "Og", "Ng"], 
                  ["", "Cn", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]], // Ones, tens, and hundreds prefixes on layer 1
-        early2: ["", "Ml", "Mc", "Na", "Pc", "Fm", "At", "Zp", "Yc", "Xn", "Vc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], // First 19 on layer 2
-        layer2: [["", "Me", "Du", "To", "Tt", "Pn", "Hx", "Hp", "Ot", "En", "Vc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], 
-                 ["", "Vc", "Ic", "Ta", "Te", "Pe", "He", "Ht", "Oa", "Ea"],
+        early2: ["", "Ml", "Mc", "Na", "Pc", "Fm", "At", "Zp", "Yc", "Rt", "Qc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], // First 19 on layer 2
+        layer2: [["", "Me", "Du", "To", "Tt", "Pn", "Hx", "Hp", "Ot", "En", "Qc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], 
+                 ["", "Qc", "Ic", "Ta", "Te", "Pe", "He", "Ht", "Oa", "Ea"],
                  ["", "Hc", "Dh", "Th", "Tth", "Ph", "Hxh", "Hph", "Oh", "Eh"]], // Ones, tens, and hundreds on layer 2. 11 through 19 use their ones entry, but higher numbers go back to ones + tens
-        early3: ["", "Ki", "Mg", "Gg", "Tr", "Pt", "Ex", "Zt", "Yt", "Xe", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // First 19 on layer 3
-        layer3: [["", "Hd", "Di", "Ti", "Tr", "Pt", "Ex", "Zt", "Yt", "Xe", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"],
+        early3: ["", "Ki", "Mg", "Gg", "Tr", "Pt", "Ex", "Zt", "Yt", "Rn", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // First 19 on layer 3
+        layer3: [["", "Hd", "Di", "Ti", "Tr", "Pt", "Ex", "Zt", "Yt", "Rn", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"],
                  ["", "Da", "Ik", "Tak", "Tek", "Pk", "Ek", "Zk", "Yk", "Nk"],
                  ["", "Ho", "Bo", "Tro", "Tot", "Po", "Eo", "Zo", "Yo", "Nt"]], // Ones, tens, and hundreds on layer 3. Behaves the same as layer 2
         prefixearly3: ["", "", "Dl", "Ta", "Tl", "Pl", "El", "Zl", "Yl", "Nl", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // When layer 3 entries below 20 are used as a prefix on a layer 4 entry rather than standing on their own, these are used. The usual layer3 entries are used above 20.
-        early4: ["", "Ka", "Mj", "Gj", "As", "Lu", "Fr", "Jv", "Sl", "Bt", "Gx", "Go", "Sp", "Vs", "Mu"] // Layer 4; the illions run out after Mu
+        early4: ["", "Ka", "Mj", "Gj", "As", "Lu", "Fr", "Jv", "Sl", "Bt", "Gx", "Go", "Sp", "Vs", "Mu", "IlPd"] // Layer 4; the illions run out after Mu, IlPd added as an emergency imprecision fighter
       };
     }
 
@@ -151,6 +151,9 @@ export class StandardNotation extends Notation {
             if (this._dialect == 2) limBase = Decimal.dTen;
             let fronts = value.slog(limBase).sub(limit.slog(limBase)).plus(1).floor();
             value = value.iteratedlog(limBase, fronts.toNumber(), true);
+            if (value.gte(limit)) { // Fights imprecision
+                value = value.log(limBase);
+            }
             if (this._dialect == 2) {
                 if (negExp) result += "/";
                 if (fronts.eq(1)) result += "MXS-(";
@@ -379,7 +382,7 @@ export class StandardNotation extends Notation {
                 layer1: [["", "U", "D", "T", "Qa", "Qt", "Sx", "Sp", "O", "N"], 
                          ["", "Dc", "Vg", "Tg", "Qd", "Qi", "Se", "St", "Og", "Nn"], 
                          ["", "Ce", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]], 
-                early2: ["", "MI", "MC", "NA", "PC", "FM", "AT", "ZP"]
+                early2: ["", "MI", "MC", "NA", "PC", "FM", "AT", "ZP","YC"]
             };
           }
           else if (dialect == 2) this.prefixes = {
@@ -415,24 +418,24 @@ export class StandardNotation extends Notation {
                       "NeK", "NkeN", "NcoD", "NctR", "NctE", "NkpT", "NkeX", "NczE", "NkyO", "NcxN"],
                       ["", "Ho", "Do", "To", "Tr", "Po", "Ex", "Zo", "Yo", "No"]], // layer3[0] is the layer3 entries below 100, layer3[1] is the layer3 entries below 100 when they come after a multiple of 100, and layer3[2] is the multiples of 100
             prefixearly3: ["", "", "D", "T", "Tr", "P", "Ex", "Z", "Y", "N", "DK", "HN", "DoK", "TrD", "TeD", "PeD", "ExD", "ZeD", "YoD", "NeD"],
-            early4: ["", "KaL", "MeJ", "GiJ", "AsT", "LuN", "FrM", "JoV", "SoL", "BeT", "GaX", "GlO", "SuP", "VrS", "MlT"]
+            early4: ["", "KaL", "MeJ", "GiJ", "AsT", "LuN", "FrM", "JoV", "SoL", "BeT", "GaX", "GlO", "SuP", "VrS", "MlT", "MXSPeD"]
           };
           else this.prefixes = {
             // MathCookie's Standard
             early1: ["k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"], // Below a decillion
             layer1: [["", "U", "D", "T", "Qa", "Qi", "Sx", "Sp", "O", "N"], 
-                     ["", "Dc", "Vg", "Tg", "Qg", "Qq", "Sg", "St", "Og", "Ng"], 
-                     ["", "Cn", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]], // Ones, tens, and hundreds prefixes on layer 1
-            early2: ["", "Ml", "Mc", "Na", "Pc", "Fm", "At", "Zp", "Yc", "Xn", "Vc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], // First 19 on layer 2
-            layer2: [["", "Me", "Du", "To", "Tt", "Pn", "Hx", "Hp", "Ot", "En", "Vc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], 
-                     ["", "Qc", "Ic", "Ta", "Te", "Pe", "He", "Ht", "Oa", "Ea"],
-                     ["", "Hc", "Dh", "Th", "Tth", "Ph", "Hxh", "Hph", "Oh", "Eh"]], // Ones, tens, and hundreds on layer 2. 11 through 19 use their ones entry, but higher numbers go back to ones + tens
-            early3: ["", "Ki", "Mg", "Gg", "Tr", "Pt", "Ex", "Zt", "Yt", "Xe", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // First 19 on layer 3
-            layer3: [["", "Hd", "Di", "Ti", "Tr", "Pt", "Ex", "Zt", "Yt", "Xe", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"],
-                     ["", "Da", "Ik", "Tak", "Tek", "Pk", "Ek", "Zk", "Yk", "Nk"],
-                     ["", "Ho", "Bo", "Tro", "Tot", "Po", "Eo", "Zo", "Yo", "Nt"]], // Ones, tens, and hundreds on layer 3. Behaves the same as layer 2
-            prefixearly3: ["", "", "Dl", "Ta", "Tl", "Pl", "El", "Zl", "Yl", "Nl", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // When layer 3 entries below 20 are used as a prefix on a layer 4 entry rather than standing on their own, these are used. The usual layer3 entries are used above 20.
-            early4: ["", "Ka", "Mj", "Gj", "As", "Lu", "Fr", "Jv", "Sl", "Bt", "Gx", "Go", "Sp", "Vs", "Mu"] // Layer 4; the illions run out after Mu
+                    ["", "Dc", "Vg", "Tg", "Qg", "Qq", "Sg", "St", "Og", "Ng"], 
+                    ["", "Cn", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]], // Ones, tens, and hundreds prefixes on layer 1
+            early2: ["", "Ml", "Mc", "Na", "Pc", "Fm", "At", "Zp", "Yc", "Rt", "Qc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], // First 19 on layer 2
+            layer2: [["", "Me", "Du", "To", "Tt", "Pn", "Hx", "Hp", "Ot", "En", "Qc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], 
+                    ["", "Qc", "Ic", "Ta", "Te", "Pe", "He", "Ht", "Oa", "Ea"],
+                    ["", "Hc", "Dh", "Th", "Tth", "Ph", "Hxh", "Hph", "Oh", "Eh"]], // Ones, tens, and hundreds on layer 2. 11 through 19 use their ones entry, but higher numbers go back to ones + tens
+            early3: ["", "Ki", "Mg", "Gg", "Tr", "Pt", "Ex", "Zt", "Yt", "Rn", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // First 19 on layer 3
+            layer3: [["", "Hd", "Di", "Ti", "Tr", "Pt", "Ex", "Zt", "Yt", "Rn", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"],
+                    ["", "Da", "Ik", "Tak", "Tek", "Pk", "Ek", "Zk", "Yk", "Nk"],
+                    ["", "Ho", "Bo", "Tro", "Tot", "Po", "Eo", "Zo", "Yo", "Nt"]], // Ones, tens, and hundreds on layer 3. Behaves the same as layer 2
+            prefixearly3: ["", "", "Dl", "Ta", "Tl", "Pl", "El", "Zl", "Yl", "Nl", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // When layer 3 entries below 20 are used as a prefix on a layer 4 entry rather than standing on their own, these are used. The usual layer3 entries are used above 20.
+            early4: ["", "Ka", "Mj", "Gj", "As", "Lu", "Fr", "Jv", "Sl", "Bt", "Gx", "Go", "Sp", "Vs", "Mu", "IlPd"] // Layer 4; the illions run out after Mu, IlPd added as an emergency imprecision fighter
           };
     }
 

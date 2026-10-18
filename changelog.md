@@ -2,6 +2,8 @@
 
 ### v1.1.x
 
+v1.1.3 (October 18, 2026): Fixed the following bugs: Standard crashing right at the transition to the next IL level, Grid having an extra row immediately before the second plane begins, and Psi-Dash appearing to be a whole layer off very close to a front number transition. Also, changed a few of the abbreviations in MathCookie's Standard to account for Jonathan Bowers updating the -illion names to account for the SI prefixes added in 2022, and the Fraction presets now notate NaN as 0/0.
+
 v1.1.2 (July 27, 2026): Changed the BinarySI presets to include robi and quebi. Fixed a couple bugs with Polynomial notation, and changed the default
 isInfinite function so that numbers so close to infinite that Decimal.slog returns Infinity on them are treated as Infinity.
 

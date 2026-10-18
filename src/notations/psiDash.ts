@@ -93,9 +93,11 @@ export class PsiDashNotation extends Notation {
             result += innerNotation.format(currentValue);
             return result;
         }
-        while ((E > 0 || F > 0 || G > 0 || H > 0) && dashArray.length < maxEntries - 1 && currentValue.lte(Decimal.pow(baseNum, this._maxPrecision)) && currentValue.lte(Number.MAX_VALUE)) {
-            let sciPair = scientifify(currentValue, baseNum, baseNum**(1 - this._maxPrecision));
-            dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1])));
+        while ((E > 0 || F > 0 || G > 0 || H > 0) && dashArray.length < maxEntries - 1 && currentValue.lte(1e16) && currentValue.lte(Number.MAX_VALUE)) {
+            let sciPair = scientifify(currentValue, baseNum);
+            dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1]).round()));
+            currentValue = Decimal.mul(sciPair[0], Decimal.pow(baseNum, sciPair[1]));
+            console.log(E, F, G, H, currentValue, sciPair.concat([]), dashArray.concat([]));
             if (E > 0) {
                 E--;
                 currentValue = Decimal.pow(baseNum, currentValue);
@@ -116,9 +118,15 @@ export class PsiDashNotation extends Notation {
                 currentValue = Decimal.pow(baseNum, currentValue.mod(1));
             }
         }
-        let sciPair = scientifify(currentValue, baseNum, baseNum**(1 - this._maxPrecision));
+        let sciPair = scientifify(currentValue, baseNum);
         dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1])));
-        while (dashArray.length > 1 && scientifify(dashArray[dashArray.length - 1], baseNum, baseNum**(-this._maxPrecision + 1))[0].eq(1)) dashArray.pop();
+        console.log(dashArray.concat([]));
+        let removingEndOnes = true;
+        while (removingEndOnes && dashArray.length > 1) {
+            let currentSci = scientifify(dashArray[dashArray.length - 1], baseNum, baseNum**(-this._maxPrecision + 1));
+            if (currentSci[0].eq(1) && dashArray[dashArray.length - 1].gte(currentSci[0].mul(Decimal.pow(baseNum, currentSci[1])))) dashArray.pop();
+            else removingEndOnes = false;
+        }
         let innerNotation = new AlternateBaseNotation(this._base, 0, this._maxPrecision - 1, this._maxPrecision - 1, -1, Decimal.dInf, undefined, undefined, undefined, undefined, -Infinity, undefined, undefined, undefined, "", undefined, undefined, undefined, undefined, this._maxPrecision);
         for (let d = 0; d < dashArray.length; d++) {
             result += innerNotation.format(dashArray[d]);

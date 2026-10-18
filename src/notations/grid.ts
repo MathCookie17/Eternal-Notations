@@ -147,6 +147,11 @@ export class GridNotation extends Notation {
                 plane.push([pair[1]]);
             }
             while (plane.length < this.minimumSizes[1]) plane.push([Decimal.dZero]);
+            if (plane.length > this._height) { // Combats imprecision
+                for (let r = 0; r < plane.length; r++) {
+                    plane[r] = [rowLimit.sub(1)];
+                }
+            }
             for (let r = 0; r < plane.length; r++) {
                 let row = plane[r];
                 while (row[row.length - 1].gte(digitLimit)) {
@@ -155,6 +160,11 @@ export class GridNotation extends Notation {
                     row.push(pair[1]);
                 }
                 while (row.length < this.minimumSizes[0]) row.push(Decimal.dZero);
+                if (row.length > this._width) {
+                    for (let d = 0; d < row.length; d++) { // Combats imprecision
+                        row[d] = digitLimit.sub(1);
+                    }
+                }
             }
         }
         let result = this.opening;

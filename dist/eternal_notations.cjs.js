@@ -4769,7 +4769,7 @@ class StandardNotation extends Notation {
                 layer1: [["", "U", "D", "T", "Qa", "Qt", "Sx", "Sp", "O", "N"],
                     ["", "Dc", "Vg", "Tg", "Qd", "Qi", "Se", "St", "Og", "Nn"],
                     ["", "Ce", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]],
-                early2: ["", "MI", "MC", "NA", "PC", "FM", "AT", "ZP"]
+                early2: ["", "MI", "MC", "NA", "PC", "FM", "AT", "ZP", "YC"]
             };
         }
         else if (dialect == 2)
@@ -4806,7 +4806,7 @@ class StandardNotation extends Notation {
                         "NeK", "NkeN", "NcoD", "NctR", "NctE", "NkpT", "NkeX", "NczE", "NkyO", "NcxN"],
                     ["", "Ho", "Do", "To", "Tr", "Po", "Ex", "Zo", "Yo", "No"]], // layer3[0] is the layer3 entries below 100, layer3[1] is the layer3 entries below 100 when they come after a multiple of 100, and layer3[2] is the multiples of 100
                 prefixearly3: ["", "", "D", "T", "Tr", "P", "Ex", "Z", "Y", "N", "DK", "HN", "DoK", "TrD", "TeD", "PeD", "ExD", "ZeD", "YoD", "NeD"],
-                early4: ["", "KaL", "MeJ", "GiJ", "AsT", "LuN", "FrM", "JoV", "SoL", "BeT", "GaX", "GlO", "SuP", "VrS", "MlT"]
+                early4: ["", "KaL", "MeJ", "GiJ", "AsT", "LuN", "FrM", "JoV", "SoL", "BeT", "GaX", "GlO", "SuP", "VrS", "MlT", "MXSPeD"]
             };
         else
             this.prefixes = {
@@ -4815,16 +4815,16 @@ class StandardNotation extends Notation {
                 layer1: [["", "U", "D", "T", "Qa", "Qi", "Sx", "Sp", "O", "N"],
                     ["", "Dc", "Vg", "Tg", "Qg", "Qq", "Sg", "St", "Og", "Ng"],
                     ["", "Cn", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]], // Ones, tens, and hundreds prefixes on layer 1
-                early2: ["", "Ml", "Mc", "Na", "Pc", "Fm", "At", "Zp", "Yc", "Xn", "Vc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], // First 19 on layer 2
-                layer2: [["", "Me", "Du", "To", "Tt", "Pn", "Hx", "Hp", "Ot", "En", "Vc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"],
-                    ["", "Vc", "Ic", "Ta", "Te", "Pe", "He", "Ht", "Oa", "Ea"],
+                early2: ["", "Ml", "Mc", "Na", "Pc", "Fm", "At", "Zp", "Yc", "Rt", "Qc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], // First 19 on layer 2
+                layer2: [["", "Me", "Du", "To", "Tt", "Pn", "Hx", "Hp", "Ot", "En", "Qc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"],
+                    ["", "Qc", "Ic", "Ta", "Te", "Pe", "He", "Ht", "Oa", "Ea"],
                     ["", "Hc", "Dh", "Th", "Tth", "Ph", "Hxh", "Hph", "Oh", "Eh"]], // Ones, tens, and hundreds on layer 2. 11 through 19 use their ones entry, but higher numbers go back to ones + tens
-                early3: ["", "Ki", "Mg", "Gg", "Tr", "Pt", "Ex", "Zt", "Yt", "Xe", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // First 19 on layer 3
-                layer3: [["", "Hd", "Di", "Ti", "Tr", "Pt", "Ex", "Zt", "Yt", "Xe", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"],
+                early3: ["", "Ki", "Mg", "Gg", "Tr", "Pt", "Ex", "Zt", "Yt", "Rn", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // First 19 on layer 3
+                layer3: [["", "Hd", "Di", "Ti", "Tr", "Pt", "Ex", "Zt", "Yt", "Rn", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"],
                     ["", "Da", "Ik", "Tak", "Tek", "Pk", "Ek", "Zk", "Yk", "Nk"],
                     ["", "Ho", "Bo", "Tro", "Tot", "Po", "Eo", "Zo", "Yo", "Nt"]], // Ones, tens, and hundreds on layer 3. Behaves the same as layer 2
                 prefixearly3: ["", "", "Dl", "Ta", "Tl", "Pl", "El", "Zl", "Yl", "Nl", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // When layer 3 entries below 20 are used as a prefix on a layer 4 entry rather than standing on their own, these are used. The usual layer3 entries are used above 20.
-                early4: ["", "Ka", "Mj", "Gj", "As", "Lu", "Fr", "Jv", "Sl", "Bt", "Gx", "Go", "Sp", "Vs", "Mu"] // Layer 4; the illions run out after Mu
+                early4: ["", "Ka", "Mj", "Gj", "As", "Lu", "Fr", "Jv", "Sl", "Bt", "Gx", "Go", "Sp", "Vs", "Mu", "IlPd"] // Layer 4; the illions run out after Mu, IlPd added as an emergency imprecision fighter
             };
     }
     formatDecimal(value) {
@@ -4877,6 +4877,9 @@ class StandardNotation extends Notation {
                     limBase = Decimal.dTen;
                 let fronts = value.slog(limBase).sub(limit.slog(limBase)).plus(1).floor();
                 value = value.iteratedlog(limBase, fronts.toNumber(), true);
+                if (value.gte(limit)) { // Fights imprecision
+                    value = value.log(limBase);
+                }
                 if (this._dialect == 2) {
                     if (negExp)
                         result += "/";
@@ -5144,7 +5147,7 @@ class StandardNotation extends Notation {
                 layer1: [["", "U", "D", "T", "Qa", "Qt", "Sx", "Sp", "O", "N"],
                     ["", "Dc", "Vg", "Tg", "Qd", "Qi", "Se", "St", "Og", "Nn"],
                     ["", "Ce", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]],
-                early2: ["", "MI", "MC", "NA", "PC", "FM", "AT", "ZP"]
+                early2: ["", "MI", "MC", "NA", "PC", "FM", "AT", "ZP", "YC"]
             };
         }
         else if (dialect == 2)
@@ -5181,7 +5184,7 @@ class StandardNotation extends Notation {
                         "NeK", "NkeN", "NcoD", "NctR", "NctE", "NkpT", "NkeX", "NczE", "NkyO", "NcxN"],
                     ["", "Ho", "Do", "To", "Tr", "Po", "Ex", "Zo", "Yo", "No"]], // layer3[0] is the layer3 entries below 100, layer3[1] is the layer3 entries below 100 when they come after a multiple of 100, and layer3[2] is the multiples of 100
                 prefixearly3: ["", "", "D", "T", "Tr", "P", "Ex", "Z", "Y", "N", "DK", "HN", "DoK", "TrD", "TeD", "PeD", "ExD", "ZeD", "YoD", "NeD"],
-                early4: ["", "KaL", "MeJ", "GiJ", "AsT", "LuN", "FrM", "JoV", "SoL", "BeT", "GaX", "GlO", "SuP", "VrS", "MlT"]
+                early4: ["", "KaL", "MeJ", "GiJ", "AsT", "LuN", "FrM", "JoV", "SoL", "BeT", "GaX", "GlO", "SuP", "VrS", "MlT", "MXSPeD"]
             };
         else
             this.prefixes = {
@@ -5190,16 +5193,16 @@ class StandardNotation extends Notation {
                 layer1: [["", "U", "D", "T", "Qa", "Qi", "Sx", "Sp", "O", "N"],
                     ["", "Dc", "Vg", "Tg", "Qg", "Qq", "Sg", "St", "Og", "Ng"],
                     ["", "Cn", "Dn", "Tc", "Qe", "Qu", "Sc", "Si", "Oe", "Ne"]], // Ones, tens, and hundreds prefixes on layer 1
-                early2: ["", "Ml", "Mc", "Na", "Pc", "Fm", "At", "Zp", "Yc", "Xn", "Vc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], // First 19 on layer 2
-                layer2: [["", "Me", "Du", "To", "Tt", "Pn", "Hx", "Hp", "Ot", "En", "Vc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"],
+                early2: ["", "Ml", "Mc", "Na", "Pc", "Fm", "At", "Zp", "Yc", "Rt", "Qc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"], // First 19 on layer 2
+                layer2: [["", "Me", "Du", "To", "Tt", "Pn", "Hx", "Hp", "Ot", "En", "Qc", "Mec", "Duc", "Tec", "Ttc", "Pnc", "Hxc", "Hpc", "Otc", "Enc"],
                     ["", "Qc", "Ic", "Ta", "Te", "Pe", "He", "Ht", "Oa", "Ea"],
                     ["", "Hc", "Dh", "Th", "Tth", "Ph", "Hxh", "Hph", "Oh", "Eh"]], // Ones, tens, and hundreds on layer 2. 11 through 19 use their ones entry, but higher numbers go back to ones + tens
-                early3: ["", "Ki", "Mg", "Gg", "Tr", "Pt", "Ex", "Zt", "Yt", "Xe", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // First 19 on layer 3
-                layer3: [["", "Hd", "Di", "Ti", "Tr", "Pt", "Ex", "Zt", "Yt", "Xe", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"],
+                early3: ["", "Ki", "Mg", "Gg", "Tr", "Pt", "Ex", "Zt", "Yt", "Rn", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // First 19 on layer 3
+                layer3: [["", "Hd", "Di", "Ti", "Tr", "Pt", "Ex", "Zt", "Yt", "Rn", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"],
                     ["", "Da", "Ik", "Tak", "Tek", "Pk", "Ek", "Zk", "Yk", "Nk"],
                     ["", "Ho", "Bo", "Tro", "Tot", "Po", "Eo", "Zo", "Yo", "Nt"]], // Ones, tens, and hundreds on layer 3. Behaves the same as layer 2
-                prefixearly3: ["", "", "Dl", "Ta", "Tl", "Pl", "El", "Zl", "Yl", "Nl", "Qt", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // When layer 3 entries below 20 are used as a prefix on a layer 4 entry rather than standing on their own, these are used. The usual layer3 entries are used above 20.
-                early4: ["", "Ka", "Mj", "Gj", "As", "Lu", "Fr", "Jv", "Sl", "Bt", "Gx", "Go", "Sp", "Vs", "Mu"] // Layer 4; the illions run out after Mu
+                prefixearly3: ["", "", "Dl", "Ta", "Tl", "Pl", "El", "Zl", "Yl", "Nl", "Da", "Hd", "Dok", "Tad", "Ted", "Pd", "Ed", "Zd", "Yd", "Nd"], // When layer 3 entries below 20 are used as a prefix on a layer 4 entry rather than standing on their own, these are used. The usual layer3 entries are used above 20.
+                early4: ["", "Ka", "Mj", "Gj", "As", "Lu", "Fr", "Jv", "Sl", "Bt", "Gx", "Go", "Sp", "Vs", "Mu", "IlPd"] // Layer 4; the illions run out after Mu, IlPd added as an emergency imprecision fighter
             };
     }
     get entriesLimit() {
@@ -9881,9 +9884,11 @@ class PsiDashNotation extends Notation {
             result += innerNotation.format(currentValue);
             return result;
         }
-        while ((E > 0 || F > 0 || G > 0 || H > 0) && dashArray.length < maxEntries - 1 && currentValue.lte(Decimal.pow(baseNum, this._maxPrecision)) && currentValue.lte(Number.MAX_VALUE)) {
-            let sciPair = scientifify(currentValue, baseNum, baseNum ** (1 - this._maxPrecision));
-            dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1])));
+        while ((E > 0 || F > 0 || G > 0 || H > 0) && dashArray.length < maxEntries - 1 && currentValue.lte(1e16) && currentValue.lte(Number.MAX_VALUE)) {
+            let sciPair = scientifify(currentValue, baseNum);
+            dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1]).round()));
+            currentValue = Decimal.mul(sciPair[0], Decimal.pow(baseNum, sciPair[1]));
+            console.log(E, F, G, H, currentValue, sciPair.concat([]), dashArray.concat([]));
             if (E > 0) {
                 E--;
                 currentValue = Decimal.pow(baseNum, currentValue);
@@ -9904,10 +9909,17 @@ class PsiDashNotation extends Notation {
                 currentValue = Decimal.pow(baseNum, currentValue.mod(1));
             }
         }
-        let sciPair = scientifify(currentValue, baseNum, baseNum ** (1 - this._maxPrecision));
+        let sciPair = scientifify(currentValue, baseNum);
         dashArray.push(sciPair[0].mul(baseNumD.pow(sciPair[1]).round()).floor().div(baseNumD.pow(sciPair[1])));
-        while (dashArray.length > 1 && scientifify(dashArray[dashArray.length - 1], baseNum, baseNum ** (-this._maxPrecision + 1))[0].eq(1))
-            dashArray.pop();
+        console.log(dashArray.concat([]));
+        let removingEndOnes = true;
+        while (removingEndOnes && dashArray.length > 1) {
+            let currentSci = scientifify(dashArray[dashArray.length - 1], baseNum, baseNum ** (-this._maxPrecision + 1));
+            if (currentSci[0].eq(1) && dashArray[dashArray.length - 1].gte(currentSci[0].mul(Decimal.pow(baseNum, currentSci[1]))))
+                dashArray.pop();
+            else
+                removingEndOnes = false;
+        }
         let innerNotation = new AlternateBaseNotation(this._base, 0, this._maxPrecision - 1, this._maxPrecision - 1, -1, Decimal.dInf, undefined, undefined, undefined, undefined, -Infinity, undefined, undefined, undefined, "", undefined, undefined, undefined, undefined, this._maxPrecision);
         for (let d = 0; d < dashArray.length; d++) {
             result += innerNotation.format(dashArray[d]);
@@ -11440,6 +11452,11 @@ class GridNotation extends Notation {
             }
             while (plane.length < this.minimumSizes[1])
                 plane.push([Decimal.dZero]);
+            if (plane.length > this._height) { // Combats imprecision
+                for (let r = 0; r < plane.length; r++) {
+                    plane[r] = [rowLimit.sub(1)];
+                }
+            }
             for (let r = 0; r < plane.length; r++) {
                 let row = plane[r];
                 while (row[row.length - 1].gte(digitLimit)) {
@@ -11449,6 +11466,11 @@ class GridNotation extends Notation {
                 }
                 while (row.length < this.minimumSizes[0])
                     row.push(Decimal.dZero);
+                if (row.length > this._width) {
+                    for (let d = 0; d < row.length; d++) { // Combats imprecision
+                        row[d] = digitLimit.sub(1);
+                    }
+                }
             }
         }
         let result = this.opening;
@@ -16247,18 +16269,18 @@ HTMLPresetAssembly.CookieFonsterExtendedSI = recipBelow(new MultibaseMultiLogari
             ["b", 9], ["y", 8], ["z", 7], ["a", 6], ["f", 5], ["p", 4], ["n", 3], ["μ", 2], ["m", 1]
         ], 0, ...[, ,], 1, ...[, ,], 1, ...[, ,], [["", ""], ["^", ""], ["^^", ""]], 16), new DefaultNotation())), value => value.lt(0)
     ])), value => true])), Decimal.recip("1000^^3")).setName("Cookie Fonster's Extended SI");
-PresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0").setName("Fraction (Loose)");
-PresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0").setName("Fraction (Medium)");
-PresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0").setName("Fraction (Precise)");
-PresetAssembly.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Loose)");
-PresetAssembly.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Medium)");
-PresetAssembly.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Precise)");
-HTMLPresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0").setName("Fraction (Loose)");
-HTMLPresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0").setName("Fraction (Medium)");
-HTMLPresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0").setName("Fraction (Precise)");
-HTMLPresetAssembly.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Loose)");
-HTMLPresetAssembly.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Medium)");
-HTMLPresetAssembly.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0").setName("Mixed Number (Precise)");
+PresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Loose)");
+PresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Medium)");
+PresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Precise)");
+PresetAssembly.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Loose)");
+PresetAssembly.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Medium)");
+PresetAssembly.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Precise)");
+HTMLPresetAssembly.LooseFraction = new FractionNotation(-1e-3).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Loose)");
+HTMLPresetAssembly.MediumFraction = new FractionNotation(-1e-6).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Medium)");
+HTMLPresetAssembly.PreciseFraction = new FractionNotation(-1e-10).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Fraction (Precise)");
+HTMLPresetAssembly.LooseMixedNumber = new FractionNotation(-1e-3, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Loose)");
+HTMLPresetAssembly.MediumMixedNumber = new FractionNotation(-1e-6, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Medium)");
+HTMLPresetAssembly.PreciseMixedNumber = new FractionNotation(-1e-10, true).setNotationGlobals(undefined, "1/0", undefined, "0/0").setName("Mixed Number (Precise)");
 PresetAssembly.LetterDigits = zeroString(new LetterDigitsNotation(...[, , , , , , , , , , , , , ,], 1 / 18279), "_").setName("Letter Digits");
 PresetAssembly.AlphabetDigits = new LetterDigitsNotation([
     ["~", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
